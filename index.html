@@ -31,6 +31,18 @@
   }
   #app{ max-width: 480px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; background: var(--cream); position:relative; }
 
+  /* En pantallas grandes (computadora), usar todo el ancho disponible en vez de quedar angosto */
+  @media (min-width: 900px){
+    html, body{ background: var(--navy); }
+    #app{ max-width: 1100px; min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.35); }
+    main{ padding-left: 48px; padding-right: 48px; }
+    .kpi-strip{ flex-wrap: wrap; overflow: visible; }
+    .kpi-card{ min-width: 160px; flex: 1 1 160px; }
+    .bottomnav{ max-width: 1100px; }
+    .fab{ right: calc(50% - 550px + 32px); }
+  }
+  @media (min-width: 900px) and (max-width: 480px){ .fab{ right: 20px; } }
+
   /* ===== LOGIN ===== */
   .login-screen{ flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding: 32px 28px; background: linear-gradient(165deg, var(--navy) 0%, #101724 100%); color: var(--cream); text-align:center; }
   .login-mark{ width:64px; height:64px; border-radius:16px; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:700; color: var(--navy); margin-bottom:28px; }
