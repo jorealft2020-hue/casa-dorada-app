@@ -199,7 +199,7 @@
       </div>
     </main>
 
-    <button class="fab" id="btnFab">+</button>
+    <button class="fab hidden" id="btnFab">+</button>
 
     <nav class="bottomnav">
       <button class="navbtn active" data-nav="inicio"><span class="ic">🏠</span>Inicio</button>
@@ -215,9 +215,13 @@
   <div class="modal-backdrop" id="modalActividad">
     <div class="modal-sheet">
       <h3>Nueva actividad</h3>
-      <div class="field"><label>Título</label><input type="text" id="actTitulo" placeholder="Ej: Llamar a cliente"></div>
-      <div class="field"><label>Descripción (opcional)</label><textarea id="actDescripcion"></textarea></div>
-      <div class="field"><label>Fecha programada</label><input type="date" id="actFecha"></div>
+      <div class="field"><label>Actividad realizada</label><textarea id="actTitulo" placeholder="Describe la actividad"></textarea></div>
+      <div class="field"><label>Locación</label><input type="text" id="actLocacion" placeholder="Ej: Oficina, proyecto, dirección..."></div>
+      <div class="field"><label>Fecha</label><input type="date" id="actFecha"></div>
+      <div class="field"><label>Hora de inicio</label><input type="time" id="actHoraInicio"></div>
+      <div class="field"><label>Hora de fin</label><input type="time" id="actHoraFin"></div>
+      <div class="field"><label>Personas involucradas</label><input type="text" id="actPersonas" placeholder="Nombres separados por coma"></div>
+      <div class="field"><label>Cargar archivo (opcional)</label><input type="file" id="actArchivo" accept="image/*,application/pdf"></div>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalActividad">Cancelar</button>
         <button class="btn-primary" id="btnGuardarActividad">Guardar</button>
@@ -258,7 +262,7 @@
       <div class="field">
         <label>Rol</label>
         <select id="eu_rol">
-          <option value="vendedor">Vendedor</option>
+          <option value="usuario">Usuario</option>
           <option value="supervisor">Supervisor</option>
           <option value="admin">Administrador</option>
         </select>
@@ -276,6 +280,17 @@
       <div class="field"><label>Cargo del destinatario</label><input type="text" id="eu_destinatario_cargo" placeholder="Gerente General"></div>
       <div class="field"><label>Con copia (CC 1)</label><input type="text" id="eu_cc_nombre" placeholder="Administración"></div>
       <div class="field"><label>Con copia (CC 2)</label><input type="text" id="eu_cc2_nombre" placeholder="Jefe de Área"></div>
+      <div class="field">
+        <label>Permisos de acceso</label>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_actividades"> Ver actividades</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_clientes"> Ver clientes</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_separaciones"> Ver separaciones</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_agenda"> Ver agenda</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_generar_informes"> Generar informes</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_gestionar_equipo"> Gestionar equipo (admin)</label>
+        </div>
+      </div>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
         <button class="btn-primary" id="btnGuardarUsuario">Guardar</button>
@@ -292,7 +307,7 @@
       <div class="field">
         <label>Rol</label>
         <select id="pa_rol">
-          <option value="vendedor">Vendedor</option>
+          <option value="usuario">Usuario</option>
           <option value="supervisor">Supervisor</option>
           <option value="admin">Administrador</option>
         </select>
@@ -373,13 +388,17 @@ async function mostrarApp(){
   document.getElementById('mainScreen').style.display = 'flex';
   document.getElementById('greetName').textContent = 'Hola, ' + (currentProfile?.nombre?.split(' ')[0] || 'usuario');
   document.getElementById('greetRole').textContent = rolLabel(currentProfile?.rol);
-  if (currentProfile?.rol === 'admin') {
+  const perm = currentProfile?.permisos || {};
+  if (currentProfile?.rol === 'admin' || perm.gestionar_equipo) {
     document.getElementById('navAdmin').classList.remove('hidden');
   }
+  if (perm.ver_clientes === false) document.querySelector('[data-nav="clientes"]').classList.add('hidden');
+  if (perm.ver_separaciones === false) document.querySelector('[data-nav="separaciones"]').classList.add('hidden');
+  if (perm.ver_agenda === false) document.querySelector('[data-nav="agenda"]').classList.add('hidden');
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
 }
 function rolLabel(rol){
-  return { admin: 'Administrador', supervisor: 'Supervisor', vendedor: 'Vendedor' }[rol] || 'Vendedor';
+  return { admin: 'Administrador', supervisor: 'Supervisor', usuario: 'Usuario' }[rol] || 'Usuario';
 }
 
 async function cargarPerfil(){
@@ -398,6 +417,7 @@ function irAVista(vista){
   const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', notificaciones:'viewNotificaciones', admin:'viewAdmin' };
   document.getElementById(map[vista]).classList.remove('hidden');
   document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
+  document.getElementById('btnFab').classList.toggle('hidden', vista !== 'actividades');
 
   if (vista === 'actividades') cargarActividadesTodas();
   if (vista === 'clientes') cargarClientes();
@@ -440,7 +460,9 @@ function renderActividades(items, contenedorId, mensajeVacio){
       <div class="card-row">
         <div>
           <p class="card-title">${escapeHtml(a.titulo)}</p>
-          <p class="card-sub">${a.fecha_programada ? fmtFecha(a.fecha_programada) : 'Sin fecha'}</p>
+          <p class="card-sub">${a.fecha_programada ? fmtFecha(a.fecha_programada) : 'Sin fecha'}${a.hora_inicio ? ' · ' + a.hora_inicio.slice(0,5) : ''}${a.hora_fin ? '–' + a.hora_fin.slice(0,5) : ''}</p>
+          ${a.locacion ? `<p class="card-sub">📍 ${escapeHtml(a.locacion)}</p>` : ''}
+          ${a.personas_involucradas ? `<p class="card-sub">👥 ${escapeHtml(a.personas_involucradas)}</p>` : ''}
         </div>
         <span class="badge badge-${a.estado}">${estadoLabel(a.estado)}</span>
       </div>
@@ -471,19 +493,52 @@ async function completarActividad(id){
 document.getElementById('btnFab').addEventListener('click', () => openModal('modalActividad'));
 document.getElementById('btnGuardarActividad').addEventListener('click', async () => {
   const titulo = document.getElementById('actTitulo').value.trim();
-  const descripcion = document.getElementById('actDescripcion').value.trim();
+  const locacion = document.getElementById('actLocacion').value.trim();
   const fecha = document.getElementById('actFecha').value || null;
-  if (!titulo) { toast('El título es obligatorio'); return; }
+  const horaInicio = document.getElementById('actHoraInicio').value || null;
+  const horaFin = document.getElementById('actHoraFin').value || null;
+  const personas = document.getElementById('actPersonas').value.trim();
+  const archivo = document.getElementById('actArchivo').files[0];
+  if (!titulo) { toast('La actividad realizada es obligatoria'); return; }
 
-  const { error } = await sb.from('actividades').insert({
-    usuario_id: currentUser.id, titulo, descripcion, fecha_programada: fecha, estado: 'pendiente'
-  });
+  toast('Guardando actividad…');
+
+  const { data: nuevaAct, error } = await sb.from('actividades').insert({
+    usuario_id: currentUser.id,
+    titulo,
+    locacion: locacion || null,
+    fecha_programada: fecha,
+    hora_inicio: horaInicio,
+    hora_fin: horaFin,
+    personas_involucradas: personas || null,
+    estado: 'pendiente'
+  }).select().single();
+
   if (error) { toast('Error al guardar'); console.error(error); return; }
-  toast('Actividad creada');
+
+  if (archivo) {
+    try {
+      const ext = archivo.name.split('.').pop() || 'dat';
+      const path = `${currentUser.id}/${nuevaAct.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await sb.storage.from('evidencias-actividades').upload(path, archivo);
+      if (!upErr) {
+        const { data: signedData } = await sb.storage.from('evidencias-actividades').createSignedUrl(path, 60 * 60 * 24 * 365);
+        if (signedData) {
+          await sb.from('actividades').update({ evidencias: [signedData.signedUrl] }).eq('id', nuevaAct.id);
+        }
+      }
+    } catch (e) { console.error('Error al subir archivo adjunto', e); }
+  }
+
+  toast('Actividad creada ✓');
   closeModal('modalActividad');
   document.getElementById('actTitulo').value = '';
-  document.getElementById('actDescripcion').value = '';
+  document.getElementById('actLocacion').value = '';
   document.getElementById('actFecha').value = '';
+  document.getElementById('actHoraInicio').value = '';
+  document.getElementById('actHoraFin').value = '';
+  document.getElementById('actPersonas').value = '';
+  document.getElementById('actArchivo').value = '';
   cargarActividadesHoy(); cargarActividadesTodas(); cargarKPIs();
 });
 
@@ -912,7 +967,7 @@ async function abrirEditarUsuario(id){
   document.getElementById('eu_id').value = data.id;
   document.getElementById('eu_nombre').value = data.nombre || '';
   document.getElementById('eu_email').value = data.email || '';
-  document.getElementById('eu_rol').value = data.rol || 'vendedor';
+  document.getElementById('eu_rol').value = data.rol || 'usuario';
   document.getElementById('eu_activo').value = (data.activo === false) ? 'false' : 'true';
   document.getElementById('eu_cargo').value = data.cargo || '';
   document.getElementById('eu_area').value = data.area || '';
@@ -920,6 +975,13 @@ async function abrirEditarUsuario(id){
   document.getElementById('eu_destinatario_cargo').value = data.destinatario_cargo || '';
   document.getElementById('eu_cc_nombre').value = data.cc_nombre || '';
   document.getElementById('eu_cc2_nombre').value = data.cc2_nombre || '';
+  const perm = data.permisos || {};
+  document.getElementById('perm_ver_actividades').checked = perm.ver_actividades !== false;
+  document.getElementById('perm_ver_clientes').checked = perm.ver_clientes !== false;
+  document.getElementById('perm_ver_separaciones').checked = perm.ver_separaciones !== false;
+  document.getElementById('perm_ver_agenda').checked = perm.ver_agenda !== false;
+  document.getElementById('perm_generar_informes').checked = perm.generar_informes !== false;
+  document.getElementById('perm_gestionar_equipo').checked = perm.gestionar_equipo === true;
   openModal('modalEditarUsuario');
 }
 
@@ -934,6 +996,14 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
     destinatario_cargo: document.getElementById('eu_destinatario_cargo').value.trim() || null,
     cc_nombre: document.getElementById('eu_cc_nombre').value.trim() || null,
     cc2_nombre: document.getElementById('eu_cc2_nombre').value.trim() || null,
+    permisos: {
+      ver_actividades: document.getElementById('perm_ver_actividades').checked,
+      ver_clientes: document.getElementById('perm_ver_clientes').checked,
+      ver_separaciones: document.getElementById('perm_ver_separaciones').checked,
+      ver_agenda: document.getElementById('perm_ver_agenda').checked,
+      generar_informes: document.getElementById('perm_generar_informes').checked,
+      gestionar_equipo: document.getElementById('perm_gestionar_equipo').checked,
+    }
   };
   const { error } = await sb.from('usuarios').update(payload).eq('id', id);
   if (error) { toast('Error al guardar'); console.error(error); return; }
