@@ -193,6 +193,8 @@
       <!-- VISTA: Admin (solo administradores) -->
       <div id="viewAdmin" class="hidden">
         <div class="section-title">Equipo</div>
+        <button class="chip-btn gold" id="btnAbrirPreautorizar" style="margin-bottom:14px; width:100%; padding:10px; font-size:13px;">➕ Agregar correo de nuevo usuario</button>
+        <div id="listaPreautorizados"></div>
         <div id="listaUsuariosAdmin"></div>
       </div>
     </main>
@@ -277,6 +279,29 @@
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
         <button class="btn-primary" id="btnGuardarUsuario">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: preautorizar nuevo usuario -->
+  <div class="modal-backdrop" id="modalPreautorizar">
+    <div class="modal-sheet">
+      <h3>Agregar correo autorizado</h3>
+      <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-8px;">La persona podrá entrar con Google usando este correo. Se le asignará el rol y datos que definas aquí.</p>
+      <div class="field"><label>Correo de Google</label><input type="email" id="pa_email" placeholder="nombre@gmail.com"></div>
+      <div class="field">
+        <label>Rol</label>
+        <select id="pa_rol">
+          <option value="vendedor">Vendedor</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <div class="field"><label>Cargo</label><input type="text" id="pa_cargo" placeholder="Ej: Ejecutivo Comercial"></div>
+      <div class="field"><label>Área</label><input type="text" id="pa_area" placeholder="Ej: Comercial"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalPreautorizar">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarPreautorizado">Agregar</button>
       </div>
     </div>
   </div>
@@ -379,7 +404,7 @@ function irAVista(vista){
   if (vista === 'separaciones') cargarSeparacionesTodas();
   if (vista === 'agenda') cargarAgenda();
   if (vista === 'notificaciones') cargarNotificaciones();
-  if (vista === 'admin') cargarUsuariosAdmin();
+  if (vista === 'admin') { cargarUsuariosAdmin(); cargarPreautorizados(); }
 }
 document.getElementById('btnBell').addEventListener('click', () => irAVista('notificaciones'));
 
@@ -460,6 +485,111 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
   document.getElementById('actDescripcion').value = '';
   document.getElementById('actFecha').value = '';
   cargarActividadesHoy(); cargarActividadesTodas(); cargarKPIs();
+});
+
+/* ============ REPORTE DIARIO EN PDF ============ */
+document.getElementById('btnDescargarReporte').addEventListener('click', async () => {
+  toast('Generando reporte del día…');
+  try {
+    const hoy = new Date().toISOString().slice(0,10);
+    const { data: actividades, error } = await sb.from('actividades')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .eq('fecha_programada', hoy)
+      .order('created_at');
+
+    if (error) { toast('Error al obtener actividades'); console.error(error); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 40;
+    let y = 0;
+
+    function encabezado(){
+      doc.setFillColor(26, 35, 50);
+      doc.rect(0, 0, pageWidth, 70, 'F');
+      doc.setTextColor(255,255,255);
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text('Reporte diario de actividades', marginX, 30);
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      const nombreVendedor = currentProfile?.nombre || 'Vendedor';
+      doc.text(`${nombreVendedor}  ·  ${fmtFecha(hoy)}`, marginX, 50);
+      doc.setTextColor(26, 35, 50);
+    }
+    encabezado();
+    y = 100;
+
+    if (!actividades || actividades.length === 0) {
+      doc.setFontSize(11);
+      doc.text('No se registraron actividades para el día de hoy.', marginX, y);
+    } else {
+      for (const act of actividades) {
+        if (y > pageHeight - 140) { doc.addPage(); encabezado(); y = 100; }
+
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        const tituloLines = doc.splitTextToSize(act.titulo, pageWidth - marginX * 2 - 90);
+        doc.text(tituloLines, marginX, y);
+
+        doc.setFontSize(9.5);
+        doc.setFont(undefined, 'bold');
+        const estadoColor = act.estado === 'completada' ? [76,122,94] : act.estado === 'cancelada' ? [180,69,60] : [138,90,23];
+        doc.setTextColor(...estadoColor);
+        doc.text(estadoLabel(act.estado), pageWidth - marginX - 80, y, { align: 'left' });
+        doc.setTextColor(26, 35, 50);
+
+        y += tituloLines.length * 14 + 4;
+
+        if (act.descripcion) {
+          doc.setFontSize(9.5);
+          doc.setFont(undefined, 'normal');
+          const descLines = doc.splitTextToSize(act.descripcion, pageWidth - marginX * 2);
+          doc.text(descLines, marginX, y);
+          y += descLines.length * 12 + 4;
+        }
+
+        // Fotos de evidencia embebidas
+        if (act.evidencias && act.evidencias.length > 0) {
+          let fotoX = marginX;
+          const fotoSize = 70;
+          for (const url of act.evidencias) {
+            try {
+              const respImg = await fetch(url);
+              const blobImg = await respImg.blob();
+              const b64Img = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blobImg);
+              });
+              if (fotoX + fotoSize > pageWidth - marginX) { fotoX = marginX; y += fotoSize + 8; }
+              if (y + fotoSize > pageHeight - 40) { doc.addPage(); encabezado(); y = 100; fotoX = marginX; }
+              doc.addImage(b64Img, fotoX, y, fotoSize, fotoSize);
+              fotoX += fotoSize + 8;
+            } catch (e) {
+              console.error('No se pudo incrustar una evidencia', e);
+            }
+          }
+          y += fotoSize + 14;
+        }
+
+        doc.setDrawColor(230, 230, 230);
+        doc.line(marginX, y, pageWidth - marginX, y);
+        y += 18;
+      }
+    }
+
+    const nombreArchivo = `reporte-diario-${(currentProfile?.nombre || 'usuario').replace(/\s+/g,'-').toLowerCase()}-${hoy}.pdf`;
+    doc.save(nombreArchivo);
+    toast('Reporte generado ✓');
+  } catch (e) {
+    toast('Error al generar el reporte');
+    console.error(e);
+  }
 });
 
 /* ============ EVIDENCIAS FOTOGRÁFICAS ============ */
@@ -704,6 +834,53 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
     toast('Error al generar el informe');
     console.error(e);
   }
+});
+
+/* ============ ADMIN: usuarios pre-autorizados ============ */
+document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => openModal('modalPreautorizar'));
+
+async function cargarPreautorizados(){
+  const { data } = await sb.from('usuarios_preautorizados').select('*').order('created_at', { ascending: false });
+  const el = document.getElementById('listaPreautorizados');
+  if (!data || data.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = `<p style="font-size:12.5px; color:var(--ink-dim); margin: 0 0 8px;">Pendientes de primer ingreso:</p>` + data.map(p => `
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${escapeHtml(p.email)}</p>
+          <p class="card-sub">${rolLabel(p.rol)}${p.cargo ? ' · ' + escapeHtml(p.cargo) : ''}</p>
+        </div>
+        <button class="chip-btn" onclick="eliminarPreautorizado('${p.email.replace(/'/g,"\\'")}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function eliminarPreautorizado(email){
+  const { error } = await sb.from('usuarios_preautorizados').delete().eq('email', email);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Eliminado');
+  cargarPreautorizados();
+}
+
+document.getElementById('btnGuardarPreautorizado').addEventListener('click', async () => {
+  const email = document.getElementById('pa_email').value.trim().toLowerCase();
+  if (!email || !email.includes('@')) { toast('Ingresa un correo válido'); return; }
+  const payload = {
+    email,
+    rol: document.getElementById('pa_rol').value,
+    cargo: document.getElementById('pa_cargo').value.trim() || null,
+    area: document.getElementById('pa_area').value.trim() || null,
+    creado_por: currentUser.id
+  };
+  const { error } = await sb.from('usuarios_preautorizados').upsert(payload);
+  if (error) { toast('Error al agregar'); console.error(error); return; }
+  toast('Correo agregado ✓ ya puede iniciar sesión');
+  closeModal('modalPreautorizar');
+  document.getElementById('pa_email').value = '';
+  document.getElementById('pa_cargo').value = '';
+  document.getElementById('pa_area').value = '';
+  cargarPreautorizados();
 });
 
 /* ============ ADMIN: gestión de equipo ============ */
