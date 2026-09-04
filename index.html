@@ -189,6 +189,12 @@
         <div class="section-title">Notificaciones</div>
         <div id="listaNotificaciones"></div>
       </div>
+
+      <!-- VISTA: Admin (solo administradores) -->
+      <div id="viewAdmin" class="hidden">
+        <div class="section-title">Equipo</div>
+        <div id="listaUsuariosAdmin"></div>
+      </div>
     </main>
 
     <button class="fab" id="btnFab">+</button>
@@ -199,6 +205,7 @@
       <button class="navbtn" data-nav="clientes"><span class="ic">👤</span>Clientes</button>
       <button class="navbtn" data-nav="separaciones"><span class="ic">🏷️</span>Separac.</button>
       <button class="navbtn" data-nav="agenda"><span class="ic">📅</span>Agenda</button>
+      <button class="navbtn hidden" id="navAdmin" data-nav="admin"><span class="ic">⚙️</span>Admin</button>
     </nav>
   </div>
 
@@ -239,7 +246,42 @@
     </div>
   </div>
 
-<div class="toast" id="toast"></div>
+<!-- MODAL: editar usuario (admin) -->
+  <div class="modal-backdrop" id="modalEditarUsuario">
+    <div class="modal-sheet">
+      <h3>Editar miembro del equipo</h3>
+      <input type="hidden" id="eu_id">
+      <div class="field"><label>Nombre</label><input type="text" id="eu_nombre" disabled></div>
+      <div class="field"><label>Correo</label><input type="text" id="eu_email" disabled></div>
+      <div class="field">
+        <label>Rol</label>
+        <select id="eu_rol">
+          <option value="vendedor">Vendedor</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="eu_activo">
+          <option value="true">Activo</option>
+          <option value="false">Inactivo (bloqueado)</option>
+        </select>
+      </div>
+      <div class="field"><label>Cargo</label><input type="text" id="eu_cargo" placeholder="Ej: Ejecutivo Comercial"></div>
+      <div class="field"><label>Área</label><input type="text" id="eu_area" placeholder="Ej: Comercial"></div>
+      <div class="field"><label>Destinatario del informe (A:)</label><input type="text" id="eu_destinatario_nombre" placeholder="Flavio Mamani Ccora"></div>
+      <div class="field"><label>Cargo del destinatario</label><input type="text" id="eu_destinatario_cargo" placeholder="Gerente General"></div>
+      <div class="field"><label>Con copia (CC 1)</label><input type="text" id="eu_cc_nombre" placeholder="Administración"></div>
+      <div class="field"><label>Con copia (CC 2)</label><input type="text" id="eu_cc2_nombre" placeholder="Jefe de Área"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarUsuario">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
 </div>
 
 <script>
@@ -306,6 +348,9 @@ async function mostrarApp(){
   document.getElementById('mainScreen').style.display = 'flex';
   document.getElementById('greetName').textContent = 'Hola, ' + (currentProfile?.nombre?.split(' ')[0] || 'usuario');
   document.getElementById('greetRole').textContent = rolLabel(currentProfile?.rol);
+  if (currentProfile?.rol === 'admin') {
+    document.getElementById('navAdmin').classList.remove('hidden');
+  }
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
 }
 function rolLabel(rol){
@@ -325,7 +370,7 @@ document.querySelectorAll('[data-nav]').forEach(btn => {
 function irAVista(vista){
   currentView = vista;
   document.querySelectorAll('main > div[id^="view"]').forEach(v => v.classList.add('hidden'));
-  const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', notificaciones:'viewNotificaciones' };
+  const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', notificaciones:'viewNotificaciones', admin:'viewAdmin' };
   document.getElementById(map[vista]).classList.remove('hidden');
   document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
 
@@ -334,6 +379,7 @@ function irAVista(vista){
   if (vista === 'separaciones') cargarSeparacionesTodas();
   if (vista === 'agenda') cargarAgenda();
   if (vista === 'notificaciones') cargarNotificaciones();
+  if (vista === 'admin') cargarUsuariosAdmin();
 }
 document.getElementById('btnBell').addEventListener('click', () => irAVista('notificaciones'));
 
@@ -658,6 +704,65 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
     toast('Error al generar el informe');
     console.error(e);
   }
+});
+
+/* ============ ADMIN: gestión de equipo ============ */
+async function cargarUsuariosAdmin(){
+  const { data, error } = await sb.from('usuarios').select('*').order('nombre');
+  const el = document.getElementById('listaUsuariosAdmin');
+  if (error) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar el equipo.'); console.error(error); return; }
+  if (!data || data.length === 0) { el.innerHTML = emptyState('👥', 'Aún no hay usuarios.'); return; }
+  el.innerHTML = data.map(u => `
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${escapeHtml(u.nombre || u.email)}</p>
+          <p class="card-sub">${escapeHtml(u.email)} · ${rolLabel(u.rol)}${u.activo === false ? ' · Inactivo' : ''}</p>
+        </div>
+        <span class="badge ${u.activo === false ? 'badge-vencida' : 'badge-completada'}">${u.activo === false ? 'Inactivo' : 'Activo'}</span>
+      </div>
+      <div class="card-actions">
+        <button class="chip-btn gold" onclick="abrirEditarUsuario('${u.id}')">✏️ Editar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+let usuariosCache = [];
+async function abrirEditarUsuario(id){
+  const { data } = await sb.from('usuarios').select('*').eq('id', id).single();
+  if (!data) { toast('No se pudo cargar el usuario'); return; }
+  document.getElementById('eu_id').value = data.id;
+  document.getElementById('eu_nombre').value = data.nombre || '';
+  document.getElementById('eu_email').value = data.email || '';
+  document.getElementById('eu_rol').value = data.rol || 'vendedor';
+  document.getElementById('eu_activo').value = (data.activo === false) ? 'false' : 'true';
+  document.getElementById('eu_cargo').value = data.cargo || '';
+  document.getElementById('eu_area').value = data.area || '';
+  document.getElementById('eu_destinatario_nombre').value = data.destinatario_nombre || '';
+  document.getElementById('eu_destinatario_cargo').value = data.destinatario_cargo || '';
+  document.getElementById('eu_cc_nombre').value = data.cc_nombre || '';
+  document.getElementById('eu_cc2_nombre').value = data.cc2_nombre || '';
+  openModal('modalEditarUsuario');
+}
+
+document.getElementById('btnGuardarUsuario').addEventListener('click', async () => {
+  const id = document.getElementById('eu_id').value;
+  const payload = {
+    rol: document.getElementById('eu_rol').value,
+    activo: document.getElementById('eu_activo').value === 'true',
+    cargo: document.getElementById('eu_cargo').value.trim() || null,
+    area: document.getElementById('eu_area').value.trim() || null,
+    destinatario_nombre: document.getElementById('eu_destinatario_nombre').value.trim() || null,
+    destinatario_cargo: document.getElementById('eu_destinatario_cargo').value.trim() || null,
+    cc_nombre: document.getElementById('eu_cc_nombre').value.trim() || null,
+    cc2_nombre: document.getElementById('eu_cc2_nombre').value.trim() || null,
+  };
+  const { error } = await sb.from('usuarios').update(payload).eq('id', id);
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  toast('Usuario actualizado ✓');
+  closeModal('modalEditarUsuario');
+  cargarUsuariosAdmin();
 });
 
 /* ============ CLIENTES ============ */
