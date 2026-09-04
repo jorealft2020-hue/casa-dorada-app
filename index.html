@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Casa Dorada · Planner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --navy: #1A2332;
+    --navy-soft: #26334A;
+    --gold: #C9973E;
+    --gold-soft: #E4C583;
+    --cream: #F7F4EE;
+    --cream-dim: #EDE8DC;
+    --ink: #1A2332;
+    --ink-dim: #6B7280;
+    --danger: #B4453C;
+    --ok: #4C7A5E;
+    --radius: 14px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family: var(--font);
+    background: var(--cream);
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+  #app{ max-width: 480px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; background: var(--cream); position:relative; }
+
+  /* ===== LOGIN ===== */
+  .login-screen{ flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding: 32px 28px; background: linear-gradient(165deg, var(--navy) 0%, #101724 100%); color: var(--cream); text-align:center; }
+  .login-mark{ width:64px; height:64px; border-radius:16px; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:700; color: var(--navy); margin-bottom:28px; }
+  .login-screen h1{ font-size: 26px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .login-screen p{ color: #A9B4C4; font-size: 14.5px; margin: 0 0 40px; max-width: 300px; line-height:1.5; }
+  .btn-google{ display:flex; align-items:center; gap:12px; background: var(--cream); color: var(--navy); border:none; border-radius: 12px; padding: 14px 24px; font-size: 15px; font-weight:600; cursor:pointer; width:100%; max-width: 320px; justify-content:center; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+  .btn-google:active{ transform: scale(0.98); }
+
+  /* ===== HEADER ===== */
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding: 18px 20px 14px; background: var(--cream); position:sticky; top:0; z-index:10; }
+  .topbar .greet{ font-size: 20px; font-weight: 700; letter-spacing:-0.02em; }
+  .topbar .role{ font-size: 12.5px; color: var(--ink-dim); margin-top:2px; }
+  .bell{ position:relative; width:40px; height:40px; border-radius:10px; background: var(--cream-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; }
+  .bell .dot{ position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%; background: var(--danger); display:none; }
+  .bell.has-unread .dot{ display:block; }
+
+  main{ flex:1; overflow-y:auto; padding: 4px 20px 100px; }
+
+  /* ===== KPI STRIP ===== */
+  .kpi-strip{ display:flex; gap:10px; overflow-x:auto; padding: 8px 0 18px; scrollbar-width:none; }
+  .kpi-strip::-webkit-scrollbar{ display:none; }
+  .kpi-card{ flex: 0 0 auto; min-width: 118px; background: var(--navy); color: var(--cream); border-radius: var(--radius); padding: 14px 16px; }
+  .kpi-card .num{ font-size: 24px; font-weight:700; color: var(--gold-soft); line-height:1; }
+  .kpi-card .lbl{ font-size: 11.5px; color: #A9B4C4; margin-top:6px; }
+
+  /* ===== SECTION ===== */
+  .section-title{ font-size: 15px; font-weight:700; margin: 22px 0 12px; display:flex; justify-content:space-between; align-items:center; }
+  .section-title .see-all{ font-size: 13px; font-weight:600; color: var(--gold); background:none; border:none; cursor:pointer; }
+
+  /* ===== CARDS ===== */
+  .card{ background:#fff; border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; border:1px solid #EAE5D8; }
+  .card-row{ display:flex; justify-content:space-between; align-items:flex-start; gap: 10px; }
+  .card-title{ font-size: 14.5px; font-weight:600; margin:0 0 3px; }
+  .card-sub{ font-size: 12.5px; color: var(--ink-dim); margin:0; }
+  .badge{ font-size:11px; font-weight:700; padding: 4px 9px; border-radius: 100px; white-space:nowrap; }
+  .badge-pendiente{ background:#FBE9D0; color:#8A5A17; }
+  .badge-en_proceso{ background:#DDE7F5; color:#2C5691; }
+  .badge-completada{ background:#DCEEE0; color: var(--ok); }
+  .badge-activa{ background:#FBE9D0; color:#8A5A17; }
+  .badge-vencida{ background:#F6DAD7; color: var(--danger); }
+  .badge-convertida_venta{ background:#DCEEE0; color: var(--ok); }
+  .card-actions{ display:flex; gap:8px; margin-top:10px; }
+  .chip-btn{ font-size:12px; font-weight:600; border:1px solid #DDD6C4; background:#fff; padding:6px 12px; border-radius:100px; cursor:pointer; color: var(--navy); }
+  .chip-btn.gold{ background: var(--gold); border-color: var(--gold); color: #fff; }
+  .empty{ text-align:center; padding: 40px 20px; color: var(--ink-dim); }
+  .empty .big{ font-size: 34px; margin-bottom:10px; }
+  .empty p{ font-size: 13.5px; line-height:1.5; margin: 4px 0 0; }
+
+  /* ===== FAB ===== */
+  .fab{ position:fixed; bottom: 92px; right: calc(50% - 240px + 20px); width:56px; height:56px; border-radius:50%; background: var(--gold); color:#fff; border:none; font-size:26px; box-shadow: 0 10px 24px rgba(201,151,62,0.5); cursor:pointer; z-index:20; }
+  @media (max-width: 480px){ .fab{ right: 20px; } }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottomnav{ position: sticky; bottom:0; left:0; right:0; background: rgba(247,244,238,0.95); backdrop-filter: blur(8px); border-top: 1px solid #E5DFCF; display:flex; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); max-width:480px; margin:0 auto; width:100%; }
+  .navbtn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; padding:8px 4px; color: var(--ink-dim); font-size: 10.5px; font-weight:600; cursor:pointer; }
+  .navbtn.active{ color: var(--navy); }
+  .navbtn .ic{ font-size: 20px; }
+
+  /* ===== MODAL ===== */
+  .modal-backdrop{ position:fixed; inset:0; background: rgba(26,35,50,0.55); z-index:50; display:none; align-items:flex-end; justify-content:center; }
+  .modal-backdrop.open{ display:flex; }
+  .modal-sheet{ background:#fff; width:100%; max-width:480px; border-radius: 20px 20px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); max-height:85vh; overflow-y:auto; }
+  .modal-sheet h3{ margin:0 0 16px; font-size:18px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color: var(--ink-dim); margin-bottom:6px; }
+  .field input, .field select, .field textarea{ width:100%; padding:11px 13px; border:1.5px solid #E5DFCF; border-radius:10px; font-size:14.5px; font-family:inherit; background:#FBFAF6; }
+  .field textarea{ resize:vertical; min-height:70px; }
+  .modal-actions{ display:flex; gap:10px; margin-top:18px; }
+  .btn-primary{ flex:1; background: var(--navy); color:#fff; border:none; padding:13px; border-radius:10px; font-size:14.5px; font-weight:700; cursor:pointer; }
+  .btn-secondary{ flex:1; background:#fff; color: var(--ink-dim); border:1.5px solid #E5DFCF; padding:13px; border-radius:10px; font-size:14.5px; font-weight:600; cursor:pointer; }
+
+  .toast{ position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background: var(--navy); color:#fff; padding:12px 20px; border-radius:100px; font-size:13.5px; font-weight:600; z-index:100; opacity:0; transition: opacity 0.25s, transform 0.25s; pointer-events:none; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-6px); }
+
+  .hidden{ display:none !important; }
+  .spinner{ width:22px; height:22px; border:3px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-mark">CD</div>
+    <h1>Casa Dorada</h1>
+    <p>Planner comercial. Entra con tu cuenta de Google para ver tus actividades, clientes y separaciones.</p>
+    <button class="btn-google" id="btnGoogleLogin">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.96 10.71A5.4 5.4 0 013.68 9c0-.6.1-1.18.28-1.71V4.96H.96A9 9 0 000 9c0 1.45.35 2.83.96 4.04l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3 2.33C4.67 5.16 6.66 3.58 9 3.58z"/></svg>
+      Continuar con Google
+    </button>
+  </div>
+
+  <!-- APP -->
+  <div id="mainScreen" class="hidden" style="display:flex; flex-direction:column; flex:1;">
+    <div class="topbar">
+      <div>
+        <div class="greet" id="greetName">Hola</div>
+        <div class="role" id="greetRole">—</div>
+      </div>
+      <button class="bell" id="btnBell"><span class="dot" id="bellDot"></span>🔔</button>
+    </div>
+
+    <main>
+      <!-- VISTA: Inicio -->
+      <div id="viewInicio">
+        <div class="kpi-strip" id="kpiStrip"></div>
+
+        <div class="section-title">Actividades de hoy <button class="see-all" data-nav="actividades">Ver todo</button></div>
+        <button class="chip-btn gold" id="btnDescargarReporte" style="margin-bottom:12px; width:100%; padding:10px; font-size:13px;">📄 Descargar reporte del día</button>
+        <button class="chip-btn" id="btnAbrirInformeFormal" style="margin-bottom:12px; width:100%; padding:10px; font-size:13px; border-color:#1A2332; color:#1A2332;">🗂️ Descargar informe formal (quincenal/mensual)</button>
+        <div id="listaActividadesHoy"></div>
+
+        <div class="section-title">Separaciones por vencer <button class="see-all" data-nav="separaciones">Ver todo</button></div>
+        <div id="listaSeparacionesVencen"></div>
+      </div>
+
+      <!-- VISTA: Actividades -->
+      <div id="viewActividades" class="hidden">
+        <div class="section-title">Mis actividades</div>
+        <div id="listaActividadesTodas"></div>
+      </div>
+
+      <!-- VISTA: Clientes -->
+      <div id="viewClientes" class="hidden">
+        <div class="section-title">Mis clientes</div>
+        <div id="listaClientes"></div>
+      </div>
+
+      <!-- VISTA: Separaciones -->
+      <div id="viewSeparaciones" class="hidden">
+        <div class="section-title">Separaciones</div>
+        <div id="listaSeparacionesTodas"></div>
+      </div>
+
+      <!-- VISTA: Agenda -->
+      <div id="viewAgenda" class="hidden">
+        <div class="section-title">Agenda</div>
+        <div id="listaAgenda"></div>
+      </div>
+
+      <!-- VISTA: Notificaciones -->
+      <div id="viewNotificaciones" class="hidden">
+        <div class="section-title">Notificaciones</div>
+        <div id="listaNotificaciones"></div>
+      </div>
+    </main>
+
+    <button class="fab" id="btnFab">+</button>
+
+    <nav class="bottomnav">
+      <button class="navbtn active" data-nav="inicio"><span class="ic">🏠</span>Inicio</button>
+      <button class="navbtn" data-nav="actividades"><span class="ic">✓</span>Tareas</button>
+      <button class="navbtn" data-nav="clientes"><span class="ic">👤</span>Clientes</button>
+      <button class="navbtn" data-nav="separaciones"><span class="ic">🏷️</span>Separac.</button>
+      <button class="navbtn" data-nav="agenda"><span class="ic">📅</span>Agenda</button>
+    </nav>
+  </div>
+
+  <!-- MODAL: nueva actividad -->
+  <div class="modal-backdrop" id="modalActividad">
+    <div class="modal-sheet">
+      <h3>Nueva actividad</h3>
+      <div class="field"><label>Título</label><input type="text" id="actTitulo" placeholder="Ej: Llamar a cliente"></div>
+      <div class="field"><label>Descripción (opcional)</label><textarea id="actDescripcion"></textarea></div>
+      <div class="field"><label>Fecha programada</label><input type="date" id="actFecha"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalActividad">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarActividad">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: informe formal -->
+  <!-- MODAL: informe formal quincenal/mensual -->
+  <div class="modal-backdrop" id="modalInformeFormal">
+    <div class="modal-sheet">
+      <h3>Informe formal de actividades</h3>
+      <div class="field">
+        <label>Tipo de informe</label>
+        <select id="infTipo">
+          <option value="quincenal">Quincenal</option>
+          <option value="mensual">Mensual</option>
+        </select>
+      </div>
+      <div class="field"><label>Fecha de inicio</label><input type="date" id="infFechaInicio"></div>
+      <div class="field"><label>Fecha de fin</label><input type="date" id="infFechaFin"></div>
+      <div class="field"><label>Resumen ejecutivo (borrador)</label><textarea id="infResumen" placeholder="Escribe un breve resumen de tu gestion en el periodo..."></textarea></div>
+      <div class="field"><label>Conclusiones y proximos pasos (borrador)</label><textarea id="infConclusiones" placeholder="Conclusiones, dificultades, plan para el siguiente periodo..."></textarea></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalInformeFormal">Cancelar</button>
+        <button class="btn-primary" id="btnGenerarInformeFormal">Generar PDF</button>
+      </div>
+    </div>
+  </div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============ CONFIGURACIÓN SUPABASE ============ */
+const SUPABASE_URL = 'https://nboikojylmkujdxinztj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib2lrb2p5bG1rdWpkeGluenRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyOTU1NzksImV4cCI6MjEwMzg3MTU3OX0.O6yaQPFwjYmIhQD--smhX1IRY0D1KETHsX30kFOmU5s';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let currentView = 'inicio';
+
+/* ============ UTILIDADES ============ */
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2400);
+}
+function fmtFecha(d){
+  if(!d) return '';
+  const date = new Date(d);
+  return date.toLocaleDateString('es-BO', { day:'2-digit', month:'short' });
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', ()=> closeModal(b.dataset.close)));
+
+/* ============ AUTH ============ */
+document.getElementById('btnGoogleLogin').addEventListener('click', async () => {
+  await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + window.location.pathname,
+      // Scope de Calendar para poder sincronizar agenda más adelante
+      scopes: 'https://www.googleapis.com/auth/calendar.events',
+      queryParams: { access_type: 'offline', prompt: 'consent' }
+    }
+  });
+});
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    // Guardar el provider_token (Google) para poder usarlo en sincronización de Calendar
+    if (session.provider_token) {
+      sessionStorage.setItem('google_provider_token', session.provider_token);
+    }
+    await cargarPerfil();
+    mostrarApp();
+  } else {
+    currentUser = null;
+    mostrarLogin();
+  }
+});
+
+function mostrarLogin(){
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('mainScreen').classList.add('hidden');
+}
+async function mostrarApp(){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainScreen').classList.remove('hidden');
+  document.getElementById('mainScreen').style.display = 'flex';
+  document.getElementById('greetName').textContent = 'Hola, ' + (currentProfile?.nombre?.split(' ')[0] || 'usuario');
+  document.getElementById('greetRole').textContent = rolLabel(currentProfile?.rol);
+  await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
+}
+function rolLabel(rol){
+  return { admin: 'Administrador', supervisor: 'Supervisor', vendedor: 'Vendedor' }[rol] || 'Vendedor';
+}
+
+async function cargarPerfil(){
+  const { data, error } = await sb.from('usuarios').select('*').eq('id', currentUser.id).single();
+  if (error) { console.error(error); return; }
+  currentProfile = data;
+}
+
+/* ============ NAVEGACIÓN ============ */
+document.querySelectorAll('[data-nav]').forEach(btn => {
+  btn.addEventListener('click', () => irAVista(btn.dataset.nav));
+});
+function irAVista(vista){
+  currentView = vista;
+  document.querySelectorAll('main > div[id^="view"]').forEach(v => v.classList.add('hidden'));
+  const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', notificaciones:'viewNotificaciones' };
+  document.getElementById(map[vista]).classList.remove('hidden');
+  document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
+
+  if (vista === 'actividades') cargarActividadesTodas();
+  if (vista === 'clientes') cargarClientes();
+  if (vista === 'separaciones') cargarSeparacionesTodas();
+  if (vista === 'agenda') cargarAgenda();
+  if (vista === 'notificaciones') cargarNotificaciones();
+}
+document.getElementById('btnBell').addEventListener('click', () => irAVista('notificaciones'));
+
+/* ============ KPIs ============ */
+async function cargarKPIs(){
+  const { data, error } = await sb.from('vista_kpis_vendedor').select('*').eq('usuario_id', currentUser.id).maybeSingle();
+  const el = document.getElementById('kpiStrip');
+  if (error || !data) { el.innerHTML = ''; return; }
+  const items = [
+    { num: data.actividades_pendientes ?? 0, lbl: 'Pendientes' },
+    { num: data.separaciones_activas ?? 0, lbl: 'Separaciones activas' },
+    { num: data.ventas_cerradas ?? 0, lbl: 'Ventas cerradas' },
+    { num: data.total_clientes ?? 0, lbl: 'Clientes' },
+  ];
+  el.innerHTML = items.map(i => `<div class="kpi-card"><div class="num">${i.num}</div><div class="lbl">${i.lbl}</div></div>`).join('');
+}
+
+/* ============ ACTIVIDADES ============ */
+async function cargarActividadesHoy(){
+  const hoy = new Date().toISOString().slice(0,10);
+  const { data, error } = await sb.from('actividades').select('*').eq('usuario_id', currentUser.id).eq('fecha_programada', hoy).order('created_at');
+  renderActividades(data || [], 'listaActividadesHoy', 'Sin actividades para hoy.');
+}
+async function cargarActividadesTodas(){
+  const { data } = await sb.from('actividades').select('*').eq('usuario_id', currentUser.id).order('fecha_programada', { ascending: true, nullsFirst: false });
+  renderActividades(data || [], 'listaActividadesTodas', 'No tienes actividades registradas.');
+}
+function renderActividades(items, contenedorId, mensajeVacio){
+  const el = document.getElementById(contenedorId);
+  if (items.length === 0) { el.innerHTML = emptyState('✓', mensajeVacio); return; }
+  el.innerHTML = items.map(a => `
+    <div class="card" data-id="${a.id}">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${escapeHtml(a.titulo)}</p>
+          <p class="card-sub">${a.fecha_programada ? fmtFecha(a.fecha_programada) : 'Sin fecha'}</p>
+        </div>
+        <span class="badge badge-${a.estado}">${estadoLabel(a.estado)}</span>
+      </div>
+      ${(a.evidencias && a.evidencias.length > 0) ? `<div class="evidencia-thumbs" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+        ${a.evidencias.map(url => `<img src="${url}" style="width:52px; height:52px; object-fit:cover; border-radius:8px; border:1px solid #E5DFCF;" />`).join('')}
+      </div>` : ''}
+      <div class="card-actions">
+        ${a.estado !== 'completada' ? `<button class="chip-btn gold" onclick="completarActividad('${a.id}')">Marcar completada</button>` : ''}
+        <label class="chip-btn" style="cursor:pointer;">
+          📷 Adjuntar foto
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="subirEvidencia('${a.id}', this.files[0])">
+        </label>
+      </div>
+    </div>
+  `).join('');
+}
+function estadoLabel(e){
+  return { pendiente:'Pendiente', en_proceso:'En proceso', completada:'Completada', cancelada:'Cancelada', activa:'Activa', vencida:'Vencida', convertida_venta:'Vendido' }[e] || e;
+}
+async function completarActividad(id){
+  const { error } = await sb.from('actividades').update({ estado: 'completada', fecha_completada: new Date().toISOString() }).eq('id', id);
+  if (error) { toast('No se pudo actualizar'); return; }
+  toast('Actividad completada ✓');
+  cargarActividadesHoy(); cargarActividadesTodas(); cargarKPIs();
+}
+
+/* ============ NUEVA ACTIVIDAD (modal) ============ */
+document.getElementById('btnFab').addEventListener('click', () => openModal('modalActividad'));
+document.getElementById('btnGuardarActividad').addEventListener('click', async () => {
+  const titulo = document.getElementById('actTitulo').value.trim();
+  const descripcion = document.getElementById('actDescripcion').value.trim();
+  const fecha = document.getElementById('actFecha').value || null;
+  if (!titulo) { toast('El título es obligatorio'); return; }
+
+  const { error } = await sb.from('actividades').insert({
+    usuario_id: currentUser.id, titulo, descripcion, fecha_programada: fecha, estado: 'pendiente'
+  });
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  toast('Actividad creada');
+  closeModal('modalActividad');
+  document.getElementById('actTitulo').value = '';
+  document.getElementById('actDescripcion').value = '';
+  document.getElementById('actFecha').value = '';
+  cargarActividadesHoy(); cargarActividadesTodas(); cargarKPIs();
+});
+
+/* ============ EVIDENCIAS FOTOGRÁFICAS ============ */
+async function subirEvidencia(actividadId, file){
+  if (!file) return;
+  toast('Subiendo foto…');
+  try {
+    const ext = file.name.split('.').pop() || 'jpg';
+    const path = `${currentUser.id}/${actividadId}/${Date.now()}.${ext}`;
+    const { error: uploadError } = await sb.storage.from('evidencias-actividades').upload(path, file, { upsert: false });
+    if (uploadError) { toast('Error al subir la foto'); console.error(uploadError); return; }
+
+    const { data: signedData, error: signedError } = await sb.storage.from('evidencias-actividades').createSignedUrl(path, 60 * 60 * 24 * 365);
+    if (signedError) { toast('Error al generar enlace'); console.error(signedError); return; }
+
+    const { data: actividadActual } = await sb.from('actividades').select('evidencias').eq('id', actividadId).single();
+    const evidenciasActuales = actividadActual?.evidencias || [];
+    const nuevasEvidencias = [...evidenciasActuales, signedData.signedUrl];
+
+    const { error: updateError } = await sb.from('actividades').update({ evidencias: nuevasEvidencias }).eq('id', actividadId);
+    if (updateError) { toast('Error al guardar evidencia'); console.error(updateError); return; }
+
+    toast('Foto adjuntada ✓');
+    cargarActividadesHoy(); cargarActividadesTodas();
+  } catch (e) {
+    toast('Error al procesar la foto');
+    console.error(e);
+  }
+}
+
+/* ============ INFORME FORMAL (QUINCENAL / MENSUAL) ============ */
+document.getElementById('btnAbrirInformeFormal').addEventListener('click', () => openModal('modalInformeFormal'));
+
+async function cargarLogoBase64(){
+  try {
+    const resp = await fetch('https://nboikojylmkujdxinztj.supabase.co/functions/v1/membrete');
+    const blob = await resp.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.error('No se pudo cargar el logo del membrete', e);
+    return null;
+  }
+}
+
+document.getElementById('btnGenerarInformeFormal').addEventListener('click', async () => {
+  const tipo = document.getElementById('infTipo').value;
+  const fechaInicio = document.getElementById('infFechaInicio').value;
+  const fechaFin = document.getElementById('infFechaFin').value;
+  const resumen = document.getElementById('infResumen').value.trim();
+  const conclusiones = document.getElementById('infConclusiones').value.trim();
+
+  if (!fechaInicio || !fechaFin) { toast('Selecciona el rango de fechas'); return; }
+
+  toast('Generando informe formal…');
+  try {
+    // 1) Traer datos de empresa (membrete)
+    const { data: empresa } = await sb.from('empresa_config').select('*').eq('id', 1).single();
+
+    // 2) Traer actividades del periodo
+    const { data: actividades, error } = await sb.from('actividades')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .gte('fecha_programada', fechaInicio)
+      .lte('fecha_programada', fechaFin)
+      .order('fecha_programada');
+
+    if (error) { toast('Error al obtener actividades'); console.error(error); return; }
+
+    // 3) Cargar logo
+    const logoBase64 = await cargarLogoBase64();
+
+    // 4) Guardar registro del informe generado (auditoría)
+    await sb.from('informes_formales').insert({
+      usuario_id: currentUser.id,
+      tipo,
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      resumen_ejecutivo: resumen,
+      conclusiones: conclusiones
+    });
+
+    // 5) Construir el PDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 56;
+    let y = 0;
+
+    // Membrete de fondo en cada página (encabezado + pie + marca de agua)
+    function dibujarMembrete(){
+      if (logoBase64) {
+        doc.addImage(logoBase64, 'JPEG', 0, 0, pageWidth, pageHeight);
+      }
+    }
+    dibujarMembrete();
+
+    y = 150; // debajo del encabezado gráfico del membrete
+
+    const fechaHoy = new Date().toLocaleDateString('es-BO', { day: 'numeric', month: 'long', year: 'numeric' });
+    const nombreVendedor = currentProfile?.nombre || 'Vendedor';
+    const cargoVendedor = currentProfile?.cargo || currentProfile?.area || 'Ejecutivo Comercial';
+    const destinatario = currentProfile?.destinatario_nombre || 'Flavio Mamani Ccora';
+    const destinatarioCargo = currentProfile?.destinatario_cargo || 'Gerente General';
+    const cc1 = currentProfile?.cc_nombre || 'Administración';
+    const cc2 = currentProfile?.cc2_nombre || 'Jefe de Área';
+    const tipoLabel = tipo === 'quincenal' ? 'QUINCENAL' : 'MENSUAL';
+    const rangoLabel = `${fmtFecha(fechaInicio)} al ${fmtFecha(fechaFin)}`;
+
+    doc.setTextColor(26, 35, 50);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(fechaHoy, pageWidth - marginX, y, { align: 'right' });
+    y += 30;
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('A:', marginX, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${destinatario}`, marginX + 25, y);
+    y += 14;
+    doc.text(`${destinatarioCargo}`, marginX + 25, y);
+    y += 14;
+    doc.text(`${(empresa?.nombre_legal || 'CASA DORADA').toUpperCase()}`, marginX + 25, y);
+    y += 22;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('CC:', marginX, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(cc1, marginX + 25, y);
+    y += 14;
+    doc.setFont(undefined, 'bold');
+    doc.text('CC:', marginX, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(cc2, marginX + 25, y);
+    y += 22;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('DE:', marginX, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${nombreVendedor} - ${cargoVendedor}`, marginX + 25, y);
+    y += 22;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('ASUNTO:', marginX, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(`INFORME ${tipoLabel} DE ACTIVIDADES - ${rangoLabel}`, marginX + 55, y);
+    y += 30;
+
+    doc.setDrawColor(201, 151, 62);
+    doc.setLineWidth(1.2);
+    doc.line(marginX, y, pageWidth - marginX, y);
+    y += 25;
+
+    // Resumen ejecutivo
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('RESUMEN EJECUTIVO', marginX, y);
+    y += 16;
+    doc.setFontSize(10.5);
+    doc.setFont(undefined, 'normal');
+    const resumenLines = doc.splitTextToSize(resumen || 'Sin resumen proporcionado.', pageWidth - marginX * 2);
+    doc.text(resumenLines, marginX, y);
+    y += resumenLines.length * 13 + 20;
+
+    // Tabla de actividades
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('ACTIVIDADES REALIZADAS EN EL PERIODO', marginX, y);
+    y += 18;
+
+    // Encabezado de tabla
+    doc.setFillColor(26, 35, 50);
+    doc.rect(marginX, y - 12, pageWidth - marginX * 2, 18, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(9.5);
+    doc.setFont(undefined, 'bold');
+    doc.text('Fecha', marginX + 5, y);
+    doc.text('Actividad', marginX + 80, y);
+    doc.text('Estado', pageWidth - marginX - 70, y);
+    y += 14;
+    doc.setTextColor(26, 35, 50);
+    doc.setFont(undefined, 'normal');
+
+    if (!actividades || actividades.length === 0) {
+      doc.text('No se registraron actividades en este periodo.', marginX + 5, y);
+      y += 16;
+    } else {
+      for (const act of actividades) {
+        if (y > pageHeight - 180) {
+          doc.addPage();
+          dibujarMembrete();
+          y = 150;
+        }
+        doc.setFontSize(9.5);
+        doc.text(act.fecha_programada ? fmtFecha(act.fecha_programada) : '-', marginX + 5, y);
+        const tituloLines = doc.splitTextToSize(act.titulo, 190);
+        doc.text(tituloLines, marginX + 80, y);
+        doc.text(estadoLabel(act.estado), pageWidth - marginX - 70, y);
+        y += Math.max(13, tituloLines.length * 11);
+        doc.setDrawColor(230, 230, 230);
+        doc.line(marginX, y - 4, pageWidth - marginX, y - 4);
+      }
+      y += 15;
+    }
+
+    if (y > pageHeight - 160) { doc.addPage(); dibujarMembrete(); y = 150; }
+
+    // Conclusiones
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('CONCLUSIONES Y PROXIMOS PASOS', marginX, y);
+    y += 16;
+    doc.setFontSize(10.5);
+    doc.setFont(undefined, 'normal');
+    const conclusionesLines = doc.splitTextToSize(conclusiones || 'Sin conclusiones proporcionadas.', pageWidth - marginX * 2);
+    doc.text(conclusionesLines, marginX, y);
+    y += conclusionesLines.length * 13 + 30;
+
+    if (y > pageHeight - 100) { doc.addPage(); dibujarMembrete(); y = 150; }
+
+    // Firma
+    doc.setFontSize(10.5);
+    doc.text('_______________________________', marginX, y);
+    y += 16;
+    doc.setFont(undefined, 'bold');
+    doc.text(nombreVendedor, marginX, y);
+    y += 14;
+    doc.setFont(undefined, 'normal');
+    doc.text(cargoVendedor, marginX, y);
+
+    const nombreArchivo = `informe-${tipo}-${nombreVendedor.replace(/\s+/g,'-').toLowerCase()}-${fechaInicio}.pdf`;
+    doc.save(nombreArchivo);
+    toast('Informe formal generado \u2713');
+    closeModal('modalInformeFormal');
+  } catch (e) {
+    toast('Error al generar el informe');
+    console.error(e);
+  }
+});
+
+/* ============ CLIENTES ============ */
+async function cargarClientes(){
+  const { data } = await sb.from('clientes').select('*').eq('vendedor_id', currentUser.id).order('nombre');
+  const el = document.getElementById('listaClientes');
+  if (!data || data.length === 0) { el.innerHTML = emptyState('👤', 'Aún no tienes clientes registrados.'); return; }
+  el.innerHTML = data.map(c => `
+    <div class="card">
+      <p class="card-title">${escapeHtml(c.nombre)}</p>
+      <p class="card-sub">${c.telefono || c.email || 'Sin contacto'}</p>
+    </div>
+  `).join('');
+}
+
+/* ============ SEPARACIONES ============ */
+async function cargarSeparacionesPorVencer(){
+  const { data } = await sb.from('vista_separaciones_por_vencer').select('*').eq('vendedor_id', currentUser.id).lte('dias_restantes', 7);
+  const el = document.getElementById('listaSeparacionesVencen');
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🏷️', 'Sin separaciones próximas a vencer.'); return; }
+  el.innerHTML = data.map(s => `
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${escapeHtml(s.propiedad_codigo)}</p>
+          <p class="card-sub">${escapeHtml(s.cliente_nombre)} · vence en ${s.dias_restantes} día(s)</p>
+        </div>
+        <span class="badge badge-${s.estado}">${estadoLabel(s.estado)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+async function cargarSeparacionesTodas(){
+  const { data } = await sb.from('separaciones').select('*, propiedades(codigo), clientes(nombre)').eq('vendedor_id', currentUser.id).order('fecha_vencimiento');
+  const el = document.getElementById('listaSeparacionesTodas');
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🏷️', 'No tienes separaciones registradas.'); return; }
+  el.innerHTML = data.map(s => `
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${escapeHtml(s.propiedades?.codigo || '—')}</p>
+          <p class="card-sub">${escapeHtml(s.clientes?.nombre || '—')} · vence ${fmtFecha(s.fecha_vencimiento)}</p>
+        </div>
+        <span class="badge badge-${s.estado}">${estadoLabel(s.estado)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============ AGENDA + SYNC GOOGLE CALENDAR ============ */
+async function cargarAgenda(){
+  const { data } = await sb.from('agenda').select('*').eq('usuario_id', currentUser.id).order('fecha_inicio');
+  const el = document.getElementById('listaAgenda');
+  if (!data || data.length === 0) { el.innerHTML = emptyState('📅', 'No tienes eventos en tu agenda.'); return; }
+  el.innerHTML = data.map(ev => `
+    <div class="card">
+      <p class="card-title">${escapeHtml(ev.titulo)}</p>
+      <p class="card-sub">${new Date(ev.fecha_inicio).toLocaleString('es-BO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
+      <div class="card-actions">
+        <button class="chip-btn ${ev.google_calendar_event_id ? '' : 'gold'}" onclick="sincronizarEvento('${ev.id}')">
+          ${ev.google_calendar_event_id ? '✓ Sincronizado' : 'Sincronizar con Calendar'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+async function sincronizarEvento(agendaId){
+  const { data: { session } } = await sb.auth.getSession();
+  const googleToken = sessionStorage.getItem('google_provider_token');
+  if (!googleToken) {
+    toast('Vuelve a iniciar sesión para autorizar Google Calendar');
+    return;
+  }
+  toast('Sincronizando…');
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/sincronizar-google-calendar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ agenda_id: agendaId, google_provider_token: googleToken })
+    });
+    const result = await resp.json();
+    if (!result.ok) { toast('Error al sincronizar'); console.error(result); return; }
+    toast('Sincronizado con Google Calendar ✓');
+    cargarAgenda();
+  } catch (e) {
+    toast('Error de conexión');
+    console.error(e);
+  }
+}
+
+/* ============ NOTIFICACIONES ============ */
+async function cargarNotificacionesBadge(){
+  const { count } = await sb.from('notificaciones').select('id', { count: 'exact', head: true }).eq('usuario_id', currentUser.id).eq('leida', false);
+  document.getElementById('btnBell').classList.toggle('has-unread', (count || 0) > 0);
+}
+async function cargarNotificaciones(){
+  const { data } = await sb.from('notificaciones').select('*').eq('usuario_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
+  const el = document.getElementById('listaNotificaciones');
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🔔', 'No tienes notificaciones.'); return; }
+  el.innerHTML = data.map(n => `
+    <div class="card" style="${n.leida ? 'opacity:0.6;' : ''}" onclick="marcarLeida('${n.id}')">
+      <p class="card-title">${escapeHtml(n.titulo)}</p>
+      <p class="card-sub">${escapeHtml(n.mensaje)}</p>
+    </div>
+  `).join('');
+  await sb.from('notificaciones').update({ leida: true }).eq('usuario_id', currentUser.id).eq('leida', false);
+  cargarNotificacionesBadge();
+}
+async function marcarLeida(id){
+  await sb.from('notificaciones').update({ leida: true }).eq('id', id);
+}
+
+/* ============ HELPERS ============ */
+function emptyState(icon, text){
+  return `<div class="empty"><div class="big">${icon}</div><p>${text}</p></div>`;
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str ?? '';
+  return d.innerHTML;
+}
+
+/* ============ INICIALIZACIÓN ============ */
+(async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    if (session.provider_token) sessionStorage.setItem('google_provider_token', session.provider_token);
+    await cargarPerfil();
+    mostrarApp();
+  } else {
+    mostrarLogin();
+  }
+})();
+</script>
+</body>
+</html>
