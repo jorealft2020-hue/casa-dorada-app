@@ -180,8 +180,11 @@
 
       <!-- VISTA: Agenda -->
       <div id="viewAgenda" class="hidden">
-        <div class="section-title">Agenda</div>
+        <div class="section-title">Agenda
+          <button class="see-all" id="btnToggleChecklist">Ver checklist</button>
+        </div>
         <div id="listaAgenda"></div>
+        <div id="listaChecklist" class="hidden"></div>
       </div>
 
       <!-- VISTA: Notificaciones -->
@@ -225,6 +228,21 @@
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalActividad">Cancelar</button>
         <button class="btn-primary" id="btnGuardarActividad">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: nuevo evento de agenda -->
+  <div class="modal-backdrop" id="modalAgenda">
+    <div class="modal-sheet">
+      <h3>Nuevo evento de agenda</h3>
+      <div class="field"><label>Actividad</label><input type="text" id="agActividad" placeholder="Ej: Reunión con cliente"></div>
+      <div class="field"><label>Locación</label><input type="text" id="agLocacion" placeholder="Ej: Oficina central"></div>
+      <div class="field"><label>Fecha</label><input type="date" id="agFecha"></div>
+      <div class="field"><label>Hora</label><input type="time" id="agHora"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalAgenda">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarAgenda">Guardar</button>
       </div>
     </div>
   </div>
@@ -417,7 +435,7 @@ function irAVista(vista){
   const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', notificaciones:'viewNotificaciones', admin:'viewAdmin' };
   document.getElementById(map[vista]).classList.remove('hidden');
   document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
-  document.getElementById('btnFab').classList.toggle('hidden', vista !== 'actividades');
+  document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda'));
 
   if (vista === 'actividades') cargarActividadesTodas();
   if (vista === 'clientes') cargarClientes();
@@ -490,7 +508,10 @@ async function completarActividad(id){
 }
 
 /* ============ NUEVA ACTIVIDAD (modal) ============ */
-document.getElementById('btnFab').addEventListener('click', () => openModal('modalActividad'));
+document.getElementById('btnFab').addEventListener('click', () => {
+  if (currentView === 'agenda') openModal('modalAgenda');
+  else openModal('modalActividad');
+});
 document.getElementById('btnGuardarActividad').addEventListener('click', async () => {
   const titulo = document.getElementById('actTitulo').value.trim();
   const locacion = document.getElementById('actLocacion').value.trim();
@@ -1060,6 +1081,47 @@ async function cargarSeparacionesTodas(){
 }
 
 /* ============ AGENDA + SYNC GOOGLE CALENDAR ============ */
+document.getElementById('btnGuardarAgenda').addEventListener('click', async () => {
+  const actividad = document.getElementById('agActividad').value.trim();
+  const locacion = document.getElementById('agLocacion').value.trim();
+  const fecha = document.getElementById('agFecha').value;
+  const hora = document.getElementById('agHora').value;
+  if (!actividad || !fecha || !hora) { toast('Completa actividad, fecha y hora'); return; }
+
+  const fechaInicio = new Date(`${fecha}T${hora}:00`).toISOString();
+
+  const { data: nuevoEv, error } = await sb.from('agenda').insert({
+    usuario_id: currentUser.id,
+    titulo: actividad,
+    locacion: locacion || null,
+    fecha_inicio: fechaInicio,
+    estado: 'programada'
+  }).select().single();
+
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+
+  toast('Evento guardado ✓');
+  closeModal('modalAgenda');
+  document.getElementById('agActividad').value = '';
+  document.getElementById('agLocacion').value = '';
+  document.getElementById('agFecha').value = '';
+  document.getElementById('agHora').value = '';
+  cargarAgenda();
+
+  // Sincronizar automáticamente con Google Calendar para que llegue la alarma (vibración/sonido los da el celular)
+  sincronizarEvento(nuevoEv.id, true);
+});
+
+document.getElementById('btnToggleChecklist').addEventListener('click', (e) => {
+  const listaAgenda = document.getElementById('listaAgenda');
+  const listaChecklist = document.getElementById('listaChecklist');
+  const enChecklist = !listaChecklist.classList.contains('hidden');
+  listaAgenda.classList.toggle('hidden', !enChecklist);
+  listaChecklist.classList.toggle('hidden', enChecklist);
+  e.target.textContent = enChecklist ? 'Ver checklist' : 'Ver agenda';
+  if (!enChecklist) cargarChecklist();
+});
+
 async function cargarAgenda(){
   const { data } = await sb.from('agenda').select('*').eq('usuario_id', currentUser.id).order('fecha_inicio');
   const el = document.getElementById('listaAgenda');
@@ -1068,6 +1130,7 @@ async function cargarAgenda(){
     <div class="card">
       <p class="card-title">${escapeHtml(ev.titulo)}</p>
       <p class="card-sub">${new Date(ev.fecha_inicio).toLocaleString('es-BO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
+      ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
       <div class="card-actions">
         <button class="chip-btn ${ev.google_calendar_event_id ? '' : 'gold'}" onclick="sincronizarEvento('${ev.id}')">
           ${ev.google_calendar_event_id ? '✓ Sincronizado' : 'Sincronizar con Calendar'}
@@ -1076,14 +1139,51 @@ async function cargarAgenda(){
     </div>
   `).join('');
 }
-async function sincronizarEvento(agendaId){
+
+/* Semáforo según minutos restantes: verde >60min, amarillo 15-60min, rojo <15min o vencido */
+function semaforoAgenda(fechaInicio){
+  const minutosRestantes = (new Date(fechaInicio) - new Date()) / 60000;
+  if (minutosRestantes <= 15) return { color: '#B4453C', label: '🔴' };
+  if (minutosRestantes <= 60) return { color: '#8A5A17', label: '🟡' };
+  return { color: '#4C7A5E', label: '🟢' };
+}
+
+async function cargarChecklist(){
+  const ahora = new Date().toISOString();
+  const { data } = await sb.from('agenda').select('*').eq('usuario_id', currentUser.id).eq('estado', 'programada').gte('fecha_inicio', ahora).order('fecha_inicio');
+  const el = document.getElementById('listaChecklist');
+  if (!data || data.length === 0) { el.innerHTML = emptyState('✅', 'No tienes actividades futuras pendientes.'); return; }
+  el.innerHTML = data.map(ev => {
+    const sem = semaforoAgenda(ev.fecha_inicio);
+    return `
+    <div class="card" style="border-left: 4px solid ${sem.color};">
+      <p class="card-title">${sem.label} ${escapeHtml(ev.titulo)}</p>
+      <p class="card-sub">${new Date(ev.fecha_inicio).toLocaleString('es-BO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}${ev.locacion ? ' · 📍 ' + escapeHtml(ev.locacion) : ''}</p>
+      <div class="card-actions">
+        <button class="chip-btn gold" onclick="cambiarEstadoAgenda('${ev.id}', 'realizada')">Realizada</button>
+        <button class="chip-btn" onclick="cambiarEstadoAgenda('${ev.id}', 'reprogramada')">Reprogramada</button>
+        <button class="chip-btn" onclick="cambiarEstadoAgenda('${ev.id}', 'cancelada')">Cancelada</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+
+async function cambiarEstadoAgenda(id, estado){
+  const { error } = await sb.from('agenda').update({ estado }).eq('id', id);
+  if (error) { toast('Error al actualizar'); console.error(error); return; }
+  toast('Actualizado ✓');
+  cargarChecklist();
+}
+
+async function sincronizarEvento(agendaId, silencioso){
   const { data: { session } } = await sb.auth.getSession();
   const googleToken = sessionStorage.getItem('google_provider_token');
   if (!googleToken) {
-    toast('Vuelve a iniciar sesión para autorizar Google Calendar');
+    if (!silencioso) toast('Vuelve a iniciar sesión para autorizar Google Calendar');
     return;
   }
-  toast('Sincronizando…');
+  if (!silencioso) toast('Sincronizando…');
   try {
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/sincronizar-google-calendar`, {
       method: 'POST',
@@ -1094,14 +1194,15 @@ async function sincronizarEvento(agendaId){
       body: JSON.stringify({ agenda_id: agendaId, google_provider_token: googleToken })
     });
     const result = await resp.json();
-    if (!result.ok) { toast('Error al sincronizar'); console.error(result); return; }
-    toast('Sincronizado con Google Calendar ✓');
+    if (!result.ok) { if (!silencioso) toast('Error al sincronizar'); console.error(result); return; }
+    if (!silencioso) toast('Sincronizado con Google Calendar ✓');
     cargarAgenda();
   } catch (e) {
-    toast('Error de conexión');
+    if (!silencioso) toast('Error de conexión');
     console.error(e);
   }
 }
+
 
 /* ============ NOTIFICACIONES ============ */
 async function cargarNotificacionesBadge(){
