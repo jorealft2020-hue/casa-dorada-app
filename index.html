@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Casa Dorada · Planner</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1A2332">
+<link rel="apple-touch-icon" href="icon-apple-touch.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
@@ -62,11 +65,23 @@
   main{ flex:1; overflow-y:auto; padding: 4px 20px 100px; }
 
   /* ===== KPI STRIP ===== */
-  .kpi-strip{ display:flex; gap:10px; overflow-x:auto; padding: 8px 0 18px; scrollbar-width:none; }
+  .kpi-strip{ display:flex; gap:12px; overflow-x:auto; padding: 8px 2px 18px; scrollbar-width:none; }
   .kpi-strip::-webkit-scrollbar{ display:none; }
-  .kpi-card{ flex: 0 0 auto; min-width: 118px; background: var(--navy); color: var(--cream); border-radius: var(--radius); padding: 14px 16px; }
-  .kpi-card .num{ font-size: 24px; font-weight:700; color: var(--gold-soft); line-height:1; }
-  .kpi-card .lbl{ font-size: 11.5px; color: #A9B4C4; margin-top:6px; }
+  .kpi-card{
+    flex: 0 0 auto; min-width: 128px; color: var(--cream);
+    border-radius: 16px; padding: 16px 18px;
+    background: linear-gradient(155deg, var(--navy) 0%, #101724 100%);
+    box-shadow: 0 6px 18px rgba(26,35,50,0.28);
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::after{ content:''; position:absolute; top:-30%; right:-30%; width:100px; height:100px; border-radius:50%; background: rgba(255,255,255,0.05); }
+  .kpi-card .kpi-ic{ font-size: 18px; opacity:0.9; margin-bottom: 8px; }
+  .kpi-card .num{ font-size: 22px; font-weight:800; line-height:1; letter-spacing:-0.01em; color: var(--gold-soft); }
+  .kpi-card.kpi-ok .num{ color: #8FD1A8; }
+  .kpi-card.kpi-warn .num{ color: #F0C879; }
+  .kpi-card.kpi-info .num{ color: #A9C6F0; }
+  .kpi-card.kpi-gold .num{ color: var(--gold-soft); }
+  .kpi-card .lbl{ font-size: 11.5px; color: #A9B4C4; margin-top:8px; font-weight:600; letter-spacing:0.01em; }
 
   /* ===== SECTION ===== */
   .section-title{ font-size: 15px; font-weight:700; margin: 22px 0 12px; display:flex; justify-content:space-between; align-items:center; }
@@ -523,14 +538,22 @@ document.getElementById('btnBell').addEventListener('click', () => irAVista('not
 async function cargarKPIs(){
   const { data, error } = await sb.from('vista_kpis_vendedor').select('*').eq('usuario_id', currentUser.id).maybeSingle();
   const el = document.getElementById('kpiStrip');
-  if (error || !data) { el.innerHTML = ''; return; }
+  if (error) { el.innerHTML = ''; console.error(error); return; }
+  const d = data || {};
   const items = [
-    { num: data.actividades_pendientes ?? 0, lbl: 'Pendientes' },
-    { num: data.separaciones_activas ?? 0, lbl: 'Separaciones activas' },
-    { num: data.ventas_cerradas ?? 0, lbl: 'Ventas cerradas' },
-    { num: data.total_clientes ?? 0, lbl: 'Clientes' },
+    { num: d.actividades_pendientes ?? 0, lbl: 'Pendientes', ic: '⏳', tone: 'warn' },
+    { num: d.actividades_completadas ?? 0, lbl: 'Completadas', ic: '✅', tone: 'ok' },
+    { num: d.separaciones_activas ?? 0, lbl: 'Separaciones activas', ic: '🏷️', tone: 'info' },
+    { num: d.ventas_cerradas ?? 0, lbl: 'Ventas cerradas', ic: '💰', tone: 'ok' },
+    { num: d.total_clientes ?? 0, lbl: 'Clientes', ic: '👤', tone: 'info' },
+    { num: 'S/ ' + Number(d.monto_total_vendido ?? 0).toLocaleString('es-PE'), lbl: 'Monto vendido', ic: '📈', tone: 'gold' },
   ];
-  el.innerHTML = items.map(i => `<div class="kpi-card"><div class="num">${i.num}</div><div class="lbl">${i.lbl}</div></div>`).join('');
+  el.innerHTML = items.map(i => `
+    <div class="kpi-card kpi-${i.tone}">
+      <div class="kpi-ic">${i.ic}</div>
+      <div class="num">${i.num}</div>
+      <div class="lbl">${i.lbl}</div>
+    </div>`).join('');
 }
 
 /* ============ ACTIVIDADES ============ */
@@ -1480,6 +1503,12 @@ function escapeHtml(str){
     mostrarLogin();
   }
 })();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(e => console.error('SW error', e));
+  });
+}
 </script>
 </body>
 </html>
