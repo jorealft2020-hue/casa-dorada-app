@@ -219,6 +219,16 @@
         <div id="listaChecklist" class="hidden"></div>
       </div>
 
+      <!-- VISTA: Rendimiento (embudo de conversión) -->
+      <div id="viewRendimiento" class="hidden">
+        <div class="section-title">Rendimiento
+          <button class="see-all" id="btnAbrirRendimiento">+ Registrar día</button>
+        </div>
+        <div id="panelEmbudo"></div>
+        <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:16px 0 6px;">Historial de registros</p>
+        <div id="listaRendimiento"></div>
+      </div>
+
       <!-- VISTA: Notificaciones -->
       <div id="viewNotificaciones" class="hidden">
         <div class="section-title">Notificaciones</div>
@@ -242,6 +252,7 @@
       <button class="navbtn" data-nav="clientes"><span class="ic">👤</span>Clientes</button>
       <button class="navbtn" data-nav="separaciones"><span class="ic">🏷️</span>Separac.</button>
       <button class="navbtn" data-nav="agenda"><span class="ic">📅</span>Agenda</button>
+      <button class="navbtn hidden" id="navRendimiento" data-nav="rendimiento"><span class="ic">📊</span>Rendim.</button>
       <button class="navbtn hidden" id="navAdmin" data-nav="admin"><span class="ic">⚙️</span>Admin</button>
     </nav>
   </div>
@@ -348,6 +359,42 @@
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalSeparacion">Cancelar</button>
         <button class="btn-primary" id="btnGuardarSeparacion">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: registro diario de rendimiento -->
+  <div class="modal-backdrop" id="modalRendimiento">
+    <div class="modal-sheet">
+      <h3>Registro diario de leads</h3>
+      <div class="field"><label>Fecha</label><input type="date" id="rd_fecha"></div>
+
+      <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:10px 0 6px;">LEADS ASIGNADOS POR CANAL</p>
+      <div class="field"><label>Facebook</label><input type="number" min="0" id="rd_leads_facebook" value="0"></div>
+      <div class="field"><label>TikTok</label><input type="number" min="0" id="rd_leads_tiktok" value="0"></div>
+      <div class="field"><label>Instagram</label><input type="number" min="0" id="rd_leads_instagram" value="0"></div>
+      <div class="field"><label>Prospección</label><input type="number" min="0" id="rd_leads_prospeccion" value="0"></div>
+      <div class="field"><label>Referidos</label><input type="number" min="0" id="rd_leads_referidos" value="0"></div>
+      <p style="font-size:13px; font-weight:700;">Total leads: <span id="rd_total_leads">0</span></p>
+
+      <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:14px 0 6px;">CONTACTADOS POR</p>
+      <div class="field"><label>Llamada</label><input type="number" min="0" id="rd_contactados_llamada" value="0"></div>
+      <div class="field"><label>Mensaje WhatsApp</label><input type="number" min="0" id="rd_contactados_wsp_msg" value="0"></div>
+      <div class="field"><label>Llamada WhatsApp</label><input type="number" min="0" id="rd_contactados_wsp_llamada" value="0"></div>
+      <p style="font-size:13px; font-weight:700;">Total contactados: <span id="rd_total_contactados">0</span></p>
+
+      <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:14px 0 6px;">RESULTADO DEL CONTACTO</p>
+      <div class="field"><label>Contestaron</label><input type="number" min="0" id="rd_contestaron" value="0"></div>
+      <div class="field"><label>No contestaron</label><input type="number" min="0" id="rd_no_contestaron" value="0"></div>
+
+      <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:14px 0 6px;">CITAS AGENDADAS SEGÚN TIPO</p>
+      <div class="field"><label>Oficina</label><input type="number" min="0" id="rd_citas_oficina" value="0"></div>
+      <div class="field"><label>MEET</label><input type="number" min="0" id="rd_citas_meet" value="0"></div>
+      <div class="field"><label>Proyecto</label><input type="number" min="0" id="rd_citas_proyecto" value="0"></div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalRendimiento">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarRendimiento">Guardar</button>
       </div>
     </div>
   </div>
@@ -519,6 +566,7 @@ async function mostrarApp(){
   }
   if (perm.ver_clientes === false) document.querySelector('[data-nav="clientes"]').classList.add('hidden');
   if (perm.ver_separaciones === false) document.querySelector('[data-nav="separaciones"]').classList.add('hidden');
+  if (currentProfile?.rol === 'usuario') document.getElementById('navRendimiento').classList.remove('hidden');
   if (perm.ver_agenda === false) document.querySelector('[data-nav="agenda"]').classList.add('hidden');
   puedeEliminar = (currentProfile?.rol === 'admin') || (perm.eliminar_registros === true);
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
@@ -540,7 +588,7 @@ document.querySelectorAll('[data-nav]').forEach(btn => {
 function irAVista(vista){
   currentView = vista;
   document.querySelectorAll('main > div[id^="view"]').forEach(v => v.classList.add('hidden'));
-  const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', notificaciones:'viewNotificaciones', admin:'viewAdmin' };
+  const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', rendimiento:'viewRendimiento', notificaciones:'viewNotificaciones', admin:'viewAdmin' };
   document.getElementById(map[vista]).classList.remove('hidden');
   document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
   document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones'));
@@ -549,6 +597,7 @@ function irAVista(vista){
   if (vista === 'clientes') cargarClientes();
   if (vista === 'separaciones') cargarSeparacionesTodas();
   if (vista === 'agenda') cargarAgenda();
+  if (vista === 'rendimiento') cargarRendimiento();
   if (vista === 'notificaciones') cargarNotificaciones();
   if (vista === 'admin') { cargarUsuariosAdmin(); cargarPreautorizados(); }
 }
@@ -701,6 +750,8 @@ document.getElementById('btnDescargarReporte').addEventListener('click', async (
 
     if (error) { toast('Error al obtener actividades'); console.error(error); return; }
 
+    const { data: rendimientoHoy } = await sb.from('rendimiento_leads').select('*').eq('usuario_id', currentUser.id).eq('fecha', hoy).maybeSingle();
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -784,6 +835,34 @@ document.getElementById('btnDescargarReporte').addEventListener('click', async (
       }
     }
 
+    if (rendimientoHoy) {
+      if (y > pageHeight - 180) { doc.addPage(); encabezado(); y = 100; }
+      y += 10;
+      doc.setDrawColor(200,200,200);
+      doc.line(marginX, y, pageWidth - marginX, y);
+      y += 20;
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('RENDIMIENTO COMERCIAL DEL DÍA', marginX, y);
+      y += 18;
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      const totalLeads = rendimientoHoy.leads_facebook + rendimientoHoy.leads_tiktok + rendimientoHoy.leads_instagram + rendimientoHoy.leads_prospeccion + rendimientoHoy.leads_referidos;
+      const totalContactados = rendimientoHoy.contactados_llamada + rendimientoHoy.contactados_whatsapp_mensaje + rendimientoHoy.contactados_whatsapp_llamada;
+      const totalCitas = rendimientoHoy.citas_oficina + rendimientoHoy.citas_meet + rendimientoHoy.citas_proyecto;
+      const lineas = [
+        `Leads asignados: ${totalLeads}  (Facebook ${rendimientoHoy.leads_facebook}, TikTok ${rendimientoHoy.leads_tiktok}, Instagram ${rendimientoHoy.leads_instagram}, Prospección ${rendimientoHoy.leads_prospeccion}, Referidos ${rendimientoHoy.leads_referidos})`,
+        `Contactados: ${totalContactados}  (Llamada ${rendimientoHoy.contactados_llamada}, WhatsApp mensaje ${rendimientoHoy.contactados_whatsapp_mensaje}, WhatsApp llamada ${rendimientoHoy.contactados_whatsapp_llamada})`,
+        `Contestaron: ${rendimientoHoy.contestaron}  ·  No contestaron: ${rendimientoHoy.no_contestaron}`,
+        `Citas agendadas: ${totalCitas}  (Oficina ${rendimientoHoy.citas_oficina}, MEET ${rendimientoHoy.citas_meet}, Proyecto ${rendimientoHoy.citas_proyecto})`,
+      ];
+      lineas.forEach(linea => {
+        const wrapped = doc.splitTextToSize(linea, pageWidth - marginX * 2);
+        doc.text(wrapped, marginX, y);
+        y += wrapped.length * 13 + 3;
+      });
+    }
+
     const nombreArchivo = `reporte-diario-${(currentProfile?.nombre || 'usuario').replace(/\s+/g,'-').toLowerCase()}-${hoy}.pdf`;
     doc.save(nombreArchivo);
     toast('Reporte generado ✓');
@@ -863,6 +942,13 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
       .order('fecha_programada');
 
     if (error) { toast('Error al obtener actividades'); console.error(error); return; }
+
+    // 2b) Traer rendimiento del periodo (leads/embudo)
+    const { data: rendimientoPeriodo } = await sb.from('rendimiento_leads')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .gte('fecha', fechaInicio)
+      .lte('fecha', fechaFin);
 
     // 3) Cargar logo
     const logoBase64 = await cargarLogoBase64();
@@ -1003,6 +1089,35 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
     }
 
     if (y > pageHeight - 160) { doc.addPage(); dibujarMembrete(); y = 150; }
+
+    // Rendimiento comercial del periodo (leads / embudo de conversión)
+    if (rendimientoPeriodo && rendimientoPeriodo.length > 0) {
+      const suma = (campo) => rendimientoPeriodo.reduce((acc, r) => acc + (r[campo] || 0), 0);
+      const totalLeads = suma('leads_facebook') + suma('leads_tiktok') + suma('leads_instagram') + suma('leads_prospeccion') + suma('leads_referidos');
+      const totalContactados = suma('contactados_llamada') + suma('contactados_whatsapp_mensaje') + suma('contactados_whatsapp_llamada');
+      const totalCitas = suma('citas_oficina') + suma('citas_meet') + suma('citas_proyecto');
+      const totalContestaron = suma('contestaron');
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('RENDIMIENTO COMERCIAL DEL PERIODO', marginX, y);
+      y += 16;
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      const lineasRend = [
+        `Leads asignados: ${totalLeads}  (Facebook ${suma('leads_facebook')}, TikTok ${suma('leads_tiktok')}, Instagram ${suma('leads_instagram')}, Prospección ${suma('leads_prospeccion')}, Referidos ${suma('leads_referidos')})`,
+        `Contactados: ${totalContactados}  ·  Contestaron: ${totalContestaron}  ·  No contestaron: ${suma('no_contestaron')}`,
+        `Citas agendadas: ${totalCitas}  (Oficina ${suma('citas_oficina')}, MEET ${suma('citas_meet')}, Proyecto ${suma('citas_proyecto')})`,
+        `Conversión leads → contactados: ${totalLeads > 0 ? Math.round((totalContactados/totalLeads)*100) : 0}%  ·  contactados → citas: ${totalContactados > 0 ? Math.round((totalCitas/totalContactados)*100) : 0}%`,
+      ];
+      lineasRend.forEach(linea => {
+        const wrapped = doc.splitTextToSize(linea, pageWidth - marginX * 2);
+        doc.text(wrapped, marginX, y);
+        y += wrapped.length * 13 + 3;
+      });
+      y += 12;
+      if (y > pageHeight - 160) { doc.addPage(); dibujarMembrete(); y = 150; }
+    }
 
     // Conclusiones
     doc.setFontSize(12);
@@ -1159,6 +1274,123 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
   closeModal('modalEditarUsuario');
   cargarUsuariosAdmin();
 });
+
+/* ============ RENDIMIENTO (embudo de conversión) ============ */
+document.getElementById('btnAbrirRendimiento').addEventListener('click', () => {
+  document.getElementById('rd_fecha').value = new Date().toISOString().slice(0,10);
+  ['rd_leads_facebook','rd_leads_tiktok','rd_leads_instagram','rd_leads_prospeccion','rd_leads_referidos',
+   'rd_contactados_llamada','rd_contactados_wsp_msg','rd_contactados_wsp_llamada',
+   'rd_contestaron','rd_no_contestaron','rd_citas_oficina','rd_citas_meet','rd_citas_proyecto'
+  ].forEach(id => document.getElementById(id).value = 0);
+  actualizarTotalesRendimiento();
+  openModal('modalRendimiento');
+});
+
+function actualizarTotalesRendimiento(){
+  const v = id => parseInt(document.getElementById(id).value) || 0;
+  const totalLeads = v('rd_leads_facebook') + v('rd_leads_tiktok') + v('rd_leads_instagram') + v('rd_leads_prospeccion') + v('rd_leads_referidos');
+  const totalContactados = v('rd_contactados_llamada') + v('rd_contactados_wsp_msg') + v('rd_contactados_wsp_llamada');
+  document.getElementById('rd_total_leads').textContent = totalLeads;
+  document.getElementById('rd_total_contactados').textContent = totalContactados;
+}
+['rd_leads_facebook','rd_leads_tiktok','rd_leads_instagram','rd_leads_prospeccion','rd_leads_referidos',
+ 'rd_contactados_llamada','rd_contactados_wsp_msg','rd_contactados_wsp_llamada'
+].forEach(id => document.getElementById(id).addEventListener('input', actualizarTotalesRendimiento));
+
+document.getElementById('btnGuardarRendimiento').addEventListener('click', async () => {
+  const v = id => parseInt(document.getElementById(id).value) || 0;
+  const fecha = document.getElementById('rd_fecha').value;
+  if (!fecha) { toast('Selecciona la fecha'); return; }
+
+  const { error } = await sb.from('rendimiento_leads').insert({
+    usuario_id: currentUser.id,
+    fecha,
+    leads_facebook: v('rd_leads_facebook'),
+    leads_tiktok: v('rd_leads_tiktok'),
+    leads_instagram: v('rd_leads_instagram'),
+    leads_prospeccion: v('rd_leads_prospeccion'),
+    leads_referidos: v('rd_leads_referidos'),
+    contactados_llamada: v('rd_contactados_llamada'),
+    contactados_whatsapp_mensaje: v('rd_contactados_wsp_msg'),
+    contactados_whatsapp_llamada: v('rd_contactados_wsp_llamada'),
+    contestaron: v('rd_contestaron'),
+    no_contestaron: v('rd_no_contestaron'),
+    citas_oficina: v('rd_citas_oficina'),
+    citas_meet: v('rd_citas_meet'),
+    citas_proyecto: v('rd_citas_proyecto'),
+  });
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  toast('Registro guardado ✓');
+  closeModal('modalRendimiento');
+  cargarRendimiento();
+});
+
+function pct(parte, total){ return total > 0 ? Math.round((parte/total)*100) : 0; }
+
+async function cargarRendimiento(){
+  const { data: embudo } = await sb.from('vista_embudo_conversion').select('*').eq('usuario_id', currentUser.id).maybeSingle();
+  const panel = document.getElementById('panelEmbudo');
+
+  const e = embudo || { total_leads:0, total_contactados:0, total_contestaron:0, total_citas:0, total_separaciones:0, total_ventas_cerradas:0 };
+  const etapas = [
+    { label: 'Leads asignados', num: e.total_leads, base: e.total_leads },
+    { label: 'Contactados', num: e.total_contactados, base: e.total_leads },
+    { label: 'Contestaron', num: e.total_contestaron, base: e.total_leads },
+    { label: 'Citas agendadas', num: e.total_citas, base: e.total_leads },
+    { label: 'Separaciones', num: e.total_separaciones, base: e.total_leads },
+    { label: 'Ventas cerradas', num: e.total_ventas_cerradas, base: e.total_leads },
+  ];
+
+  panel.innerHTML = `
+    <div class="card">
+      <p class="card-title" style="margin-bottom:10px;">Embudo de conversión (acumulado)</p>
+      ${etapas.map(et => `
+        <div style="margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:3px;">
+            <span>${et.label}</span>
+            <span style="font-weight:700;">${et.num} ${et.base > 0 ? `(${pct(et.num, et.base)}%)` : ''}</span>
+          </div>
+          <div style="background:#EDE8DC; border-radius:6px; height:8px; overflow:hidden;">
+            <div style="background: var(--gold); width:${pct(et.num, et.base)}%; height:100%;"></div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="card">
+      <p class="card-title" style="margin-bottom:6px;">Desglose por canal</p>
+      <p class="card-sub">Facebook: ${e.leads_facebook ?? 0} · TikTok: ${e.leads_tiktok ?? 0} · Instagram: ${e.leads_instagram ?? 0}</p>
+      <p class="card-sub">Prospección: ${e.leads_prospeccion ?? 0} · Referidos: ${e.leads_referidos ?? 0}</p>
+      <p class="card-sub" style="margin-top:6px;">Citas: Oficina ${e.citas_oficina ?? 0} · MEET ${e.citas_meet ?? 0} · Proyecto ${e.citas_proyecto ?? 0}</p>
+    </div>
+  `;
+
+  const { data: registros } = await sb.from('rendimiento_leads').select('*').eq('usuario_id', currentUser.id).order('fecha', { ascending: false }).limit(30);
+  const el = document.getElementById('listaRendimiento');
+  if (!registros || registros.length === 0) { el.innerHTML = emptyState('📊', 'Aún no has registrado tu rendimiento diario.'); return; }
+  el.innerHTML = registros.map(r => {
+    const totalLeads = r.leads_facebook + r.leads_tiktok + r.leads_instagram + r.leads_prospeccion + r.leads_referidos;
+    const totalContactados = r.contactados_llamada + r.contactados_whatsapp_mensaje + r.contactados_whatsapp_llamada;
+    return `
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${fmtFecha(r.fecha)}</p>
+          <p class="card-sub">${totalLeads} leads · ${totalContactados} contactados · ${r.contestaron} contestaron</p>
+        </div>
+        ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarRendimiento('${r.id}')">🗑️</button>` : ''}
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+
+async function eliminarRendimiento(id){
+  if (!confirm('¿Eliminar este registro de rendimiento?')) return;
+  const { error } = await sb.from('rendimiento_leads').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Registro eliminado');
+  cargarRendimiento();
+}
 
 /* ============ CLIENTES ============ */
 async function cargarClientes(){
