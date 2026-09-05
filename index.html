@@ -803,7 +803,25 @@ document.getElementById('btnDescargarReporte').addEventListener('click', async (
         doc.setTextColor(26, 35, 50);
 
         y += tituloLines.length * 14 + 4;
+doc.setFontSize(9.5);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 110, 125);
 
+        let datosExtra = [];
+        if (act.hora_inicio) {
+          const hIni = act.hora_inicio.slice(0, 5);
+          const hFin = act.hora_fin ? act.hora_fin.slice(0, 5) : '';
+          datosExtra.push(`⏰ Horario: ${hIni}${hFin ? ' a ' + hFin : ''}`);
+        }
+        if (act.locacion) datosExtra.push(`📍 Lugar: ${act.locacion}`);
+        if (act.personas_involucradas) datosExtra.push(`👥 Personas: ${act.personas_involucradas}`);
+
+        if (datosExtra.length > 0) {
+          const lineaInfo = doc.splitTextToSize(datosExtra.join('   ·   '), pageWidth - marginX * 2);
+          doc.text(lineaInfo, marginX, y);
+          y += lineaInfo.length * 12 + 4;
+        }
+        doc.setTextColor(26, 35, 50);
         if (act.descripcion) {
           doc.setFontSize(9.5);
           doc.setFont(undefined, 'normal');
