@@ -947,7 +947,8 @@ document.getElementById('btnAbrirInformeFormal').addEventListener('click', () =>
 
 async function cargarLogoBase64(){
   try {
-    const resp = await fetch('https://nboikojylmkujdxinztj.supabase.co/functions/v1/membrete');
+    const resp = await fetch('membrete_fullpage.png');
+    if (!resp.ok) return null;
     const blob = await resp.blob();
     return await new Promise((resolve, reject) => {
       const reader = new FileReader();
