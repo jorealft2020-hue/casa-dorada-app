@@ -811,10 +811,10 @@ doc.setFontSize(9.5);
         if (act.hora_inicio) {
           const hIni = act.hora_inicio.slice(0, 5);
           const hFin = act.hora_fin ? act.hora_fin.slice(0, 5) : '';
-          datosExtra.push(`⏰ Horario: ${hIni}${hFin ? ' a ' + hFin : ''}`);
+          datosExtra.push(` Horario: ${hIni}${hFin ? ' a ' + hFin : ''}`);
         }
-        if (act.locacion) datosExtra.push(`📍 Lugar: ${act.locacion}`);
-        if (act.personas_involucradas) datosExtra.push(`👥 Personas: ${act.personas_involucradas}`);
+        if (act.locacion) datosExtra.push(` Lugar: ${act.locacion}`);
+        if (act.personas_involucradas) datosExtra.push(` Personas: ${act.personas_involucradas}`);
 
         if (datosExtra.length > 0) {
           const lineaInfo = doc.splitTextToSize(datosExtra.join('   ·   '), pageWidth - marginX * 2);
