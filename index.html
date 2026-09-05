@@ -247,6 +247,79 @@
     </div>
   </div>
 
+  <!-- MODAL: nueva separación -->
+  <div class="modal-backdrop" id="modalSeparacion">
+    <div class="modal-sheet">
+      <h3>Nueva separación</h3>
+
+      <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:10px 0 6px;">DATOS DEL CLIENTE</p>
+      <div class="field"><label>Nombres y apellidos</label><input type="text" id="sp_cliente_nombre"></div>
+      <div class="field"><label>DNI</label><input type="text" id="sp_cliente_dni"></div>
+      <div class="field"><label>Celular</label><input type="text" id="sp_cliente_celular"></div>
+      <div class="field"><label>Dirección</label><input type="text" id="sp_cliente_direccion"></div>
+      <div class="field"><label>Correo</label><input type="email" id="sp_cliente_correo"></div>
+
+      <div class="field" style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="sp_tiene_conyuge" style="width:auto;">
+        <label style="margin:0;">Tiene cónyuge / copropietario</label>
+      </div>
+      <div id="sp_bloque_conyuge" class="hidden">
+        <div class="field"><label>Nombres del cónyuge/copropietario</label><input type="text" id="sp_conyuge_nombre"></div>
+        <div class="field"><label>DNI</label><input type="text" id="sp_conyuge_dni"></div>
+        <div class="field"><label>Celular</label><input type="text" id="sp_conyuge_celular"></div>
+        <div class="field"><label>Dirección</label><input type="text" id="sp_conyuge_direccion"></div>
+      </div>
+
+      <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:14px 0 6px;">LOTE Y COTIZACIÓN</p>
+      <div class="field"><label>N° cotización</label><input type="text" id="sp_cotizacion"></div>
+      <div class="field"><label>Socio</label><input type="text" id="sp_socio"></div>
+      <div class="field"><label>Manzana</label><select id="sp_manzana"></select></div>
+      <div class="field"><label>Lote</label><input type="text" id="sp_lote"></div>
+      <div class="field"><label>Área (m²)</label><input type="number" step="0.01" id="sp_area"></div>
+      <div class="field"><label>Valor total (S/)</label><input type="number" step="0.01" id="sp_valor_total"></div>
+
+      <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:14px 0 6px;">SEPARACIÓN Y PAGO</p>
+      <div class="field"><label>Fecha de separación</label><input type="date" id="sp_fecha_separacion"></div>
+      <div class="field"><label>Monto de separación (S/)</label><input type="number" step="0.01" id="sp_monto_separacion"></div>
+      <div class="field"><label>Voucher / comprobante (imagen)</label><input type="file" id="sp_voucher" accept="image/*"></div>
+      <div class="field"><label>Entidad bancaria</label><input type="text" id="sp_medio_pago" placeholder="Ej: BCP, Interbank..."></div>
+      <div class="field"><label>N° de operación</label><input type="text" id="sp_n_operacion"></div>
+
+      <div class="field">
+        <label>Condición</label>
+        <select id="sp_condicion">
+          <option value="contado">Al contado</option>
+          <option value="financiado">Financiado</option>
+        </select>
+      </div>
+
+      <div id="sp_bloque_financiado" class="hidden">
+        <div class="field"><label>Valor de inicial (S/)</label><input type="number" step="0.01" id="sp_valor_inicial"></div>
+        <div class="field"><label>Saldo (S/)</label><input type="number" step="0.01" id="sp_saldo" readonly style="background:#EFEBDF;"></div>
+        <div class="field">
+          <label>Meses a financiar</label>
+          <select id="sp_meses_financiar">
+            <option value="6">6</option>
+            <option value="12">12</option>
+            <option value="24">24</option>
+            <option value="36">36</option>
+            <option value="48">48</option>
+            <option value="otro">Otro (ingresar manualmente)</option>
+          </select>
+        </div>
+        <div class="field hidden" id="sp_meses_otro_wrap"><label>N° de meses</label><input type="number" id="sp_meses_otro"></div>
+        <div class="field"><label>Inversión mensual (S/)</label><input type="number" step="0.01" id="sp_inversion_mensual" readonly style="background:#EFEBDF;"></div>
+      </div>
+
+      <div class="field"><label>Fecha de vencimiento de la separación</label><input type="date" id="sp_fecha_vencimiento"></div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalSeparacion">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarSeparacion">Guardar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: informe formal -->
   <!-- MODAL: informe formal quincenal/mensual -->
   <div class="modal-backdrop" id="modalInformeFormal">
@@ -435,7 +508,7 @@ function irAVista(vista){
   const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', notificaciones:'viewNotificaciones', admin:'viewAdmin' };
   document.getElementById(map[vista]).classList.remove('hidden');
   document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
-  document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda'));
+  document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones'));
 
   if (vista === 'actividades') cargarActividadesTodas();
   if (vista === 'clientes') cargarClientes();
@@ -510,6 +583,7 @@ async function completarActividad(id){
 /* ============ NUEVA ACTIVIDAD (modal) ============ */
 document.getElementById('btnFab').addEventListener('click', () => {
   if (currentView === 'agenda') openModal('modalAgenda');
+  else if (currentView === 'separaciones') { prepararModalSeparacion(); openModal('modalSeparacion'); }
   else openModal('modalActividad');
 });
 document.getElementById('btnGuardarActividad').addEventListener('click', async () => {
@@ -1047,21 +1121,179 @@ async function cargarClientes(){
 }
 
 /* ============ SEPARACIONES ============ */
+
+/* Llenar el select de Manzana: A..Z y A1..Z1 */
+function prepararModalSeparacion(){
+  const sel = document.getElementById('sp_manzana');
+  if (sel.options.length === 0) {
+    const opciones = [];
+    for (let i = 0; i < 26; i++) opciones.push(String.fromCharCode(65 + i));
+    for (let i = 0; i < 26; i++) opciones.push(String.fromCharCode(65 + i) + '1');
+    sel.innerHTML = opciones.map(o => `<option value="${o}">${o}</option>`).join('');
+  }
+  // Reset del formulario
+  ['sp_cliente_nombre','sp_cliente_dni','sp_cliente_celular','sp_cliente_direccion','sp_cliente_correo',
+   'sp_conyuge_nombre','sp_conyuge_dni','sp_conyuge_celular','sp_conyuge_direccion',
+   'sp_cotizacion','sp_socio','sp_lote','sp_area','sp_valor_total','sp_fecha_separacion','sp_monto_separacion',
+   'sp_medio_pago','sp_n_operacion','sp_valor_inicial','sp_saldo','sp_meses_otro','sp_inversion_mensual','sp_fecha_vencimiento'
+  ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('sp_tiene_conyuge').checked = false;
+  document.getElementById('sp_bloque_conyuge').classList.add('hidden');
+  document.getElementById('sp_condicion').value = 'contado';
+  document.getElementById('sp_bloque_financiado').classList.add('hidden');
+  document.getElementById('sp_meses_otro_wrap').classList.add('hidden');
+  document.getElementById('sp_voucher').value = '';
+}
+
+document.getElementById('sp_tiene_conyuge').addEventListener('change', (e) => {
+  document.getElementById('sp_bloque_conyuge').classList.toggle('hidden', !e.target.checked);
+});
+
+document.getElementById('sp_condicion').addEventListener('change', (e) => {
+  document.getElementById('sp_bloque_financiado').classList.toggle('hidden', e.target.value !== 'financiado');
+  calcularFinanciamiento();
+});
+
+document.getElementById('sp_meses_financiar').addEventListener('change', (e) => {
+  document.getElementById('sp_meses_otro_wrap').classList.toggle('hidden', e.target.value !== 'otro');
+  calcularFinanciamiento();
+});
+
+['sp_valor_total','sp_valor_inicial','sp_monto_separacion','sp_meses_otro'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calcularFinanciamiento);
+});
+
+/* Saldo = Valor total - (Inicial + Monto de separación) | Inversión mensual = Saldo / meses */
+function calcularFinanciamiento(){
+  const valorTotal = parseFloat(document.getElementById('sp_valor_total').value) || 0;
+  const inicial = parseFloat(document.getElementById('sp_valor_inicial').value) || 0;
+  const separacion = parseFloat(document.getElementById('sp_monto_separacion').value) || 0;
+  const saldo = Math.max(valorTotal - (inicial + separacion), 0);
+  document.getElementById('sp_saldo').value = saldo.toFixed(2);
+
+  const mesesSel = document.getElementById('sp_meses_financiar').value;
+  const meses = mesesSel === 'otro' ? (parseInt(document.getElementById('sp_meses_otro').value) || 0) : parseInt(mesesSel);
+  const inversion = meses > 0 ? saldo / meses : 0;
+  document.getElementById('sp_inversion_mensual').value = inversion.toFixed(2);
+}
+
+document.getElementById('btnGuardarSeparacion').addEventListener('click', async () => {
+  const nombre = document.getElementById('sp_cliente_nombre').value.trim();
+  const manzana = document.getElementById('sp_manzana').value;
+  const lote = document.getElementById('sp_lote').value.trim();
+  const valorTotal = parseFloat(document.getElementById('sp_valor_total').value) || 0;
+  const fechaSeparacion = document.getElementById('sp_fecha_separacion').value;
+  const montoSeparacion = parseFloat(document.getElementById('sp_monto_separacion').value) || 0;
+  const fechaVencimiento = document.getElementById('sp_fecha_vencimiento').value;
+  const condicion = document.getElementById('sp_condicion').value;
+
+  if (!nombre || !lote || !fechaSeparacion || !fechaVencimiento || !montoSeparacion) {
+    toast('Completa cliente, lote, fechas y monto de separación');
+    return;
+  }
+
+  toast('Guardando separación…');
+  try {
+    // 1) Generar código correlativo del cliente
+    const { data: codigoGenerado, error: errCodigo } = await sb.rpc('generar_codigo_cliente', { p_vendedor_id: currentUser.id });
+    if (errCodigo) { toast('Error al generar código'); console.error(errCodigo); return; }
+
+    // 2) Crear cliente
+    const { data: nuevoCliente, error: errCliente } = await sb.from('clientes').insert({
+      vendedor_id: currentUser.id,
+      nombre,
+      dni: document.getElementById('sp_cliente_dni').value.trim() || null,
+      celular: document.getElementById('sp_cliente_celular').value.trim() || null,
+      telefono: document.getElementById('sp_cliente_celular').value.trim() || null,
+      direccion: document.getElementById('sp_cliente_direccion').value.trim() || null,
+      correo: document.getElementById('sp_cliente_correo').value.trim() || null,
+      email: document.getElementById('sp_cliente_correo').value.trim() || null,
+      conyuge_nombre: document.getElementById('sp_conyuge_nombre').value.trim() || null,
+      conyuge_dni: document.getElementById('sp_conyuge_dni').value.trim() || null,
+      conyuge_celular: document.getElementById('sp_conyuge_celular').value.trim() || null,
+      conyuge_direccion: document.getElementById('sp_conyuge_direccion').value.trim() || null,
+      codigo_correlativo: codigoGenerado
+    }).select().single();
+    if (errCliente) { toast('Error al crear cliente'); console.error(errCliente); return; }
+
+    // 3) Crear o reutilizar la propiedad (manzana + lote)
+    const codigoPropiedad = `MZ${manzana}-LT${lote}`;
+    const { data: propiedad, error: errProp } = await sb.from('propiedades')
+      .upsert({ codigo: codigoPropiedad, proyecto: 'Costa Dorada', tipo: 'lote', area_m2: parseFloat(document.getElementById('sp_area').value) || null, precio: valorTotal, estado: 'separado' }, { onConflict: 'codigo' })
+      .select().single();
+    if (errProp) { toast('Error al registrar el lote'); console.error(errProp); return; }
+
+    // 4) Subir voucher si se adjuntó
+    let voucherUrl = null;
+    const voucherFile = document.getElementById('sp_voucher').files[0];
+    if (voucherFile) {
+      const ext = voucherFile.name.split('.').pop() || 'jpg';
+      const path = `${currentUser.id}/${nuevoCliente.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await sb.storage.from('documentos-separaciones').upload(path, voucherFile);
+      if (!upErr) {
+        const { data: signedData } = await sb.storage.from('documentos-separaciones').createSignedUrl(path, 60 * 60 * 24 * 365);
+        voucherUrl = signedData?.signedUrl || null;
+      }
+    }
+
+    // 5) Crear la separación
+    const mesesSel = document.getElementById('sp_meses_financiar').value;
+    const meses = condicion === 'financiado' ? (mesesSel === 'otro' ? parseInt(document.getElementById('sp_meses_otro').value) || null : parseInt(mesesSel)) : null;
+
+    const { error: errSep } = await sb.from('separaciones').insert({
+      propiedad_id: propiedad.id,
+      cliente_id: nuevoCliente.id,
+      vendedor_id: currentUser.id,
+      monto_separacion: montoSeparacion,
+      fecha_separacion: fechaSeparacion,
+      fecha_vencimiento: fechaVencimiento,
+      estado: 'activa',
+      n_cotizacion: document.getElementById('sp_cotizacion').value.trim() || null,
+      socio: document.getElementById('sp_socio').value.trim() || null,
+      manzana, lote,
+      area_m2: parseFloat(document.getElementById('sp_area').value) || null,
+      valor_total: valorTotal,
+      condicion,
+      valor_inicial: condicion === 'financiado' ? (parseFloat(document.getElementById('sp_valor_inicial').value) || null) : null,
+      saldo: condicion === 'financiado' ? (parseFloat(document.getElementById('sp_saldo').value) || null) : null,
+      meses_financiar: meses,
+      inversion_mensual: condicion === 'financiado' ? (parseFloat(document.getElementById('sp_inversion_mensual').value) || null) : null,
+      medio_pago: document.getElementById('sp_medio_pago').value.trim() || null,
+      n_operacion: document.getElementById('sp_n_operacion').value.trim() || null,
+      voucher_url: voucherUrl
+    });
+    if (errSep) { toast('Error al guardar la separación'); console.error(errSep); return; }
+
+    toast(`Separación creada ✓ Código: ${codigoGenerado}`);
+    closeModal('modalSeparacion');
+    cargarSeparacionesTodas(); cargarSeparacionesPorVencer(); cargarClientes(); cargarKPIs();
+  } catch (e) {
+    toast('Error inesperado al guardar');
+    console.error(e);
+  }
+});
+
+
 async function cargarSeparacionesPorVencer(){
   const { data } = await sb.from('vista_separaciones_por_vencer').select('*').eq('vendedor_id', currentUser.id).lte('dias_restantes', 7);
   const el = document.getElementById('listaSeparacionesVencen');
   if (!data || data.length === 0) { el.innerHTML = emptyState('🏷️', 'Sin separaciones próximas a vencer.'); return; }
-  el.innerHTML = data.map(s => `
-    <div class="card">
+  el.innerHTML = data.map(s => {
+    const dias = s.dias_restantes;
+    const color = dias <= 1 ? '#B4453C' : dias <= 3 ? '#8A5A17' : '#4C7A5E';
+    const sem = dias <= 1 ? '🔴' : dias <= 3 ? '🟡' : '🟢';
+    return `
+    <div class="card" style="border-left: 4px solid ${color};">
       <div class="card-row">
         <div>
-          <p class="card-title">${escapeHtml(s.propiedad_codigo)}</p>
-          <p class="card-sub">${escapeHtml(s.cliente_nombre)} · vence en ${s.dias_restantes} día(s)</p>
+          <p class="card-title">${sem} ${escapeHtml(s.propiedad_codigo)}</p>
+          <p class="card-sub">${escapeHtml(s.cliente_nombre)} · vence en ${dias} día(s)</p>
         </div>
         <span class="badge badge-${s.estado}">${estadoLabel(s.estado)}</span>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 async function cargarSeparacionesTodas(){
   const { data } = await sb.from('separaciones').select('*, propiedades(codigo), clientes(nombre)').eq('vendedor_id', currentUser.id).order('fecha_vencimiento');
