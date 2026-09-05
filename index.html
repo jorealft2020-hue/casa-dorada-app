@@ -890,6 +890,22 @@ doc.setFontSize(9.5);
     }
 
     const nombreArchivo = `reporte-diario-${(currentProfile?.nombre || 'usuario').replace(/\s+/g,'-').toLowerCase()}-${hoy}.pdf`;
+    const blob = doc.output('blob');
+    const archivoPDF = new File([blob], nombreArchivo, { type: 'application/pdf' });
+
+    if (navigator.canShare && navigator.canShare({ files: [archivoPDF] })) {
+      try {
+        await navigator.share({
+          files: [archivoPDF],
+          title: 'Reporte diario',
+        });
+        toast('Reporte listo ✓');
+        return;
+      } catch (e) {}
+    }
+
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank');
     doc.save(nombreArchivo);
     toast('Reporte generado ✓');
   } catch (e) {
