@@ -249,10 +249,10 @@
     <nav class="bottomnav">
       <button class="navbtn active" data-nav="inicio"><span class="ic">🏠</span>Inicio</button>
       <button class="navbtn" data-nav="actividades"><span class="ic">✓</span>Tareas</button>
-      <button class="navbtn" data-nav="clientes"><span class="ic">👤</span>Clientes</button>
+      <button class="navbtn" id="navRendimiento" data-nav="rendimiento"><span class="ic">📊</span>Rendim.</button>
       <button class="navbtn" data-nav="separaciones"><span class="ic">🏷️</span>Separac.</button>
       <button class="navbtn" data-nav="agenda"><span class="ic">📅</span>Agenda</button>
-      <button class="navbtn hidden" id="navRendimiento" data-nav="rendimiento"><span class="ic">📊</span>Rendim.</button>
+      <button class="navbtn hidden" data-nav="clientes"><span class="ic">👤</span>Clientes</button>
       <button class="navbtn hidden" id="navAdmin" data-nav="admin"><span class="ic">⚙️</span>Admin</button>
     </nav>
   </div>
@@ -564,10 +564,10 @@ async function mostrarApp(){
   if (currentProfile?.rol === 'admin' || perm.gestionar_equipo) {
     document.getElementById('navAdmin').classList.remove('hidden');
   }
-  if (perm.ver_clientes === false) document.querySelector('[data-nav="clientes"]').classList.add('hidden');
-  if (perm.ver_separaciones === false) document.querySelector('[data-nav="separaciones"]').classList.add('hidden');
-  if (currentProfile?.rol === 'usuario') document.getElementById('navRendimiento').classList.remove('hidden');
-  if (perm.ver_agenda === false) document.querySelector('[data-nav="agenda"]').classList.add('hidden');
+  const esAdminGlobal = currentProfile?.rol === 'admin';
+  if (esAdminGlobal || perm.ver_clientes !== false) document.querySelector('[data-nav="clientes"]').classList.remove('hidden');
+  if (!esAdminGlobal && perm.ver_separaciones === false) document.querySelector('[data-nav="separaciones"]').classList.add('hidden');
+  if (!esAdminGlobal && perm.ver_agenda === false) document.querySelector('[data-nav="agenda"]').classList.add('hidden');
   puedeEliminar = (currentProfile?.rol === 'admin') || (perm.eliminar_registros === true);
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
 }
@@ -1328,10 +1328,47 @@ document.getElementById('btnGuardarRendimiento').addEventListener('click', async
 function pct(parte, total){ return total > 0 ? Math.round((parte/total)*100) : 0; }
 
 async function cargarRendimiento(){
-  const { data: embudo } = await sb.from('vista_embudo_conversion').select('*').eq('usuario_id', currentUser.id).maybeSingle();
   const panel = document.getElementById('panelEmbudo');
+  const esAdmin = currentProfile?.rol === 'admin';
+  const esSupervisor = currentProfile?.rol === 'supervisor';
 
-  const e = embudo || { total_leads:0, total_contactados:0, total_contestaron:0, total_citas:0, total_separaciones:0, total_ventas_cerradas:0 };
+  // Determinar el conjunto de usuarios a agregar según el rol de quien mira
+  let usuarioIds = [currentUser.id];
+  let tituloAlcance = 'Tu rendimiento';
+  if (esAdmin) {
+    const { data: todos } = await sb.from('usuarios').select('id').eq('rol', 'usuario');
+    usuarioIds = (todos || []).map(u => u.id);
+    tituloAlcance = 'Rendimiento de todo el equipo (todos los asesores)';
+  } else if (esSupervisor) {
+    const { data: miArea } = await sb.from('usuarios').select('id').eq('area', currentProfile?.area || '__nada__');
+    usuarioIds = (miArea || []).map(u => u.id);
+    tituloAlcance = `Rendimiento del área: ${currentProfile?.area || '—'}`;
+  }
+
+  if (usuarioIds.length === 0) usuarioIds = [currentUser.id];
+
+  const { data: filas } = await sb.from('vista_embudo_conversion').select('*').in('usuario_id', usuarioIds);
+  const lista = filas || [];
+
+  // Sumar todas las filas del alcance correspondiente
+  const suma = (campo) => lista.reduce((acc, f) => acc + (Number(f[campo]) || 0), 0);
+  const e = {
+    total_leads: suma('total_leads'),
+    total_contactados: suma('total_contactados'),
+    total_contestaron: suma('total_contestaron'),
+    total_citas: suma('total_citas'),
+    total_separaciones: suma('total_separaciones'),
+    total_ventas_cerradas: suma('total_ventas_cerradas'),
+    leads_facebook: suma('leads_facebook'),
+    leads_tiktok: suma('leads_tiktok'),
+    leads_instagram: suma('leads_instagram'),
+    leads_prospeccion: suma('leads_prospeccion'),
+    leads_referidos: suma('leads_referidos'),
+    citas_oficina: suma('citas_oficina'),
+    citas_meet: suma('citas_meet'),
+    citas_proyecto: suma('citas_proyecto'),
+  };
+
   const etapas = [
     { label: 'Leads asignados', num: e.total_leads, base: e.total_leads },
     { label: 'Contactados', num: e.total_contactados, base: e.total_leads },
@@ -1341,9 +1378,22 @@ async function cargarRendimiento(){
     { label: 'Ventas cerradas', num: e.total_ventas_cerradas, base: e.total_leads },
   ];
 
+  let filaPorAsesor = '';
+  if ((esAdmin || esSupervisor) && lista.length > 0) {
+    const { data: nombres } = await sb.from('usuarios').select('id, nombre').in('id', usuarioIds);
+    const mapaNombres = Object.fromEntries((nombres || []).map(u => [u.id, u.nombre]));
+    filaPorAsesor = `
+    <div class="card">
+      <p class="card-title" style="margin-bottom:8px;">Desglose por asesor</p>
+      ${lista.map(f => `
+        <p class="card-sub">${escapeHtml(mapaNombres[f.usuario_id] || '—')}: ${f.total_leads} leads · ${f.total_contactados} contactados · ${f.total_ventas_cerradas} ventas</p>
+      `).join('')}
+    </div>`;
+  }
+
   panel.innerHTML = `
     <div class="card">
-      <p class="card-title" style="margin-bottom:10px;">Embudo de conversión (acumulado)</p>
+      <p class="card-title" style="margin-bottom:10px;">${tituloAlcance}</p>
       ${etapas.map(et => `
         <div style="margin-bottom:10px;">
           <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:3px;">
@@ -1358,12 +1408,14 @@ async function cargarRendimiento(){
     </div>
     <div class="card">
       <p class="card-title" style="margin-bottom:6px;">Desglose por canal</p>
-      <p class="card-sub">Facebook: ${e.leads_facebook ?? 0} · TikTok: ${e.leads_tiktok ?? 0} · Instagram: ${e.leads_instagram ?? 0}</p>
-      <p class="card-sub">Prospección: ${e.leads_prospeccion ?? 0} · Referidos: ${e.leads_referidos ?? 0}</p>
-      <p class="card-sub" style="margin-top:6px;">Citas: Oficina ${e.citas_oficina ?? 0} · MEET ${e.citas_meet ?? 0} · Proyecto ${e.citas_proyecto ?? 0}</p>
+      <p class="card-sub">Facebook: ${e.leads_facebook} · TikTok: ${e.leads_tiktok} · Instagram: ${e.leads_instagram}</p>
+      <p class="card-sub">Prospección: ${e.leads_prospeccion} · Referidos: ${e.leads_referidos}</p>
+      <p class="card-sub" style="margin-top:6px;">Citas: Oficina ${e.citas_oficina} · MEET ${e.citas_meet} · Proyecto ${e.citas_proyecto}</p>
     </div>
+    ${filaPorAsesor}
   `;
 
+  // El historial de registros individuales sigue siendo solo el propio (para editar/eliminar)
   const { data: registros } = await sb.from('rendimiento_leads').select('*').eq('usuario_id', currentUser.id).order('fecha', { ascending: false }).limit(30);
   const el = document.getElementById('listaRendimiento');
   if (!registros || registros.length === 0) { el.innerHTML = emptyState('📊', 'Aún no has registrado tu rendimiento diario.'); return; }
