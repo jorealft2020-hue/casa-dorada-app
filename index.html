@@ -840,56 +840,288 @@ doc.setFontSize(9.5);
               const blobImg = await respImg.blob();
               const b64Img = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blobImg);
-              });
-              if (fotoX + fotoSize > pageWidth - marginX) { fotoX = marginX; y += fotoSize + 8; }
-              if (y + fotoSize > pageHeight - 40) { doc.addPage(); encabezado(); y = 100; fotoX = marginX; }
-              doc.addImage(b64Img, fotoX, y, fotoSize, fotoSize);
-              fotoX += fotoSize + 8;
-            } catch (e) {
-              console.error('No se pudo incrustar una evidencia', e);
-            }
-          }
-          y += fotoSize + 14;
-        }
+document.getElementById('btnDescargarReporte').addEventListener('click', async () => {
+  toast('Generando reporte diario oficial…');
+  try {
+    const hoy = typeof obtenerHoyLocal === 'function' ? obtenerHoyLocal() : new Date().toISOString().slice(0,10);
+    const logoBase64 = typeof cargarLogoBase64 === 'function' ? await cargarLogoBase64() : null;
 
-        doc.setDrawColor(230, 230, 230);
-        doc.line(marginX, y, pageWidth - marginX, y);
-        y += 18;
+    const { data: actividades, error } = await sb.from('actividades')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .eq('fecha_programada', hoy)
+      .order('hora_inicio', { ascending: true, nullsFirst: false });
+
+    if (error) { toast('Error al obtener actividades'); console.error(error); return; }
+
+    const { data: rendimientoHoy } = await sb.from('rendimiento_leads')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .eq('fecha', hoy)
+      .maybeSingle();
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 42;
+    const anchoUtil = pageWidth - (marginX * 2);
+    let y = 0;
+
+    // Colores corporativos Casa Dorada
+    const cNavy = [26, 35, 50];
+    const cGold = [201, 151, 62];
+    const cDim = [107, 114, 128];
+    const cBgCard = [251, 250, 246];
+    const cBorder = [229, 223, 207];
+
+    function dibujarFondoYMembrete(){
+      if (logoBase64) {
+        doc.addImage(logoBase64, 'PNG', 0, 0, pageWidth, pageHeight);
       }
     }
 
-    if (rendimientoHoy) {
-      if (y > pageHeight - 180) { doc.addPage(); encabezado(); y = 100; }
-      y += 10;
-      doc.setDrawColor(200,200,200);
-      doc.line(marginX, y, pageWidth - marginX, y);
-      y += 20;
-      doc.setFontSize(12);
+    function dibujarEncabezadoPrincipal(){
+      dibujarFondoYMembrete();
+      
+      // Título Institucional
+      y = 112;
+      doc.setTextColor(...cNavy);
+      doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
-      doc.text('RENDIMIENTO COMERCIAL DEL DÍA', marginX, y);
-      y += 18;
-      doc.setFontSize(10);
+      doc.text('INFORME DIARIO DE ACTIVIDADES', marginX, y);
+
+      // Subtítulo con acento dorado
+      y += 14;
+      doc.setTextColor(...cGold);
+      doc.setFontSize(8.5);
+      doc.setFont(undefined, 'bold');
+      doc.text('CONSTRUCTORA & INMOBILIARIA CASA DORADA  ·  PROYECTO COSTA DORADA', marginX, y);
+
+      // Ficha Técnica de Control (Caja moderna superior)
+      y += 10;
+      doc.setFillColor(...cBgCard);
+      doc.setDrawColor(...cBorder);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(marginX, y, anchoUtil, 40, 5, 5, 'FD');
+
+      const colab = currentProfile?.nombre || 'Jorge Alexander Luque Cepeda';
+      const cargo = currentProfile?.cargo || currentProfile?.area || 'Director Comercial';
+      const fechaTxt = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
+
+      doc.setFontSize(8.5);
+      doc.setTextColor(...cDim);
       doc.setFont(undefined, 'normal');
-      const totalLeads = rendimientoHoy.leads_facebook + rendimientoHoy.leads_tiktok + rendimientoHoy.leads_instagram + rendimientoHoy.leads_prospeccion + rendimientoHoy.leads_referidos;
-      const totalContactados = rendimientoHoy.contactados_llamada + rendimientoHoy.contactados_whatsapp_mensaje + rendimientoHoy.contactados_whatsapp_llamada;
-      const totalCitas = rendimientoHoy.citas_oficina + rendimientoHoy.citas_meet + rendimientoHoy.citas_proyecto;
-      const lineas = [
-        `Leads asignados: ${totalLeads}  (Facebook ${rendimientoHoy.leads_facebook}, TikTok ${rendimientoHoy.leads_tiktok}, Instagram ${rendimientoHoy.leads_instagram}, Prospección ${rendimientoHoy.leads_prospeccion}, Referidos ${rendimientoHoy.leads_referidos})`,
-        `Contactados: ${totalContactados}  (Llamada ${rendimientoHoy.contactados_llamada}, WhatsApp mensaje ${rendimientoHoy.contactados_whatsapp_mensaje}, WhatsApp llamada ${rendimientoHoy.contactados_whatsapp_llamada})`,
-        `Contestaron: ${rendimientoHoy.contestaron}  ·  No contestaron: ${rendimientoHoy.no_contestaron}`,
-        `Citas agendadas: ${totalCitas}  (Oficina ${rendimientoHoy.citas_oficina}, MEET ${rendimientoHoy.citas_meet}, Proyecto ${rendimientoHoy.citas_proyecto})`,
-      ];
-      lineas.forEach(linea => {
-        const wrapped = doc.splitTextToSize(linea, pageWidth - marginX * 2);
-        doc.text(wrapped, marginX, y);
-        y += wrapped.length * 13 + 3;
-      });
+      doc.text('COLABORADOR:', marginX + 12, y + 16);
+      doc.text('FECHA DE GESTIÓN:', marginX + 280, y + 16);
+      doc.text('CARGO / ÁREA:', marginX + 12, y + 30);
+      doc.text('PROYECTO:', marginX + 280, y + 30);
+
+      doc.setTextColor(...cNavy);
+      doc.setFont(undefined, 'bold');
+      doc.text(colab, marginX + 90, y + 16);
+      doc.text(fechaTxt, marginX + 375, y + 16);
+      doc.text(cargo, marginX + 90, y + 30);
+      doc.text('Costa Dorada Ciudad Smart', marginX + 375, y + 30);
+
+      y += 54;
     }
 
-    const nombreArchivo = `reporte-diario-${(currentProfile?.nombre || 'usuario').replace(/\s+/g,'-').toLowerCase()}-${hoy}.pdf`;
+    dibujarEncabezadoPrincipal();
+
+    // SECCIÓN 1: RESUMEN DE RENDIMIENTO COMERCIAL
+    if (rendimientoHoy) {
+      doc.setTextColor(...cNavy);
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('1. MÉTRICAS DE RENDIMIENTO COMERCIAL DEL DÍA', marginX, y);
+      y += 10;
+
+      const totalLeads = (rendimientoHoy.leads_facebook || 0) + (rendimientoHoy.leads_tiktok || 0) + (rendimientoHoy.leads_instagram || 0) + (rendimientoHoy.leads_prospeccion || 0) + (rendimientoHoy.leads_referidos || 0);
+      const totalContactados = (rendimientoHoy.contactados_llamada || 0) + (rendimientoHoy.contactados_whatsapp_mensaje || 0) + (rendimientoHoy.contactados_whatsapp_llamada || 0);
+      const totalCitas = (rendimientoHoy.citas_oficina || 0) + (rendimientoHoy.citas_meet || 0) + (rendimientoHoy.citas_proyecto || 0);
+
+      const kpis = [
+        { label: 'Leads Asignados', valor: String(totalLeads) },
+        { label: 'Contactados', valor: String(totalContactados) },
+        { label: 'Contestaron', valor: String(rendimientoHoy.contestaron || 0) },
+        { label: 'Citas Agendadas', valor: String(totalCitas) },
+      ];
+
+      const kpiWidth = (anchoUtil - (3 * 8)) / 4;
+      kpis.forEach((kpi, idx) => {
+        const kpiX = marginX + (idx * (kpiWidth + 8));
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...cBorder);
+        doc.roundedRect(kpiX, y, kpiWidth, 32, 4, 4, 'FD');
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...cGold);
+        doc.text(kpi.valor, kpiX + (kpiWidth / 2), y + 14, { align: 'center' });
+
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...cDim);
+        doc.text(kpi.label, kpiX + (kpiWidth / 2), y + 25, { align: 'center' });
+      });
+
+      y += 44;
+    }
+
+    // SECCIÓN 2: DETALLE DE ACTIVIDADES EJECUTADAS
+    doc.setTextColor(...cNavy);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text(rendimientoHoy ? '2. ACTIVIDADES Y GESTIONES EJECUTADAS' : '1. ACTIVIDADES Y GESTIONES EJECUTADAS', marginX, y);
+    y += 12;
+
+    if (!actividades || actividades.length === 0) {
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(...cBorder);
+      doc.roundedRect(marginX, y, anchoUtil, 32, 4, 4, 'FD');
+      doc.setFontSize(9);
+      doc.setTextColor(...cDim);
+      doc.setFont(undefined, 'normal');
+      doc.text('No se registraron actividades comerciales en el planner para esta fecha.', marginX + 14, y + 20);
+      y += 44;
+    } else {
+      let fotosParaAdjuntar = [];
+
+      for (const act of actividades) {
+        if (y > pageHeight - 160) {
+          doc.addPage();
+          dibujarFondoYMembrete();
+          y = 120;
+        }
+
+        const hIni = act.hora_inicio ? act.hora_inicio.slice(0,5) : '--:--';
+        const hFin = act.hora_fin ? act.hora_fin.slice(0,5) : '';
+        const horarioStr = hFin ? `${hIni} - ${hFin}` : `${hIni}`;
+
+        const tituloLines = doc.splitTextToSize(act.titulo, anchoUtil - 140);
+        const cardHeight = Math.max(38, (tituloLines.length * 12) + 26);
+
+        // Tarjeta con borde
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...cBorder);
+        doc.setLineWidth(0.7);
+        doc.roundedRect(marginX, y, anchoUtil, cardHeight, 4, 4, 'FD');
+
+        // Franja lateral de estado
+        const estadoOk = act.estado === 'completada';
+        doc.setFillColor(estadoOk ? 76 : 201, estadoOk ? 122 : 151, estadoOk ? 94 : 62);
+        doc.rect(marginX, y, 4, cardHeight, 'F');
+
+        // Título de la actividad
+        doc.setFontSize(9.5);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...cNavy);
+        doc.text(tituloLines, marginX + 14, y + 15);
+
+        // Badge de estado
+        doc.setFillColor(estadoOk ? 220 : 251, estadoOk ? 238 : 233, estadoOk ? 224 : 208);
+        doc.roundedRect(pageWidth - marginX - 78, y + 8, 68, 14, 3, 3, 'F');
+        doc.setFontSize(7.5);
+        doc.setTextColor(estadoOk ? 76 : 138, estadoOk ? 122 : 90, estadoOk ? 94 : 23);
+        doc.text(estadoLabel(act.estado), pageWidth - marginX - 44, y + 18, { align: 'center' });
+
+        // Metadatos (Horario, Lugar, Personas)
+        let detalles = [`Horario: ${horarioStr}`];
+        if (act.locacion) detalles.push(`Lugar: ${act.locacion}`);
+        if (act.personas_involucradas) detalles.push(`Con: ${act.personas_involucradas}`);
+
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...cDim);
+        const metaStr = doc.splitTextToSize(detalles.join('   |   '), anchoUtil - 24);
+        doc.text(metaStr, marginX + 14, y + cardHeight - 8);
+
+        if (act.evidencias && act.evidencias.length > 0) {
+          fotosParaAdjuntar.push({ titulo: act.titulo, urls: act.evidencias });
+        }
+
+        y += cardHeight + 8;
+      }
+
+      // SECCIÓN 3: EVIDENCIAS FOTOGRÁFICAS
+      if (fotosParaAdjuntar.length > 0) {
+        if (y > pageHeight - 180) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
+
+        doc.setTextColor(...cNavy);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('3. SUSTENTO FOTOGRÁFICO DE CAMPO', marginX, y);
+        y += 14;
+
+        for (const item of fotosParaAdjuntar) {
+          const fotoW = 100;
+          const fotoH = 75;
+          let fotoX = marginX;
+
+          for (const url of item.urls) {
+            if (fotoX + fotoW > pageWidth - marginX) {
+              fotoX = marginX;
+              y += fotoH + 18;
+            }
+            if (y + fotoH > pageHeight - 120) {
+              doc.addPage();
+              dibujarFondoYMembrete();
+              y = 120;
+              fotoX = marginX;
+            }
+
+            try {
+              const respImg = await fetch(url);
+              const blobImg = await respImg.blob();
+              const b64Img = await new Promise((resolve) => {
+                const r = new FileReader();
+                r.onloadend = () => resolve(r.result);
+                r.readAsDataURL(blobImg);
+              });
+              doc.setDrawColor(...cBorder);
+              doc.rect(fotoX - 1, y - 1, fotoW + 2, fotoH + 2);
+              doc.addImage(b64Img, fotoX, y, fotoW, fotoH);
+              fotoX += fotoW + 12;
+            } catch (err) {
+              console.error('Error al cargar evidencia en PDF', err);
+            }
+          }
+          y += fotoH + 16;
+        }
+      }
+    }
+
+    // SECCIÓN 4: FIRMAS FORMALES
+    if (y > pageHeight - 110) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
+    y = Math.max(y + 20, pageHeight - 105);
+
+    const colW = (anchoUtil - 40) / 2;
+    doc.setDrawColor(...cDim);
+    doc.setLineWidth(0.8);
+    doc.line(marginX + 20, y, marginX + colW - 20, y);
+    doc.setFontSize(8.5);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...cNavy);
+    doc.text(currentProfile?.nombre || 'Jorge Alexander Luque Cepeda', marginX + (colW / 2), y + 12, { align: 'center' });
+    doc.setFontSize(7.5);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...cDim);
+    doc.text(currentProfile?.cargo || 'Director Comercial', marginX + (colW / 2), y + 22, { align: 'center' });
+
+    const vbX = marginX + colW + 40;
+    doc.line(vbX + 20, y, vbX + colW - 20, y);
+    doc.setFontSize(8.5);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...cNavy);
+    doc.text('V°B° Gerencia General', vbX + (colW / 2), y + 12, { align: 'center' });
+    doc.setFontSize(7.5);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...cDim);
+    doc.text('Constructora & Inmobiliaria Casa Dorada', vbX + (colW / 2), y + 22, { align: 'center' });
+
+    // EXPORTAR Y ABRIR DIRECTO EN EL CELULAR
+    const nombreArchivo = `informe-diario-${(currentProfile?.nombre || 'usuario').replace(/\s+/g,'-').toLowerCase()}-${hoy}.pdf`;
     const blob = doc.output('blob');
     const archivoPDF = new File([blob], nombreArchivo, { type: 'application/pdf' });
 
@@ -897,9 +1129,9 @@ doc.setFontSize(9.5);
       try {
         await navigator.share({
           files: [archivoPDF],
-          title: 'Reporte diario',
+          title: 'Informe Diario de Actividades',
         });
-        toast('Reporte listo ✓');
+        toast('Informe generado ✓');
         return;
       } catch (e) {}
     }
@@ -907,9 +1139,9 @@ doc.setFontSize(9.5);
     const blobUrl = URL.createObjectURL(blob);
     window.open(blobUrl, '_blank');
     doc.save(nombreArchivo);
-    toast('Reporte generado ✓');
+    toast('Informe generado ✓');
   } catch (e) {
-    toast('Error al generar el reporte');
+    toast('Error al generar el informe');
     console.error(e);
   }
 });
