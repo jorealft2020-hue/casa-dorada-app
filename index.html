@@ -36,7 +36,12 @@
 
   /* En pantallas grandes (computadora), usar todo el ancho disponible en vez de quedar angosto */
   @media (min-width: 900px){
-    html, body{ background: var(--navy); }
+    html, body{
+      background: var(--navy);
+      background-image: url('logo-costa-dorada-marca-agua.png');
+      background-repeat: no-repeat; background-position: center 90%; background-size: 420px;
+      background-attachment: fixed;
+    }
     #app{ max-width: 1100px; min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.35); }
     main{ padding-left: 48px; padding-right: 48px; }
     .kpi-strip{ flex-wrap: wrap; overflow: visible; }
@@ -47,7 +52,19 @@
   @media (min-width: 900px) and (max-width: 480px){ .fab{ right: 20px; } }
 
   /* ===== LOGIN ===== */
-  .login-screen{ flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding: 32px 28px; background: linear-gradient(165deg, var(--navy) 0%, #101724 100%); color: var(--cream); text-align:center; }
+  .login-screen{
+    flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding: 32px 28px; text-align:center; color: var(--cream); position:relative; overflow:hidden;
+    background: linear-gradient(165deg, var(--navy) 0%, #101724 100%);
+  }
+  .login-screen::before{
+    content:''; position:absolute; inset:0;
+    background-image: url('logo-costa-dorada.png');
+    background-repeat: no-repeat; background-position: center 78%; background-size: 340px;
+    opacity: 0.10; pointer-events:none;
+  }
+  .login-screen > *{ position:relative; z-index:1; }
+  .login-logo{ width: 220px; max-width: 72vw; margin-bottom: 26px; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.35)); }
   .login-mark{ width:64px; height:64px; border-radius:16px; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:700; color: var(--navy); margin-bottom:28px; }
   .login-screen h1{ font-size: 26px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em; }
   .login-screen p{ color: #A9B4C4; font-size: 14.5px; margin: 0 0 40px; max-width: 300px; line-height:1.5; }
@@ -142,7 +159,7 @@
 
   <!-- LOGIN -->
   <div class="login-screen" id="loginScreen">
-    <div class="login-mark">CD</div>
+    <img class="login-logo" src="logo-casa-dorada.png" alt="Casa Dorada">
     <h1>Casa Dorada</h1>
     <p>Planner comercial. Entra con tu cuenta de Google para ver tus actividades, clientes y separaciones.</p>
     <button class="btn-google" id="btnGoogleLogin">
@@ -394,6 +411,7 @@
           <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_separaciones"> Ver separaciones</label>
           <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_agenda"> Ver agenda</label>
           <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_generar_informes"> Generar informes</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_eliminar_registros"> Eliminar registros</label>
           <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_gestionar_equipo"> Gestionar equipo (admin)</label>
         </div>
       </div>
@@ -439,6 +457,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let currentProfile = null;
 let currentView = 'inicio';
+let puedeEliminar = false;
 
 /* ============ UTILIDADES ============ */
 function toast(msg){
@@ -501,6 +520,7 @@ async function mostrarApp(){
   if (perm.ver_clientes === false) document.querySelector('[data-nav="clientes"]').classList.add('hidden');
   if (perm.ver_separaciones === false) document.querySelector('[data-nav="separaciones"]').classList.add('hidden');
   if (perm.ver_agenda === false) document.querySelector('[data-nav="agenda"]').classList.add('hidden');
+  puedeEliminar = (currentProfile?.rol === 'admin') || (perm.eliminar_registros === true);
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
 }
 function rolLabel(rol){
@@ -589,9 +609,17 @@ function renderActividades(items, contenedorId, mensajeVacio){
           📷 Adjuntar foto
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="subirEvidencia('${a.id}', this.files[0])">
         </label>
+        ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarActividad('${a.id}')">🗑️ Eliminar</button>` : ''}
       </div>
     </div>
   `).join('');
+}
+async function eliminarActividad(id){
+  if (!confirm('¿Eliminar esta actividad? Esta acción no se puede deshacer.')) return;
+  const { error } = await sb.from('actividades').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Actividad eliminada');
+  cargarActividadesHoy(); cargarActividadesTodas(); cargarKPIs();
 }
 function estadoLabel(e){
   return { pendiente:'Pendiente', en_proceso:'En proceso', completada:'Completada', cancelada:'Cancelada', activa:'Activa', vencida:'Vencida', convertida_venta:'Vendido' }[e] || e;
@@ -1099,6 +1127,7 @@ async function abrirEditarUsuario(id){
   document.getElementById('perm_ver_separaciones').checked = perm.ver_separaciones !== false;
   document.getElementById('perm_ver_agenda').checked = perm.ver_agenda !== false;
   document.getElementById('perm_generar_informes').checked = perm.generar_informes !== false;
+  document.getElementById('perm_eliminar_registros').checked = perm.eliminar_registros === true;
   document.getElementById('perm_gestionar_equipo').checked = perm.gestionar_equipo === true;
   openModal('modalEditarUsuario');
 }
@@ -1120,6 +1149,7 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
       ver_separaciones: document.getElementById('perm_ver_separaciones').checked,
       ver_agenda: document.getElementById('perm_ver_agenda').checked,
       generar_informes: document.getElementById('perm_generar_informes').checked,
+      eliminar_registros: document.getElementById('perm_eliminar_registros').checked,
       gestionar_equipo: document.getElementById('perm_gestionar_equipo').checked,
     }
   };
@@ -1137,10 +1167,22 @@ async function cargarClientes(){
   if (!data || data.length === 0) { el.innerHTML = emptyState('👤', 'Aún no tienes clientes registrados.'); return; }
   el.innerHTML = data.map(c => `
     <div class="card">
-      <p class="card-title">${escapeHtml(c.nombre)}</p>
-      <p class="card-sub">${c.telefono || c.email || 'Sin contacto'}</p>
+      <div class="card-row">
+        <div>
+          <p class="card-title">${escapeHtml(c.nombre)}${c.codigo_correlativo ? ' · ' + escapeHtml(c.codigo_correlativo) : ''}</p>
+          <p class="card-sub">${c.celular || c.telefono || c.correo || c.email || 'Sin contacto'}</p>
+        </div>
+      </div>
+      ${puedeEliminar ? `<div class="card-actions"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarCliente('${c.id}')">🗑️ Eliminar</button></div>` : ''}
     </div>
   `).join('');
+}
+async function eliminarCliente(id){
+  if (!confirm('¿Eliminar este cliente? También se pierde el vínculo con sus separaciones.')) return;
+  const { error } = await sb.from('clientes').delete().eq('id', id);
+  if (error) { toast('Error al eliminar (puede tener separaciones asociadas)'); console.error(error); return; }
+  toast('Cliente eliminado');
+  cargarClientes(); cargarKPIs();
 }
 
 /* ============ SEPARACIONES ============ */
@@ -1331,8 +1373,16 @@ async function cargarSeparacionesTodas(){
         </div>
         <span class="badge badge-${s.estado}">${estadoLabel(s.estado)}</span>
       </div>
+      ${puedeEliminar ? `<div class="card-actions"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarSeparacion('${s.id}')">🗑️ Eliminar</button></div>` : ''}
     </div>
   `).join('');
+}
+async function eliminarSeparacion(id){
+  if (!confirm('¿Eliminar esta separación? Esta acción no se puede deshacer.')) return;
+  const { error } = await sb.from('separaciones').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Separación eliminada');
+  cargarSeparacionesTodas(); cargarSeparacionesPorVencer(); cargarKPIs();
 }
 
 /* ============ AGENDA + SYNC GOOGLE CALENDAR ============ */
@@ -1390,9 +1440,17 @@ async function cargarAgenda(){
         <button class="chip-btn ${ev.google_calendar_event_id ? '' : 'gold'}" onclick="sincronizarEvento('${ev.id}')">
           ${ev.google_calendar_event_id ? '✓ Sincronizado' : 'Sincronizar con Calendar'}
         </button>
+        ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️</button>` : ''}
       </div>
     </div>
   `).join('');
+}
+async function eliminarEventoAgenda(id){
+  if (!confirm('¿Eliminar este evento de agenda?')) return;
+  const { error } = await sb.from('agenda').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Evento eliminado');
+  cargarAgenda();
 }
 
 /* Semáforo según minutos restantes: verde >60min, amarillo 15-60min, rojo <15min o vencido */
