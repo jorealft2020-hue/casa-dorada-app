@@ -1898,17 +1898,23 @@ async function cargarAgenda(){
   if (!data || data.length === 0) { el.innerHTML = emptyState('📅', 'No tienes eventos en tu agenda.'); return; }
   el.innerHTML = data.map(ev => `
     <div class="card">
-      <p class="card-title">${escapeHtml(ev.titulo)}</p>
-      <p class="card-sub">${new Date(ev.fecha_inicio).toLocaleString('es-BO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
-      ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
-      <div class="card-actions">
-        <button class="chip-btn ${ev.google_calendar_event_id ? '' : 'gold'}" onclick="sincronizarEvento('${ev.id}')">
-          ${ev.google_calendar_event_id ? '✓ Sincronizado' : 'Sincronizar con Calendar'}
-        </button>
-        ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️</button>` : ''}
+      <div class="card-row">
+        <div>
+          <p class="card-title">${escapeHtml(ev.titulo)}</p>
+          <p class="card-sub">${new Date(ev.fecha_inicio).toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
+          ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
+        </div>
+        ${ev.google_calendar_event_id ? '<span class="badge badge-completada" style="font-size:10.5px;">✓ En Google Calendar</span>' : '<span class="badge badge-pendiente" style="font-size:10.5px;">Sincronizando…</span>'}
       </div>
+      ${puedeEliminar ? `<div class="card-actions" style="margin-top:8px;"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️ Eliminar</button></div>` : ''}
     </div>
   `).join('');
+
+  // Sincroniza en automático en segundo plano los que falten:
+  const pendientes = (data || []).filter(ev => !ev.google_calendar_event_id);
+  for (const ev of pendientes) {
+    sincronizarEvento(ev.id, true);
+  }
 }
 async function eliminarEventoAgenda(id){
   if (!confirm('¿Eliminar este evento de agenda?')) return;
@@ -1956,7 +1962,7 @@ async function cambiarEstadoAgenda(id, estado){
 
 async function sincronizarEvento(agendaId, silencioso){
   const { data: { session } } = await sb.auth.getSession();
-  const googleToken = sessionStorage.getItem('google_provider_token');
+  const googleToken = localStorage.getItem('google_provider_token');
   if (!googleToken) {
     if (!silencioso) toast('Vuelve a iniciar sesión para autorizar Google Calendar');
     return;
@@ -2019,7 +2025,7 @@ function escapeHtml(str){
   const { data: { session } } = await sb.auth.getSession();
   if (session?.user) {
     currentUser = session.user;
-    if (session.provider_token) sessionStorage.setItem('google_provider_token', session.provider_token);
+    if (session.provider_token) localStorage.setItem('google_provider_token', session.provider_token);
     await cargarPerfil();
     mostrarApp();
   } else {
