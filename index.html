@@ -1903,17 +1903,6 @@ async function conectarGoogleCalendar(){
   });
 }
 
-async function conectarGoogleCalendar(){
-  await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: 'https://jorealft2020-hue.github.io/casa-dorada-app/',
-      scopes: 'https://www.googleapis.com/auth/calendar.events',
-      queryParams: { access_type: 'offline', prompt: 'consent' }
-    }
-  });
-}
-
 async function cargarAgenda(){
   const { data } = await sb.from('agenda').select('*').eq('usuario_id', currentUser.id).order('fecha_inicio');
   const el = document.getElementById('listaAgenda');
@@ -2082,4 +2071,6 @@ if ('serviceWorker' in navigator) {
     keys.forEach(key => caches.delete(key));
   });
 }
-  
+  </script>
+</body>
+</html>
