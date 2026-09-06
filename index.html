@@ -1892,10 +1892,24 @@ document.getElementById('btnToggleChecklist').addEventListener('click', (e) => {
   if (!enChecklist) cargarChecklist();
 });
 
+async function conectarGoogleCalendar(){
+  await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://jorealft2020-hue.github.io/casa-dorada-app/',
+      scopes: 'https://www.googleapis.com/auth/calendar.events',
+      queryParams: { access_type: 'offline', prompt: 'consent' }
+    }
+  });
+}
+
 async function cargarAgenda(){
   const { data } = await sb.from('agenda').select('*').eq('usuario_id', currentUser.id).order('fecha_inicio');
   const el = document.getElementById('listaAgenda');
   if (!data || data.length === 0) { el.innerHTML = emptyState('📅', 'No tienes eventos en tu agenda.'); return; }
+  
+  const token = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+
   el.innerHTML = data.map(ev => `
     <div class="card">
       <div class="card-row">
@@ -1904,16 +1918,21 @@ async function cargarAgenda(){
           <p class="card-sub">${new Date(ev.fecha_inicio).toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
           ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
         </div>
-        ${ev.google_calendar_event_id ? '<span class="badge badge-completada" style="font-size:10.5px;">✓ En Google Calendar</span>' : '<span class="badge badge-pendiente" style="font-size:10.5px;">Sincronizando…</span>'}
+        ${ev.google_calendar_event_id 
+          ? '<span class="badge badge-completada" style="font-size:10.5px;">✓ En Google Calendar</span>' 
+          : (token 
+              ? '<span class="badge badge-pendiente" style="font-size:10.5px; cursor:pointer;" onclick="sincronizarEvento(\'' + ev.id + '\', false)">Sincronizando…</span>' 
+              : '<button class="chip-btn gold" style="font-size:10.5px; padding:4px 10px;" onclick="conectarGoogleCalendar()">🔗 Conectar Calendar</button>')}
       </div>
       ${puedeEliminar ? `<div class="card-actions" style="margin-top:8px;"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️ Eliminar</button></div>` : ''}
     </div>
   `).join('');
 
-  // Sincroniza en automático en segundo plano los que falten:
-  const pendientes = (data || []).filter(ev => !ev.google_calendar_event_id);
-  for (const ev of pendientes) {
-    sincronizarEvento(ev.id, true);
+  if (token) {
+    const pendientes = (data || []).filter(ev => !ev.google_calendar_event_id);
+    for (const ev of pendientes) {
+      sincronizarEvento(ev.id, true);
+    }
   }
 }
 async function eliminarEventoAgenda(id){
