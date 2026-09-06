@@ -1919,7 +1919,7 @@ async function cargarAgenda(){
   const el = document.getElementById('listaAgenda');
   if (!data || data.length === 0) { el.innerHTML = emptyState('📅', 'No tienes eventos en tu agenda.'); return; }
   
-  const token = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+  const token = localStorage.getItem('google_provider_token') || localStorage.getItem('google_provider_token');
 
   el.innerHTML = data.map(ev => {
     let estadoCalendarHtml = '';
