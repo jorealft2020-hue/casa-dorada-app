@@ -747,52 +747,6 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
 
 /* ============ REPORTE DIARIO EN PDF ============ */
 document.getElementById('btnDescargarReporte').addEventListener('click', async () => {
-  toast('Generando reporte del día…');
-  try {
-    const hoy = new Date().toISOString().slice(0,10);
-    const { data: actividades, error } = await sb.from('actividades')
-      .select('*')
-      .eq('usuario_id', currentUser.id)
-      .eq('fecha_programada', hoy)
-      .order('created_at');
-
-    if (error) { toast('Error al obtener actividades'); console.error(error); return; }
-
-    const { data: rendimientoHoy } = await sb.from('rendimiento_leads').select('*').eq('usuario_id', currentUser.id).eq('fecha', hoy).maybeSingle();
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const marginX = 40;
-    let y = 0;
-
-    function encabezado(){
-      doc.setFillColor(26, 35, 50);
-      doc.rect(0, 0, pageWidth, 70, 'F');
-      doc.setTextColor(255,255,255);
-      doc.setFontSize(16);
-      doc.setFont(undefined, 'bold');
-      doc.text('Reporte diario de actividades', marginX, 30);
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      const nombreVendedor = currentProfile?.nombre || 'Vendedor';
-      doc.text(`${nombreVendedor}  ·  ${fmtFecha(hoy)}`, marginX, 50);
-      doc.setTextColor(26, 35, 50);
-    }
-    encabezado();
-    y = 100;
-
-    if (!actividades || actividades.length === 0) {
-      doc.setFontSize(11);
-      doc.text('No se registraron actividades para el día de hoy.', marginX, y);
-    } else {
-      for (const act of actividades) {
-        if (y > pageHeight - 140) { doc.addPage(); encabezado(); y = 100; }
-
-        doc.setFontSize(12);
-
-document.getElementById('btnDescargarReporte').addEventListener('click', async () => {
   toast('Generando reporte diario oficial…');
   try {
     const hoy = typeof obtenerHoyLocal === 'function' ? obtenerHoyLocal() : new Date().toISOString().slice(0,10);
