@@ -548,7 +548,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     currentUser = session.user;
     // Guardar el provider_token (Google) para poder usarlo en sincronización de Calendar
     if (session.provider_token) {
-      sessionStorage.setItem('google_provider_token', session.provider_token);
+      localStorage.setItem('google_provider_token', session.provider_token);
     }
     await cargarPerfil();
     mostrarApp();
