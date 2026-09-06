@@ -791,55 +791,7 @@ document.getElementById('btnDescargarReporte').addEventListener('click', async (
         if (y > pageHeight - 140) { doc.addPage(); encabezado(); y = 100; }
 
         doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        const tituloLines = doc.splitTextToSize(act.titulo, pageWidth - marginX * 2 - 90);
-        doc.text(tituloLines, marginX, y);
 
-        doc.setFontSize(9.5);
-        doc.setFont(undefined, 'bold');
-        const estadoColor = act.estado === 'completada' ? [76,122,94] : act.estado === 'cancelada' ? [180,69,60] : [138,90,23];
-        doc.setTextColor(...estadoColor);
-        doc.text(estadoLabel(act.estado), pageWidth - marginX - 80, y, { align: 'left' });
-        doc.setTextColor(26, 35, 50);
-
-        y += tituloLines.length * 14 + 4;
-doc.setFontSize(9.5);
-        doc.setFont(undefined, 'normal');
-        doc.setTextColor(100, 110, 125);
-
-        let datosExtra = [];
-        if (act.hora_inicio) {
-          const hIni = act.hora_inicio.slice(0, 5);
-          const hFin = act.hora_fin ? act.hora_fin.slice(0, 5) : '';
-          datosExtra.push(` Horario: ${hIni}${hFin ? ' a ' + hFin : ''}`);
-        }
-        if (act.locacion) datosExtra.push(` Lugar: ${act.locacion}`);
-        if (act.personas_involucradas) datosExtra.push(` Personas: ${act.personas_involucradas}`);
-
-        if (datosExtra.length > 0) {
-          const lineaInfo = doc.splitTextToSize(datosExtra.join('   ·   '), pageWidth - marginX * 2);
-          doc.text(lineaInfo, marginX, y);
-          y += lineaInfo.length * 12 + 4;
-        }
-        doc.setTextColor(26, 35, 50);
-        if (act.descripcion) {
-          doc.setFontSize(9.5);
-          doc.setFont(undefined, 'normal');
-          const descLines = doc.splitTextToSize(act.descripcion, pageWidth - marginX * 2);
-          doc.text(descLines, marginX, y);
-          y += descLines.length * 12 + 4;
-        }
-
-        // Fotos de evidencia embebidas
-        if (act.evidencias && act.evidencias.length > 0) {
-          let fotoX = marginX;
-          const fotoSize = 70;
-          for (const url of act.evidencias) {
-            try {
-              const respImg = await fetch(url);
-              const blobImg = await respImg.blob();
-              const b64Img = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
 document.getElementById('btnDescargarReporte').addEventListener('click', async () => {
   toast('Generando reporte diario oficial…');
   try {
