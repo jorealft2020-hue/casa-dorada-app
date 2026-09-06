@@ -1903,6 +1903,17 @@ async function conectarGoogleCalendar(){
   });
 }
 
+async function conectarGoogleCalendar(){
+  await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://jorealft2020-hue.github.io/casa-dorada-app/',
+      scopes: 'https://www.googleapis.com/auth/calendar.events',
+      queryParams: { access_type: 'offline', prompt: 'consent' }
+    }
+  });
+}
+
 async function cargarAgenda(){
   const { data } = await sb.from('agenda').select('*').eq('usuario_id', currentUser.id).order('fecha_inicio');
   const el = document.getElementById('listaAgenda');
@@ -1910,23 +1921,30 @@ async function cargarAgenda(){
   
   const token = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
 
-  el.innerHTML = data.map(ev => `
-    <div class="card">
-      <div class="card-row">
-        <div>
-          <p class="card-title">${escapeHtml(ev.titulo)}</p>
-          <p class="card-sub">${new Date(ev.fecha_inicio).toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
-          ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
+  el.innerHTML = data.map(ev => {
+    let estadoCalendarHtml = '';
+    if (ev.google_calendar_event_id) {
+      estadoCalendarHtml = '<span class="badge badge-completada" style="font-size:10.5px;">✓ En Google Calendar</span>';
+    } else if (token) {
+      estadoCalendarHtml = '<button class="chip-btn gold" style="font-size:10.5px; padding:4px 10px;" onclick="sincronizarEvento(\'' + ev.id + '\', false)">🔄 Sincronizar ahora</button>';
+    } else {
+      estadoCalendarHtml = '<button class="chip-btn gold" style="font-size:10.5px; padding:4px 10px;" onclick="conectarGoogleCalendar()">🔗 Conectar Calendar</button>';
+    }
+
+    return `
+      <div class="card">
+        <div class="card-row">
+          <div>
+            <p class="card-title">${escapeHtml(ev.titulo)}</p>
+            <p class="card-sub">${new Date(ev.fecha_inicio).toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
+            ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
+          </div>
+          ${estadoCalendarHtml}
         </div>
-        ${ev.google_calendar_event_id 
-          ? '<span class="badge badge-completada" style="font-size:10.5px;">✓ En Google Calendar</span>' 
-          : (token 
-              ? '<span class="badge badge-pendiente" style="font-size:10.5px; cursor:pointer;" onclick="sincronizarEvento(\'' + ev.id + '\', false)">Sincronizando…</span>' 
-              : '<button class="chip-btn gold" style="font-size:10.5px; padding:4px 10px;" onclick="conectarGoogleCalendar()">🔗 Conectar Calendar</button>')}
+        ${puedeEliminar ? `<div class="card-actions" style="margin-top:8px;"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️ Eliminar</button></div>` : ''}
       </div>
-      ${puedeEliminar ? `<div class="card-actions" style="margin-top:8px;"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️ Eliminar</button></div>` : ''}
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   if (token) {
     const pendientes = (data || []).filter(ev => !ev.google_calendar_event_id);
@@ -1935,6 +1953,7 @@ async function cargarAgenda(){
     }
   }
 }
+  
 async function eliminarEventoAgenda(id){
   if (!confirm('¿Eliminar este evento de agenda?')) return;
   const { error } = await sb.from('agenda').delete().eq('id', id);
@@ -2054,10 +2073,13 @@ function escapeHtml(str){
 })();
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(e => console.error('SW error', e));
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (let registration of registrations) {
+      registration.unregister();
+    }
+  });
+  caches.keys().then(keys => {
+    keys.forEach(key => caches.delete(key));
   });
 }
-</script>
-</body>
-</html>
+  
