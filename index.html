@@ -1962,12 +1962,13 @@ async function cambiarEstadoAgenda(id, estado){
 
 async function sincronizarEvento(agendaId, silencioso){
   const { data: { session } } = await sb.auth.getSession();
-  const googleToken = localStorage.getItem('google_provider_token');
+  const googleToken = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
   if (!googleToken) {
-    if (!silencioso) toast('Vuelve a iniciar sesión para autorizar Google Calendar');
+    if (!silencioso) toast('Toca en Conectar Calendar para autorizar');
     return;
   }
-  if (!silencioso) toast('Sincronizando…');
+  localStorage.setItem('google_provider_token', googleToken);
+
   try {
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/sincronizar-google-calendar`, {
       method: 'POST',
@@ -1978,12 +1979,12 @@ async function sincronizarEvento(agendaId, silencioso){
       body: JSON.stringify({ agenda_id: agendaId, google_provider_token: googleToken })
     });
     const result = await resp.json();
-    if (!result.ok) { if (!silencioso) toast('Error al sincronizar'); console.error(result); return; }
-    if (!silencioso) toast('Sincronizado con Google Calendar ✓');
-    cargarAgenda();
+    if (result.ok) {
+      if (!silencioso) toast('Sincronizado con Google Calendar ✓');
+      cargarAgenda();
+    }
   } catch (e) {
-    if (!silencioso) toast('Error de conexión');
-    console.error(e);
+    console.error('Error al sincronizar con Calendar', e);
   }
 }
 
