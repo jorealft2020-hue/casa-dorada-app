@@ -165,6 +165,147 @@
   .hidden{ display:none !important; }
   .spinner{ width:22px; height:22px; border:3px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto; }
   @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  /* Arreglo estricto para checkboxes */
+  .field input[type="checkbox"]{ width: auto !important; height: auto !important; margin: 0; }
+
+  /* ===== DISEÑO PROFESIONAL DE PERMISOS ===== */
+  .perm-section-title{ font-size: 11.5px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 8px; border-bottom: 1px solid #EDE8DC; padding-bottom: 4px; }
+  .perm-card{
+    display: flex; align-items: center; justify-content: space-between;
+    background: #FBFAF6; border: 1.2px solid #E5DFCF; border-radius: 10px;
+    padding: 10px 14px; margin-bottom: 7px; cursor: pointer; user-select: none;
+  }
+  .perm-card:active{ background: #F3EFE6; }
+  .perm-card-info{ display: flex; flex-direction: column; gap: 2px; padding-right: 10px; }
+  .perm-card-title{ font-size: 13px; font-weight: 700; color: var(--navy); }
+  .perm-card-desc{ font-size: 11px; color: var(--ink-dim); }
+  .perm-card input[type="checkbox"]{
+    width: 20px !important; height: 20px !important;
+    accent-color: var(--gold); flex-shrink: 0; cursor: pointer; margin: 0 !important;
+  }
+
+  /* ===== PORTADA BIENVENIDA (INICIO) ===== */
+  .welcome-card{
+    background: linear-gradient(135deg, var(--navy) 0%, #223048 100%);
+    border-radius: 18px; padding: 22px 20px; color: #fff; margin-bottom: 14px;
+    box-shadow: 0 8px 24px rgba(26,35,50,0.25); position:relative; overflow:hidden;
+  }
+  .welcome-card::after{
+    content:''; position:absolute; top:-20%; right:-20%; width:140px; height:140px; border-radius:50%;
+    background: radial-gradient(circle, rgba(201,151,62,0.25) 0%, transparent 70%); pointer-events:none;
+  }
+  .welcome-badge{ display:inline-flex; align-items:center; gap:6px; background: rgba(201,151,62,0.2); border:1px solid rgba(201,151,62,0.4); color: var(--gold-soft); padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+  .welcome-title{ font-size: 22px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .welcome-sub{ font-size: 13px; color: #CBD5E1; margin: 0 0 14px; line-height: 1.45; }
+  .btn-ir-control{ background: linear-gradient(135deg, var(--gold) 0%, #D4A74F 100%); color: #fff; border:none; border-radius: 10px; padding: 12px 16px; font-size: 13.5px; font-weight: 700; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 14px rgba(201,151,62,0.4); }
+
+  /* Frase Inspiracional del Día */
+  .quote-card{
+    background: #fff; border: 1.5px solid #EAE5D8; border-left: 5px solid var(--gold);
+    border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  }
+  .quote-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; }
+  .quote-tag{ font-size: 11px; font-weight: 800; color: var(--gold); text-transform:uppercase; letter-spacing: 0.04em; }
+  .quote-date{ font-size: 11.5px; color: var(--ink-dim); }
+  .quote-body{ font-size: 14px; font-style: italic; color: var(--navy); line-height: 1.5; margin: 0 0 8px; }
+  .quote-author{ font-size: 12px; font-weight: 700; color: var(--ink-dim); text-align: right; margin: 0; }
+
+  /* Video Motivacional */
+  .video-card{
+    background: #fff; border: 1px solid #EAE5D8; border-radius: var(--radius);
+    padding: 14px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  }
+  .video-header{ display:flex; align-items:center; gap:8px; margin-bottom: 10px; }
+  .video-header h4{ margin:0; font-size: 13.5px; font-weight: 700; color: var(--navy); }
+  .video-wrapper{
+    position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+    border-radius: 12px; background: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .video-wrapper iframe{ position: absolute; top:0; left:0; width:100%; height:100%; border:0; }
+
+  /* Resumen de Ayer y Plan de Hoy */
+  .daily-analysis-card{
+    background: #fff; border: 1px solid #EAE5D8; border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  }
+  .da-section-title{ font-size: 11.5px; font-weight: 800; color: var(--gold); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 8px; display:flex; align-items:center; gap:6px; }
+  .da-stats-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .da-stat-box{ background: var(--cream); border: 1px solid #E8E2D2; border-radius: 10px; padding: 10px 12px; text-align:center; }
+  .da-stat-num{ font-size: 20px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 3px; }
+  .da-stat-lbl{ font-size: 11px; color: var(--ink-dim); font-weight:600; }
+  .da-plan-box{ background: #F4F8F5; border: 1px solid #D2E4D6; border-radius: 10px; padding: 12px 14px; color: #285437; font-size: 13px; line-height: 1.45; }
+
+
+  /* ===== ESTILOS CALENDARIO (ESTILO GOOGLE CALENDAR) ===== */
+  .calendar-view-selector{
+    background: #EDE8DC; padding: 4px; border-radius: 12px; display: flex; gap: 4px; margin-bottom: 12px;
+  }
+  .cal-view-btn{
+    flex: 1; border: none; padding: 8px 4px; border-radius: 9px; font-size: 11.5px; font-weight: 700;
+    color: var(--navy); background: transparent; cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .cal-view-btn.active{
+    background: var(--navy); color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .cal-nav-bar{
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 4px 2px;
+  }
+  .cal-nav-title{ font-size: 16px; font-weight: 800; color: var(--navy); text-transform: capitalize; }
+  .cal-nav-controls{ display: flex; gap: 6px; align-items: center; }
+  .cal-nav-arrow{
+    background: #fff; border: 1.5px solid #E5DFCF; border-radius: 8px; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; color: var(--navy);
+  }
+  .cal-nav-today{
+    background: #fff; border: 1.5px solid #E5DFCF; border-radius: 8px; padding: 6px 12px;
+    font-size: 11.5px; font-weight: 700; cursor: pointer; color: var(--navy);
+  }
+
+  .cal-weekdays-header{
+    display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 700;
+    color: var(--ink-dim); text-transform: lowercase; margin-bottom: 6px;
+  }
+  .cal-month-grid{
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 14px;
+  }
+  .cal-day-cell{
+    min-height: 58px; background: #fff; border: 1.2px solid #EAE5D8; border-radius: 9px; padding: 4px 2px;
+    display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; transition: all 0.15s;
+  }
+  .cal-day-cell.other-month{ opacity: 0.35; background: #FAF9F6; }
+  .cal-day-cell.selected{ border: 2px solid var(--navy) !important; background: #F7F5EE; box-shadow: 0 2px 8px rgba(26,35,50,0.12); }
+  .cal-day-num{
+    font-size: 12px; font-weight: 600; color: var(--navy); width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 2px;
+  }
+  .cal-day-cell.today .cal-day-num{
+    background: var(--gold); color: #fff; border-radius: 50%; font-weight: 800;
+  }
+  .cal-day-pill{
+    background: #FBE9D0; color: #8A5A17; font-size: 8.5px; font-weight: 700;
+    padding: 2px 4px; border-radius: 4px; margin-top: 2px; width: 92%; text-align: center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cal-day-dot{
+    width: 5px; height: 5px; border-radius: 50%; background: var(--gold); margin-top: 2px;
+  }
+
+  .cal-week-strip{
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 14px;
+  }
+  .cal-week-day-btn{
+    background: #fff; border: 1.2px solid #EAE5D8; border-radius: 10px; padding: 8px 2px; text-align: center; cursor: pointer;
+  }
+  .cal-week-day-btn.selected{
+    border-color: var(--navy); background: var(--navy); color: #fff;
+  }
+  .cal-week-day-btn.selected .cal-week-num{ color: #fff; }
+  .cal-week-name{ font-size: 10px; text-transform: uppercase; font-weight: 700; opacity: 0.8; margin-bottom: 2px; }
+  .cal-week-num{ font-size: 15px; font-weight: 800; }
+  .cal-week-dot{ width: 4px; height: 4px; border-radius: 50%; background: var(--gold); margin: 3px auto 0; }
+
 </style>
 </head>
 <body>
@@ -195,13 +336,63 @@
     </div>
 
     <main>
-      <!-- VISTA: Inicio -->
+      <!-- VISTA: Inicio (PORTADA DE BIENVENIDA, FRASE, VIDEO Y PLAN DEL DÍA) -->
       <div id="viewInicio">
+        <div class="welcome-card">
+          <div class="welcome-badge">⭐ Casa Dorada · Costa Dorada</div>
+          <h2 class="welcome-title" id="wb_saludo">¡Buenos días!</h2>
+          <p class="welcome-sub" id="wb_subtitulo">Bienvenido a tu jornada comercial y de gestión. Enfoque total en metas y cierres.</p>
+          <button class="btn-ir-control" onclick="irAVista('control')">
+            <span>📊 Abrir Tablero Operativo y Reportes</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+        <div class="quote-card">
+          <div class="quote-header">
+            <span class="quote-tag">💡 Enfoque del día</span>
+            <span class="quote-date" id="qd_fecha">—</span>
+          </div>
+          <p class="quote-body" id="qd_frase">"La disciplina es el puente entre las metas y los logros extraordinarios."</p>
+          <p class="quote-author" id="qd_autor">— Jim Rohn</p>
+        </div>
+
+        <div class="video-card">
+          <div class="video-header">
+            <span style="font-size:18px;">🎬</span>
+            <h4 id="vd_titulo">Píldora de mentalidad y ventas de hoy</h4>
+          </div>
+          <div class="video-wrapper">
+            <iframe id="vd_iframe" src="https://www.youtube-nocookie.com/embed/Hq0V_pBDRy8" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <div class="daily-analysis-card">
+          <div class="da-section-title"><span>📈</span> Balance de gestión</div>
+          <div class="da-stats-grid">
+            <div class="da-stat-box">
+              <div class="da-stat-num" id="da_tareas_ayer">0</div>
+              <div class="da-stat-lbl">Tareas ayer</div>
+            </div>
+            <div class="da-stat-box">
+              <div class="da-stat-num" id="da_leads_ayer">0</div>
+              <div class="da-stat-lbl">Prospectos contactados</div>
+            </div>
+          </div>
+          <div class="da-section-title"><span>🎯</span> Recomendación estratégica para hoy</div>
+          <div class="da-plan-box" id="da_plan_texto">
+            Prioriza a primera hora el contacto de los nuevos prospectos ingresados y la confirmación de citas en campo para asegurar las visitas al Proyecto Costa Dorada.
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: Control (TABLERO OPERATIVO: KPIS, REPORTES Y SEPARACIONES) -->
+      <div id="viewControl" class="hidden">
         <div class="kpi-strip" id="kpiStrip"></div>
 
         <div class="section-title">Actividades realizadas hoy <button class="see-all" data-nav="actividades">Ver todo</button></div>
-        <button class="chip-btn gold" id="btnDescargarReporte" style="margin-bottom:12px; width:100%; padding:10px; font-size:13px;">📄 Descargar reporte diario</button>
-        <button class="chip-btn" id="btnAbrirInformeFormal" style="margin-bottom:12px; width:100%; padding:10px; font-size:13px; border-color:#1A2332; color:#1A2332;">🗂️ Descargar informe formal (quincenal/mensual)</button>
+        <button class="chip-btn gold" id="btnDescargarReporte" style="margin-bottom:12px; width:100%; padding:11px; font-size:13px; font-weight:700;">📄 Descargar reporte diario</button>
+        <button class="chip-btn" id="btnAbrirInformeFormal" style="margin-bottom:12px; width:100%; padding:11px; font-size:13px; border-color:#1A2332; color:#1A2332; font-weight:700;">🗂️ Descargar informe formal (quincenal/mensual)</button>
         <div id="listaActividadesHoy"></div>
 
         <div class="section-title">Separaciones por vencer <button class="see-all" data-nav="separaciones">Ver todo</button></div>
@@ -230,13 +421,55 @@
         <div id="listaSeparacionesTodas"></div>
       </div>
 
-      <!-- VISTA: Agenda -->
+      <!-- VISTA: Agenda (CALENDARIO COMPLETO + CHECKLIST PERSISTENTE) -->
       <div id="viewAgenda" class="hidden">
-        <div class="section-title">Agenda
-          <button class="see-all" id="btnToggleChecklist">Ver checklist</button>
+        <!-- Selector de Vistas: Día | Semana | Mes | Checklist -->
+        <div class="calendar-view-selector">
+          <button class="cal-view-btn" data-cal-view="dia">Día</button>
+          <button class="cal-view-btn" data-cal-view="semana">Semana</button>
+          <button class="cal-view-btn active" data-cal-view="mes">Mes</button>
+          <button class="cal-view-btn" data-cal-view="checklist">Checklist</button>
         </div>
-        <div id="listaAgenda"></div>
-        <div id="listaChecklist" class="hidden"></div>
+
+        <!-- Barra de Navegación de Fecha -->
+        <div class="cal-nav-bar" id="calNavBar">
+          <div class="cal-nav-title" id="calNavTitle">Septiembre 2026</div>
+          <div class="cal-nav-controls">
+            <button class="cal-nav-arrow" id="btnCalPrev">◀</button>
+            <button class="cal-nav-today" id="btnCalToday">Hoy</button>
+            <button class="cal-nav-arrow" id="btnCalNext">▶</button>
+          </div>
+        </div>
+
+        <!-- CONTENEDOR VISTA MES (Grilla como Google Calendar) -->
+        <div id="calContainerMes" class="cal-container">
+          <div class="cal-weekdays-header">
+            <div>lun</div><div>mar</div><div>mié</div><div>jue</div><div>vie</div><div>sáb</div><div>dom</div>
+          </div>
+          <div class="cal-month-grid" id="calMonthGrid"></div>
+          <!-- Detalle de eventos del día seleccionado -->
+          <div class="section-title" id="calSelectedDayHeader" style="margin-top:14px; font-size:14px;">Eventos del día seleccionado</div>
+          <div id="calSelectedDayEvents"></div>
+        </div>
+
+        <!-- CONTENEDOR VISTA SEMANA -->
+        <div id="calContainerSemana" class="cal-container hidden">
+          <div class="cal-week-strip" id="calWeekStrip"></div>
+          <div id="calWeekEventsList"></div>
+        </div>
+
+        <!-- CONTENEDOR VISTA DÍA -->
+        <div id="calContainerDia" class="cal-container hidden">
+          <div id="calDiaEventsList"></div>
+        </div>
+
+        <!-- CONTENEDOR CHECKLIST PERSISTENTE -->
+        <div id="calContainerChecklist" class="cal-container hidden">
+          <div class="section-title" style="margin-top:0;">Checklist de actividades
+            <span style="font-size:11px; font-weight:600; color:var(--gold);">(Permanecen activas hasta resolver)</span>
+          </div>
+          <div id="listaChecklist"></div>
+        </div>
       </div>
 
       <!-- VISTA: Rendimiento -->
@@ -265,6 +498,27 @@
       <!-- VISTA: Admin (solo administradores / directores) -->
       <div id="viewAdmin" class="hidden">
         <div class="section-title">Gestión de equipo y permisos</div>
+
+        <!-- TARJETA: ENLACES DE INSTALACIÓN Y ACCESO (SOLO SUPERADMIN / DESARROLLADOR) -->
+        <div class="card" id="cardEnlacesTecnicos" style="margin-bottom: 16px; border-left: 5px solid var(--gold); box-shadow: 0 4px 14px rgba(0,0,0,0.05);">
+          <div class="card-row">
+            <div>
+              <p class="card-title" style="font-size: 15px;">📲 Enlaces de Instalación para Colaboradores</p>
+              <p class="card-sub" style="margin-top: 3px;">Comparte estos enlaces con los nuevos colaboradores autorizados para que instalen el aplicativo en sus dispositivos móviles o computadoras.</p>
+            </div>
+          </div>
+          <div class="card-actions" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <button class="chip-btn gold" onclick="copiarLinkInstalacion('celular')" style="width: 100%; justify-content: center; padding: 11px 14px; font-size: 12.5px; font-weight: 700;">
+              📱 Copiar invitación e instalación para Celular (Android / iPhone)
+            </button>
+            <button class="chip-btn" onclick="copiarLinkInstalacion('pc')" style="width: 100%; justify-content: center; padding: 11px 14px; font-size: 12.5px; font-weight: 700; border-color: var(--navy); color: var(--navy);">
+              💻 Copiar invitación e instalación para Computadora / Laptop / Web
+            </button>
+            <button class="chip-btn" onclick="compartirWhatsAppInvitacion()" style="width: 100%; justify-content: center; padding: 11px 14px; font-size: 12.5px; font-weight: 700; background: #25D366; border-color: #25D366; color: #fff;">
+              💬 Enviar invitación directa por WhatsApp
+            </button>
+          </div>
+        </div>
         <button class="chip-btn gold" id="btnAbrirPreautorizar" style="margin-bottom:14px; width:100%; padding:10px; font-size:13px;">➕ Registrar nuevo usuario en el equipo</button>
         <div id="listaPreautorizados"></div>
         <div id="listaUsuariosAdmin"></div>
@@ -275,12 +529,13 @@
 
     <nav class="bottomnav">
       <button class="navbtn active" data-nav="inicio"><span class="ic">🏠</span>Inicio</button>
-      <button class="navbtn" data-nav="actividades"><span class="ic">✓</span>Tareas</button>
-      <button class="navbtn" id="navRendimiento" data-nav="rendimiento"><span class="ic">📊</span>Rendim.</button>
-      <button class="navbtn" data-nav="separaciones"><span class="ic">🏷️</span>Separac.</button>
-      <button class="navbtn" data-nav="agenda"><span class="ic">📅</span>Agenda</button>
-      <button class="navbtn hidden" data-nav="clientes"><span class="ic">👤</span>Clientes</button>
-      <button class="navbtn hidden" id="navAdmin" data-nav="admin"><span class="ic">⚙️</span>Admin</button>
+      <button class="navbtn" data-nav="control" id="navControl"><span class="ic">📊</span>Control</button>
+      <button class="navbtn" data-nav="actividades" id="navTareas"><span class="ic">✓</span>Tareas</button>
+      <button class="navbtn" data-nav="agenda" id="navAgenda"><span class="ic">📅</span>Agenda</button>
+      <button class="navbtn" data-nav="clientes" id="navClientes"><span class="ic">👤</span>Clientes</button>
+      <button class="navbtn" data-nav="separaciones" id="navSeparaciones"><span class="ic">🏷️</span>Separac.</button>
+      <button class="navbtn" data-nav="rendimiento" id="navRendimiento"><span class="ic">📈</span>Rendim.</button>
+      <button class="navbtn hidden" data-nav="admin" id="navAdmin"><span class="ic">⚙️</span>Admin</button>
     </nav>
   </div>
 
@@ -511,6 +766,10 @@
       </div>
 
       <div class="field"><label>Próxima acción a realizar *</label><input type="text" id="cl_proxima_accion" placeholder="Ej: Llamar mañana 10am para coordinar visita guiada"></div>
+      <div style="display:flex; gap:10px;">
+        <div class="field" style="flex:1;"><label>Fecha próxima acción</label><input type="date" id="cl_proxima_fecha"></div>
+        <div class="field" style="flex:1;"><label>Hora próxima acción</label><input type="time" id="cl_proxima_hora"></div>
+      </div>
 
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalCliente">Cancelar</button>
@@ -608,7 +867,8 @@
           <option value="supervisor">Supervisor de Área</option>
           <option value="director_comercial">Director Comercial</option>
           <option value="gerencia">Gerencia General</option>
-          <option value="admin">SuperAdmin (Desarrollador)</option>
+          <option value="admin">Administrador de la Empresa</option>
+          <option value="superadmin">SuperAdmin (Desarrollador / Matriz)</option>
         </select>
       </div>
 
@@ -620,19 +880,96 @@
         </select>
       </div>
 
-      <div class="field">
-        <label>Permisos de acceso</label>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_actividades"> Ver actividades</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_clientes"> Ver cartera de clientes</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_separaciones"> Ver separaciones</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_ver_agenda"> Ver agenda</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_reportes_pasados"> Descargar reportes de fechas anteriores</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_generar_informes"> Generar informes</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_eliminar_registros"> Eliminar registros</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="perm_gestionar_equipo"> Gestionar equipo (admin)</label>
+            <!-- PERMISOS ESTRUCTURADOS EN TARJETAS ELEGANTES -->
+      <div class="perm-section-title">📁 ACCESO A MÓDULOS</div>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Módulo de Tareas</span>
+          <span class="perm-card-desc">Registrar y consultar tareas realizadas</span>
         </div>
-      </div>
+        <input type="checkbox" id="perm_ver_actividades">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Cartera de Clientes</span>
+          <span class="perm-card-desc">Gestionar prospectos y próximas acciones</span>
+        </div>
+        <input type="checkbox" id="perm_ver_clientes">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Módulo de Separaciones</span>
+          <span class="perm-card-desc">Visualizar y registrar separaciones de lotes</span>
+        </div>
+        <input type="checkbox" id="perm_ver_separaciones">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Módulo de Agenda</span>
+          <span class="perm-card-desc">Citas programadas y checklist persistente</span>
+        </div>
+        <input type="checkbox" id="perm_ver_agenda">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Módulo de Rendimiento</span>
+          <span class="perm-card-desc">Visualizar embudo y métricas</span>
+        </div>
+        <input type="checkbox" id="perm_ver_rendimiento">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Tablero de Control</span>
+          <span class="perm-card-desc">KPIs y reportes en el panel operativo</span>
+        </div>
+        <input type="checkbox" id="perm_ver_control">
+      </label>
+
+      <div class="perm-section-title">📊 ACCESO A KPIS EN RENDIMIENTO</div>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Ver Monto Total Vendido (S/)</span>
+          <span class="perm-card-desc">Muestra la cifra total en soles</span>
+        </div>
+        <input type="checkbox" id="perm_kpi_monto">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Ver Desglose por Colaborador</span>
+          <span class="perm-card-desc">Métricas individuales de cada asesor</span>
+        </div>
+        <input type="checkbox" id="perm_kpi_desglose">
+      </label>
+
+      <div class="perm-section-title">⚙️ OPERACIONES Y GESTIÓN</div>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Reportes de Fechas Anteriores</span>
+          <span class="perm-card-desc">Emitir reporte diario de días pasados</span>
+        </div>
+        <input type="checkbox" id="perm_reportes_pasados">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Generar Informes Formales</span>
+          <span class="perm-card-desc">Emitir PDFs quincenales / mensuales con membrete</span>
+        </div>
+        <input type="checkbox" id="perm_generar_informes">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Eliminar Registros</span>
+          <span class="perm-card-desc">Borrar clientes, citas o tareas</span>
+        </div>
+        <input type="checkbox" id="perm_eliminar_registros">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Gestionar Equipo (Admin)</span>
+          <span class="perm-card-desc">Crear y editar usuarios y permisos</span>
+        </div>
+        <input type="checkbox" id="perm_gestionar_equipo">
+      </label>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
         <button class="btn-primary" id="btnGuardarUsuario">Guardar cambios</button>
@@ -672,23 +1009,94 @@
           <option value="supervisor">Supervisor de Área</option>
           <option value="director_comercial">Director Comercial</option>
           <option value="gerencia">Gerencia General</option>
-          <option value="admin">SuperAdmin (Desarrollador)</option>
+          <option value="admin">Administrador de la Empresa</option>
+          <option value="superadmin">SuperAdmin (Desarrollador / Matriz)</option>
         </select>
       </div>
 
-      <div class="field">
-        <label>Permisos de acceso</label>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="pa_perm_ver_actividades" checked> Ver actividades</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="pa_perm_ver_clientes" checked> Ver cartera de clientes</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="pa_perm_ver_separaciones" checked> Ver separaciones</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="pa_perm_ver_agenda" checked> Ver agenda</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="pa_perm_reportes_pasados"> Descargar reportes de fechas anteriores</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="pa_perm_generar_informes" checked> Generar informes</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;"><input type="checkbox" id="pa_perm_eliminar_registros"> Eliminar registros</label>
+            <!-- PERMISOS LIMPIOS EN ALTA -->
+      <div class="perm-section-title">📁 ACCESO A MÓDULOS</div>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Módulo de Tareas</span>
+          <span class="perm-card-desc">Registrar y consultar tareas</span>
         </div>
-      </div>
+        <input type="checkbox" id="pa_perm_ver_actividades" checked>
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Cartera de Clientes</span>
+          <span class="perm-card-desc">Gestionar prospectos y próximas acciones</span>
+        </div>
+        <input type="checkbox" id="pa_perm_ver_clientes" checked>
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Módulo de Separaciones</span>
+          <span class="perm-card-desc">Visualizar y registrar separaciones</span>
+        </div>
+        <input type="checkbox" id="pa_perm_ver_separaciones" checked>
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Módulo de Agenda</span>
+          <span class="perm-card-desc">Citas y checklist persistente</span>
+        </div>
+        <input type="checkbox" id="pa_perm_ver_agenda" checked>
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Módulo de Rendimiento</span>
+          <span class="perm-card-desc">Embudo y métricas</span>
+        </div>
+        <input type="checkbox" id="pa_perm_ver_rendimiento" checked>
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Tablero de Control</span>
+          <span class="perm-card-desc">KPIs y reportes</span>
+        </div>
+        <input type="checkbox" id="pa_perm_ver_control" checked>
+      </label>
 
+      <div class="perm-section-title">📊 ACCESO A KPIS EN RENDIMIENTO</div>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Ver Monto Total Vendido (S/)</span>
+          <span class="perm-card-desc">Cifra en soles</span>
+        </div>
+        <input type="checkbox" id="pa_perm_kpi_monto">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Ver Desglose por Colaborador</span>
+          <span class="perm-card-desc">Rendimiento individual</span>
+        </div>
+        <input type="checkbox" id="pa_perm_kpi_desglose">
+      </label>
+
+      <div class="perm-section-title">⚙️ OPERACIONES Y REPORTES</div>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Reportes de Fechas Anteriores</span>
+          <span class="perm-card-desc">Emitir reporte de días pasados</span>
+        </div>
+        <input type="checkbox" id="pa_perm_reportes_pasados">
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Generar Informes Formales</span>
+          <span class="perm-card-desc">PDFs quincenales / mensuales</span>
+        </div>
+        <input type="checkbox" id="pa_perm_generar_informes" checked>
+      </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Eliminar Registros</span>
+          <span class="perm-card-desc">Borrar clientes, citas o tareas</span>
+        </div>
+        <input type="checkbox" id="pa_perm_eliminar_registros">
+      </label>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalPreautorizar">Cancelar</button>
         <button class="btn-primary" id="btnGuardarPreautorizado">Agregar colaborador</button>
@@ -711,6 +1119,98 @@ let currentView = 'inicio';
 let puedeEliminar = false;
 
 /* ============ UTILIDADES ============ */
+/* ============ CATÁLOGO MOTIVACIONAL Y DE VENTAS ============ */
+const FRASES_MOTIVACIONALES = [
+  { f: "La disciplina es el puente entre las metas y los logros extraordinarios.", a: "Jim Rohn" },
+  { f: "El éxito en las ventas inmobiliarias radica en el número de relaciones de valor que construyes cada día.", a: "Brian Tracy" },
+  { f: "Tu actitud y tu determinación diaria definirán la magnitud de tus cierres comerciales.", a: "Zig Ziglar" },
+  { f: "No vendes simplemente un terreno; entregas el patrimonio y la seguridad jurídica para una familia.", a: "Camilo Cruz" },
+  { f: "Los líderes comerciales se forjan en el seguimiento constante y la empatía con cada prospecto.", a: "Stephen Covey" },
+  { f: "Cada llamada y cada objeción resuelta te coloca a un paso del cierre de separación.", a: "Tony Robbins" },
+  { f: "La constancia supera al talento cuando el talento no se organiza con disciplina diaria.", a: "Napoleon Hill" },
+  { f: "Sé tan apasionado y profesional en tu labor que a tus clientes les resulte imposible ignorarte.", a: "Grant Cardone" },
+  { f: "La confianza del cliente se gana con transparencia, puntualidad y conocimiento total de tu proyecto.", a: "Jorge Luque" }
+];
+
+const VIDEOS_MOTIVACIONALES = [
+  { id: "Hq0V_pBDRy8", t: "5 Estrategias para organizar tu día y vender más · Brian Tracy" },
+  { id: "osK3rxLTfu0", t: "Técnicas de mentalidad y cierre comercial · Margarita Pasos" },
+  { id: "7RUmzfEaGco", t: "Poderoso discurso de enfoque y hambre de éxito · Dan Peña" },
+  { id: "BV8zIuGCJ3w", t: "Consejos clave de mentalidad empresarial y constancia · Jack Ma" },
+  { id: "-AhceVRNPJk", t: "Motivación y actitud para superar cualquier límite comercial" }
+];
+
+function cargarPortadaInicio(){
+  const hoy = new Date();
+  const diaNum = hoy.getDate();
+  const hora = hoy.getHours();
+
+  let saludoTxt = "¡Buenos días!";
+  if (hora >= 12 && hora < 19) saludoTxt = "¡Buenas tardes!";
+  else if (hora >= 19 || hora < 5) saludoTxt = "¡Buenas noches!";
+
+  const colabNombre = currentProfile?.nombre ? currentProfile.nombre.split(' ')[0] : 'Colaborador';
+  const elSaludo = document.getElementById('wb_saludo');
+  if (elSaludo) elSaludo.textContent = `${saludoTxt}, ${colabNombre}`;
+
+  const rolCargo = currentProfile?.cargo || rolLabel(currentProfile?.rol);
+  const areaTxt = currentProfile?.area || 'Casa Dorada';
+  const elSub = document.getElementById('wb_subtitulo');
+  if (elSub) elSub.textContent = `${rolCargo} · ${areaTxt}. Enfoque total en metas y cierres en Costa Dorada Ciudad Smart.`;
+
+  const fraseObj = FRASES_MOTIVACIONALES[(diaNum - 1) % FRASES_MOTIVACIONALES.length];
+  const elFrase = document.getElementById('qd_frase');
+  if (elFrase) elFrase.textContent = `"${fraseObj.f}"`;
+  const elAutor = document.getElementById('qd_autor');
+  if (elAutor) elAutor.textContent = `— ${fraseObj.a}`;
+  const elFechaQ = document.getElementById('qd_fecha');
+  if (elFechaQ) elFechaQ.textContent = fmtFecha(obtenerHoyLocal());
+
+  const videoObj = VIDEOS_MOTIVACIONALES[(diaNum - 1) % VIDEOS_MOTIVACIONALES.length];
+  const elVidTit = document.getElementById('vd_titulo');
+  if (elVidTit) elVidTit.textContent = videoObj.t;
+  const elIframe = document.getElementById('vd_iframe');
+  if (elIframe) elIframe.src = `https://www.youtube-nocookie.com/embed/${videoObj.id}`;
+
+  cargarAnalisisAyerYHoy();
+}
+
+async function cargarAnalisisAyerYHoy(){
+  const ayer = new Date();
+  ayer.setDate(ayer.getDate() - 1);
+  const anio = ayer.getFullYear();
+  const mes = String(ayer.getMonth() + 1).padStart(2, '0');
+  const dia = String(ayer.getDate()).padStart(2, '0');
+  const fechaAyer = `${anio}-${mes}-${dia}`;
+
+  const { count: tareasAyer } = await sb.from('actividades')
+    .select('id', { count: 'exact', head: true })
+    .eq('usuario_id', currentUser.id)
+    .eq('fecha_programada', fechaAyer);
+
+  const { data: rendAyer } = await sb.from('rendimiento_leads')
+    .select('*')
+    .eq('usuario_id', currentUser.id)
+    .eq('fecha', fechaAyer)
+    .maybeSingle();
+
+  const totalContactadosAyer = rendAyer ? (rendAyer.contactados_llamada + rendAyer.contactados_whatsapp_mensaje + rendAyer.contactados_whatsapp_llamada) : 0;
+  
+  const elTA = document.getElementById('da_tareas_ayer');
+  if (elTA) elTA.textContent = tareasAyer || 0;
+  const elLA = document.getElementById('da_leads_ayer');
+  if (elLA) elLA.textContent = totalContactadosAyer || 0;
+
+  const planEl = document.getElementById('da_plan_texto');
+  if (planEl) {
+    if (totalContactadosAyer > 0) {
+      planEl.innerHTML = `<strong>Ayer contactaste a ${totalContactadosAyer} prospecto(s).</strong> Hoy haz seguimiento inmediato a los interesados para concretar sus visitas en campo al Proyecto Costa Dorada.`;
+    } else {
+      planEl.innerHTML = `<strong>Arranque con fuerza:</strong> Hoy es un día clave para prospectar en ferias y redes. Establece contacto con al menos 10 prospectos y agenda tus actividades antes del mediodía.`;
+    }
+  }
+}
+
 function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -789,31 +1289,41 @@ async function mostrarApp(){
   const perm = currentProfile?.permisos || {};
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial';
-  
-  if (esSuperAdminODirector || perm.gestionar_equipo) {
-    document.getElementById('navAdmin').classList.remove('hidden');
-  }
-  
-  const tieneAccesoClientes = esSuperAdminODirector || rol === 'gerencia' || perm.ver_clientes !== false;
-  document.querySelector('[data-nav="clientes"]').classList.toggle('hidden', !tieneAccesoClientes);
-  
-  const tieneAccesoSeparaciones = esSuperAdminODirector || rol === 'gerencia' || perm.ver_separaciones !== false;
-  document.querySelector('[data-nav="separaciones"]').classList.toggle('hidden', !tieneAccesoSeparaciones);
-  
-  const tieneAccesoAgenda = esSuperAdminODirector || rol === 'gerencia' || perm.ver_agenda !== false;
-  document.querySelector('[data-nav="agenda"]').classList.toggle('hidden', !tieneAccesoAgenda);
+  const esGerencia = rol === 'gerencia';
+
+  const elNavAdmin = document.getElementById('navAdmin');
+  if (elNavAdmin) elNavAdmin.classList.toggle('hidden', !(rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || perm.gestionar_equipo));
+
+  // Solo el SuperAdmin (desarrollador) ve enlaces técnicos del código fuente y matriz
+  const cardEnlaces = document.getElementById('cardEnlacesTecnicos');
+  if (cardEnlaces) cardEnlaces.classList.toggle('hidden', rol !== 'superadmin');
+
+  const showMod = (id, cond) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', !cond);
+  };
+
+  showMod('navControl', esSuperAdminODirector || esGerencia || perm.ver_control !== false);
+  showMod('navTareas', esSuperAdminODirector || esGerencia || perm.ver_actividades !== false);
+  showMod('navAgenda', esSuperAdminODirector || esGerencia || perm.ver_agenda !== false);
+  showMod('navClientes', esSuperAdminODirector || esGerencia || perm.ver_clientes !== false);
+  showMod('navSeparaciones', esSuperAdminODirector || esGerencia || perm.ver_separaciones !== false);
+  showMod('navRendimiento', esSuperAdminODirector || esGerencia || perm.ver_rendimiento !== false);
 
   puedeEliminar = esSuperAdminODirector || (perm.eliminar_registros === true);
+
+  cargarPortadaInicio();
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
 }
 
 function rolLabel(rol){
   return { 
-    admin: 'SuperAdmin (Desarrollador)',
+    superadmin: 'SuperAdmin (Desarrollador / Matriz)',
+    admin: 'Administrador de la Empresa',
     gerencia: 'Gerencia General',
     director_comercial: 'Director Comercial',
     supervisor: 'Supervisor de Área', 
-    usuario: 'Colaborador' 
+    usuario: 'Colaborador / Operativo' 
   }[rol] || 'Colaborador';
 }
 
@@ -830,11 +1340,25 @@ document.querySelectorAll('[data-nav]').forEach(btn => {
 function irAVista(vista){
   currentView = vista;
   document.querySelectorAll('main > div[id^="view"]').forEach(v => v.classList.add('hidden'));
-  const map = { inicio:'viewInicio', actividades:'viewActividades', clientes:'viewClientes', separaciones:'viewSeparaciones', agenda:'viewAgenda', rendimiento:'viewRendimiento', notificaciones:'viewNotificaciones', admin:'viewAdmin' };
-  document.getElementById(map[vista]).classList.remove('hidden');
+  const map = { 
+    inicio:'viewInicio', 
+    control:'viewControl',
+    actividades:'viewActividades', 
+    clientes:'viewClientes', 
+    separaciones:'viewSeparaciones', 
+    agenda:'viewAgenda', 
+    rendimiento:'viewRendimiento', 
+    notificaciones:'viewNotificaciones', 
+    admin:'viewAdmin' 
+  };
+  const targetId = map[vista] || 'viewInicio';
+  const targetEl = document.getElementById(targetId);
+  if (targetEl) targetEl.classList.remove('hidden');
   document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
   document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones' && vista !== 'clientes'));
 
+  if (vista === 'inicio') cargarPortadaInicio();
+  if (vista === 'control') { cargarKPIs(); cargarActividadesHoy(); cargarSeparacionesPorVencer(); }
   if (vista === 'actividades') cargarActividadesTodas();
   if (vista === 'clientes') cargarClientes();
   if (vista === 'separaciones') cargarSeparacionesTodas();
@@ -1024,13 +1548,42 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
   try {
     const logoBase64 = typeof cargarLogoBase64 === 'function' ? await cargarLogoBase64() : null;
 
-    const { data: actividades, error } = await sb.from('actividades')
+    // 1. Actividades registradas directamente en Tareas
+    const { data: actsRegistradas } = await sb.from('actividades')
       .select('*')
       .eq('usuario_id', currentUser.id)
-      .eq('fecha_programada', fechaReporte)
-      .order('hora_inicio', { ascending: true, nullsFirst: false });
+      .eq('fecha_programada', fechaReporte);
 
-    if (error) { toast('Error al obtener actividades'); console.error(error); return; }
+    // 2. Actividades de Agenda realizadas en esa fecha
+    const { data: agendasRealizadas } = await sb.from('agenda')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .or('estado.eq.realizada,estado.eq.completada')
+      .gte('fecha_inicio', fechaReporte + 'T00:00:00')
+      .lte('fecha_inicio', fechaReporte + 'T23:59:59');
+
+    // 3. Unificar ambas fuentes para que el reporte sea 100% completo
+    let actividades = [...(actsRegistradas || [])];
+    (agendasRealizadas || []).forEach(ag => {
+      const hIni = ag.fecha_inicio && ag.fecha_inicio.includes('T') ? ag.fecha_inicio.split('T')[1].slice(0, 5) : null;
+      const existe = actividades.some(a => a.titulo.trim().toLowerCase() === ag.titulo.trim().toLowerCase());
+      if (!existe) {
+        actividades.push({
+          id: ag.id,
+          titulo: ag.titulo,
+          locacion: ag.locacion,
+          fecha_programada: fechaReporte,
+          hora_inicio: hIni,
+          hora_fin: null,
+          estado: 'completada',
+          descripcion: ag.resultado ? `Resultado: ${ag.resultado}` : (ag.motivo ? `Motivo: ${ag.motivo}` : (ag.descripcion || null)),
+          personas_involucradas: null,
+          evidencias: []
+        });
+      }
+    });
+
+    actividades.sort((a, b) => (a.hora_inicio || '99:99').localeCompare(b.hora_inicio || '99:99'));
 
     const { data: rendimientoDia } = await sb.from('rendimiento_leads')
       .select('*')
@@ -1375,14 +1928,41 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
   try {
     const { data: empresa } = await sb.from('empresa_config').select('*').eq('id', 1).single();
 
-    const { data: actividades, error } = await sb.from('actividades')
+    // 1. Actividades registradas en Tareas
+    const { data: acts1 } = await sb.from('actividades')
       .select('*')
       .eq('usuario_id', currentUser.id)
       .gte('fecha_programada', fechaInicio)
-      .lte('fecha_programada', fechaFin)
-      .order('fecha_programada');
+      .lte('fecha_programada', fechaFin);
 
-    if (error) { toast('Error al obtener actividades'); console.error(error); return; }
+    // 2. Actividades de Agenda realizadas en el periodo
+    const { data: ags1 } = await sb.from('agenda')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .or('estado.eq.realizada,estado.eq.completada')
+      .gte('fecha_inicio', fechaInicio + 'T00:00:00')
+      .lte('fecha_inicio', fechaFin + 'T23:59:59');
+
+    let actividades = [...(acts1 || [])];
+    (ags1 || []).forEach(ag => {
+      const fProg = ag.fecha_inicio ? ag.fecha_inicio.slice(0, 10) : fechaInicio;
+      const hIni = ag.fecha_inicio && ag.fecha_inicio.includes('T') ? ag.fecha_inicio.split('T')[1].slice(0, 5) : null;
+      const existe = actividades.some(a => a.titulo.trim().toLowerCase() === ag.titulo.trim().toLowerCase() && a.fecha_programada === fProg);
+      if (!existe) {
+        const resultadoTxt = ag.resultado ? ` (Resultado: ${ag.resultado})` : '';
+        actividades.push({
+          id: ag.id,
+          titulo: ag.titulo + resultadoTxt,
+          locacion: ag.locacion,
+          fecha_programada: fProg,
+          hora_inicio: hIni,
+          hora_fin: null,
+          estado: 'completada'
+        });
+      }
+    });
+
+    actividades.sort((a, b) => (a.fecha_programada || '').localeCompare(b.fecha_programada || ''));
 
     const { data: rendimientoPeriodo } = await sb.from('rendimiento_leads')
       .select('*')
@@ -1582,6 +2162,63 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
   }
 });
 
+
+/* ============ COMPARTIR E INSTALAR APLICATIVO (SUPERADMIN) ============ */
+function copiarLinkInstalacion(tipo){
+  const urlApp = 'https://jorealft2020-hue.github.io/casa-dorada-app/';
+  let mensaje = '';
+
+  if (tipo === 'celular') {
+    mensaje = `¡Hola! Bienvenido al equipo de Constructora & Inmobiliaria Casa Dorada.\n\n` +
+      `Te comparto el enlace de acceso a nuestro Planner Comercial y Operativo:\n${urlApp}\n\n` +
+      `📲 CÓMO INSTALARLO EN TU CELULAR (Android / iPhone):\n` +
+      `1. Abre el enlace en Google Chrome (en Android) o Safari (en iPhone).\n` +
+      `2. En Android: Toca los 3 puntos arriba a la derecha y selecciona "Instalar aplicación" o "Agregar a la pantalla principal".\n` +
+      `3. En iPhone: Toca el botón Compartir (cuadrado con flecha hacia arriba) y selecciona "Agregar al inicio".\n` +
+      `4. Inicia sesión con tu correo de Google autorizado en el sistema.`;
+  } else {
+    mensaje = `¡Hola! Bienvenido al equipo de Constructora & Inmobiliaria Casa Dorada.\n\n` +
+      `Te comparto el enlace para usar el Planner Corporativo en tu computadora o laptop:\n${urlApp}\n\n` +
+      `💻 CÓMO INSTALARLO EN TU COMPUTADORA (PC / LAPTOP / NAVEGADOR):\n` +
+      `1. Abre el enlace en Google Chrome o Microsoft Edge en tu computadora.\n` +
+      `2. En la barra de direcciones (arriba a la derecha), haz clic en el ícono de instalar (pantalla con flecha hacia abajo) o ve al menú de 3 puntos > "Instalar Casa Dorada".\n` +
+      `3. La app se abrirá en una ventana propia como programa de escritorio independiente.\n` +
+      `4. Inicia sesión con tu cuenta de Google autorizada.`;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(mensaje).then(() => {
+      toast('Mensaje con instrucciones copiado al portapapeles ✓');
+    }).catch(() => fallbackCopiar(mensaje));
+  } else {
+    fallbackCopiar(mensaje);
+  }
+}
+
+function fallbackCopiar(texto){
+  const t = document.createElement('textarea');
+  t.value = texto;
+  t.style.position = 'fixed';
+  t.style.opacity = '0';
+  document.body.appendChild(t);
+  t.select();
+  try {
+    document.execCommand('copy');
+    toast('Instrucciones copiadas al portapapeles ✓');
+  } catch (e) {
+    toast('Copia el enlace manualmente: https://jorealft2020-hue.github.io/casa-dorada-app/');
+  }
+  document.body.removeChild(t);
+}
+
+function compartirWhatsAppInvitacion(){
+  const urlApp = 'https://jorealft2020-hue.github.io/casa-dorada-app/';
+  const texto = `¡Hola! Te comparto el enlace de acceso al Planner Corporativo de Constructora & Inmobiliaria Casa Dorada.\n\n` +
+    `Ingresa aquí desde tu celular o computadora con tu correo de Google autorizado:\n${urlApp}\n\n` +
+    `Recuerda que puedes instalarlo como aplicación tocando en 'Instalar' o 'Agregar al inicio'.`;
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+}
+
 /* ============ ADMIN: USUARIOS PRE-AUTORIZADOS (ALTA COMPLETA) ============ */
 document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => openModal('modalPreautorizar'));
 
@@ -1599,10 +2236,43 @@ async function cargarPreautorizados(){
           ${p.celular ? `<p class="card-sub">📱 WhatsApp: ${escapeHtml(p.celular)}</p>` : ''}
           ${p.area ? `<p class="card-sub">🏢 Área: ${escapeHtml(p.area)}</p>` : ''}
         </div>
-        <button class="chip-btn" onclick="eliminarPreautorizado('${p.email.replace(/'/g,"\\'")}')">🗑️</button>
+      </div>
+      <div class="card-actions" style="margin-top:10px;">
+        <button class="chip-btn gold" onclick="abrirEditarPreautorizado('${p.email.replace(/'/g,"\'")}');">✏️ Editar ficha y permisos</button>
+        <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarPreautorizado('${p.email.replace(/'/g,"\'")}');">🗑️ Eliminar</button>
       </div>
     </div>
   `).join('');
+}
+
+async function abrirEditarPreautorizado(email){
+  const { data: p } = await sb.from('usuarios_preautorizados').select('*').eq('email', email).single();
+  if (!p) { toast('No se encontró el registro'); return; }
+
+  document.getElementById('pa_modal_titulo').textContent = 'Editar colaborador pendiente';
+  document.getElementById('pa_nombre').value = p.nombre || '';
+  document.getElementById('pa_email').value = p.email;
+  document.getElementById('pa_email').disabled = true;
+  document.getElementById('pa_dni').value = p.dni || '';
+  document.getElementById('pa_celular').value = p.celular || '';
+  document.getElementById('pa_area').value = p.area || 'Comercial';
+  document.getElementById('pa_cargo').value = p.cargo || '';
+  document.getElementById('pa_rol').value = p.rol || 'usuario';
+
+  const perm = p.permisos || {};
+  document.getElementById('pa_perm_ver_actividades').checked = perm.ver_actividades !== false;
+  document.getElementById('pa_perm_ver_clientes').checked = perm.ver_clientes !== false;
+  document.getElementById('pa_perm_ver_separaciones').checked = perm.ver_separaciones !== false;
+  document.getElementById('pa_perm_ver_agenda').checked = perm.ver_agenda !== false;
+  document.getElementById('pa_perm_ver_rendimiento').checked = perm.ver_rendimiento !== false;
+  document.getElementById('pa_perm_ver_control').checked = perm.ver_control !== false;
+  document.getElementById('pa_perm_kpi_monto').checked = perm.kpi_monto === true;
+  document.getElementById('pa_perm_kpi_desglose').checked = perm.kpi_desglose === true;
+  document.getElementById('pa_perm_reportes_pasados').checked = perm.reportes_pasados === true;
+  document.getElementById('pa_perm_generar_informes').checked = perm.generar_informes !== false;
+  document.getElementById('pa_perm_eliminar_registros').checked = perm.eliminar_registros === true;
+
+  openModal('modalPreautorizar');
 }
 
 async function eliminarPreautorizado(email){
@@ -1996,10 +2666,31 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
     toast('Error al guardar cliente'); console.error(error); return;
   }
 
+  // AUTO-AGENDAMIENTO DE LA PRÓXIMA ACCIÓN EN AGENDA Y CALENDAR:
+  if (proximaFecha && proximaHora) {
+    try {
+      const fInicioISO = new Date(`${proximaFecha}T${proximaHora}:00`).toISOString();
+      const { data: agendaEv } = await sb.from('agenda').insert({
+        usuario_id: currentUser.id,
+        titulo: `[Cliente: ${nombre}] ${proximaAccion}`,
+        locacion: `📱 Tel: ${celular} · Origen: ${origen}`,
+        fecha_inicio: fInicioISO,
+        estado: 'programada'
+      }).select().single();
+
+      if (agendaEv) {
+        sincronizarEventoCalendar(agendaEv);
+      }
+    } catch (eAgenda) {
+      console.error('No se pudo auto-agendar la próxima acción:', eAgenda);
+    }
+  }
+
   toast('Cliente registrado con éxito ✓');
   closeModal('modalCliente');
   cargarClientes();
   cargarKPIs();
+  cargarAgenda();
 });
 
 async function cargarClientes(){
@@ -2420,6 +3111,293 @@ async function sincronizarSeparacionCalendar(sep){
 }
 
 /* Agenda ordenada de forma descendente (las nuevas y futuras arriba) */
+
+/* ============ CALENDARIO INTERACTIVO (VISTAS: DÍA, SEMANA, MES, CHECKLIST) ============ */
+const calEstado = {
+  view: 'mes', // 'dia', 'semana', 'mes', 'checklist'
+  fechaRef: new Date(), // Fecha de navegación del mes/semana
+  diaSeleccionado: obtenerHoyLocal(),
+  eventos: []
+};
+
+const MESES_CAL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const DIAS_SEMANA_CORTO = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+
+// Selector de Vistas
+document.querySelectorAll('.cal-view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cal-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    cambiarVistaCalendario(btn.dataset.calView);
+  });
+});
+
+function cambiarVistaCalendario(vista){
+  calEstado.view = vista;
+  const navBar = document.getElementById('calNavBar');
+  const contMes = document.getElementById('calContainerMes');
+  const contSem = document.getElementById('calContainerSemana');
+  const contDia = document.getElementById('calContainerDia');
+  const contChk = document.getElementById('calContainerChecklist');
+
+  if (contMes) contMes.classList.toggle('hidden', vista !== 'mes');
+  if (contSem) contSem.classList.toggle('hidden', vista !== 'semana');
+  if (contDia) contDia.classList.toggle('hidden', vista !== 'dia');
+  if (contChk) contChk.classList.toggle('hidden', vista !== 'checklist');
+
+  if (vista === 'checklist') {
+    if (navBar) navBar.classList.add('hidden');
+    cargarChecklist();
+  } else {
+    if (navBar) navBar.classList.remove('hidden');
+    actualizarTituloNavCal();
+    if (vista === 'mes') renderizarMes();
+    if (vista === 'semana') renderizarSemana();
+    if (vista === 'dia') renderizarDia();
+  }
+}
+
+// Navegación de Fechas (◀ Hoy ▶)
+document.getElementById('btnCalPrev').addEventListener('click', () => navegarCal(-1));
+document.getElementById('btnCalNext').addEventListener('click', () => navegarCal(1));
+document.getElementById('btnCalToday').addEventListener('click', () => {
+  calEstado.fechaRef = new Date();
+  calEstado.diaSeleccionado = obtenerHoyLocal();
+  actualizarTituloNavCal();
+  renderizarVistaActiva();
+});
+
+function navegarCal(dir){
+  const f = calEstado.fechaRef;
+  if (calEstado.view === 'mes') {
+    f.setMonth(f.getMonth() + dir);
+  } else if (calEstado.view === 'semana') {
+    f.setDate(f.getDate() + (dir * 7));
+  } else if (calEstado.view === 'dia') {
+    f.setDate(f.getDate() + dir);
+    const y = f.getFullYear();
+    const m = String(f.getMonth() + 1).padStart(2, '0');
+    const d = String(f.getDate()).padStart(2, '0');
+    calEstado.diaSeleccionado = `${y}-${m}-${d}`;
+  }
+  actualizarTituloNavCal();
+  renderizarVistaActiva();
+}
+
+function actualizarTituloNavCal(){
+  const f = calEstado.fechaRef;
+  const mesNombre = MESES_CAL[f.getMonth()];
+  const anio = f.getFullYear();
+  const el = document.getElementById('calNavTitle');
+  if (!el) return;
+
+  if (calEstado.view === 'mes') {
+    el.textContent = `${mesNombre} ${anio}`;
+  } else if (calEstado.view === 'semana') {
+    const lun = getLunesDeSemana(f);
+    const dom = new Date(lun);
+    dom.setDate(dom.getDate() + 6);
+    el.textContent = `${lun.getDate()} ${MESES_CAL[lun.getMonth()].slice(0,3)} – ${dom.getDate()} ${MESES_CAL[dom.getMonth()].slice(0,3)}`;
+  } else if (calEstado.view === 'dia') {
+    const dSel = new Date(calEstado.diaSeleccionado + 'T00:00:00');
+    el.textContent = `${dSel.getDate()} de ${MESES_CAL[dSel.getMonth()]}`;
+  }
+}
+
+function renderizarVistaActiva(){
+  if (calEstado.view === 'mes') renderizarMes();
+  else if (calEstado.view === 'semana') renderizarSemana();
+  else if (calEstado.view === 'dia') renderizarDia();
+}
+
+function getLunesDeSemana(d){
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(date.setDate(diff));
+}
+
+// 1. RENDER VISTA MES (GRILLA ESTILO GOOGLE CALENDAR)
+function renderizarMes(){
+  const grid = document.getElementById('calMonthGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const f = calEstado.fechaRef;
+  const year = f.getFullYear();
+  const month = f.getMonth();
+  const hoyStr = obtenerHoyLocal();
+
+  const primerDia = new Date(year, month, 1);
+  let diaSemana = primerDia.getDay();
+  let offsetLunes = diaSemana === 0 ? 6 : diaSemana - 1;
+
+  const ultimoDiaMes = new Date(year, month + 1, 0).getDate();
+  const ultimoDiaMesAnt = new Date(year, month, 0).getDate();
+
+  const celdas = [];
+  // Mes anterior
+  for (let i = offsetLunes - 1; i >= 0; i--) {
+    const diaNum = ultimoDiaMesAnt - i;
+    const mAnt = month === 0 ? 11 : month - 1;
+    const yAnt = month === 0 ? year - 1 : year;
+    const dateStr = `${yAnt}-${String(mAnt+1).padStart(2,'0')}-${String(diaNum).padStart(2,'0')}`;
+    celdas.push({ diaNum, dateStr, esMesActual: false });
+  }
+  // Mes actual
+  for (let d = 1; d <= ultimoDiaMes; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    celdas.push({ diaNum: d, dateStr, esMesActual: true });
+  }
+  // Mes siguiente
+  const restantes = (7 - (celdas.length % 7)) % 7;
+  for (let d = 1; d <= restantes; d++) {
+    const mSig = month === 11 ? 0 : month + 1;
+    const ySig = month === 11 ? year + 1 : year;
+    const dateStr = `${ySig}-${String(mSig+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    celdas.push({ diaNum: d, dateStr, esMesActual: false });
+  }
+
+  celdas.forEach(c => {
+    const esHoy = c.dateStr === hoyStr;
+    const esSeleccionado = c.dateStr === calEstado.diaSeleccionado;
+    
+    // Filtrar eventos de este día
+    const evsDia = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(c.dateStr));
+
+    const cellEl = document.createElement('div');
+    cellEl.className = `cal-day-cell ${c.esMesActual ? '' : 'other-month'} ${esHoy ? 'today' : ''} ${esSeleccionado ? 'selected' : ''}`;
+    
+    let pillHtml = '';
+    if (evsDia.length > 0) {
+      pillHtml = `<div class="cal-day-pill">${evsDia.length === 1 ? escapeHtml(evsDia[0].titulo) : `${evsDia.length} tareas`}</div>`;
+    }
+
+    cellEl.innerHTML = `
+      <div class="cal-day-num">${c.diaNum}</div>
+      ${pillHtml}
+    `;
+
+    cellEl.addEventListener('click', () => {
+      calEstado.diaSeleccionado = c.dateStr;
+      document.querySelectorAll('.cal-day-cell').forEach(el => el.classList.remove('selected'));
+      cellEl.classList.add('selected');
+      renderizarEventosDiaSeleccionado();
+    });
+
+    grid.appendChild(cellEl);
+  });
+
+  renderizarEventosDiaSeleccionado();
+}
+
+function renderizarEventosDiaSeleccionado(){
+  const cont = document.getElementById('calSelectedDayEvents');
+  const hdr = document.getElementById('calSelectedDayHeader');
+  if (!cont) return;
+
+  const dSel = calEstado.diaSeleccionado;
+  if (hdr) hdr.textContent = `Eventos del ${fmtFecha(dSel)}`;
+
+  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(dSel));
+  if (evs.length === 0) {
+    cont.innerHTML = `<div class="empty" style="padding:20px 0;"><p>Sin eventos programados para este día.</p></div>`;
+    return;
+  }
+
+  cont.innerHTML = evs.map(ev => renderizarTarjetaAgenda(ev)).join('');
+}
+
+// 2. RENDER VISTA SEMANA
+function renderizarSemana(){
+  const strip = document.getElementById('calWeekStrip');
+  const list = document.getElementById('calWeekEventsList');
+  if (!strip || !list) return;
+
+  strip.innerHTML = '';
+  const lunes = getLunesDeSemana(calEstado.fechaRef);
+  const hoyStr = obtenerHoyLocal();
+
+  const diasSemana = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lunes);
+    d.setDate(d.getDate() + i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    diasSemana.push({ dateStr, diaNum: d.getDate(), diaNombre: DIAS_SEMANA_CORTO[i] });
+  }
+
+  diasSemana.forEach(d => {
+    const esSeleccionado = d.dateStr === calEstado.diaSeleccionado;
+    const tieneEvs = (calEstado.eventos || []).some(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(d.dateStr));
+
+    const btn = document.createElement('div');
+    btn.className = `cal-week-day-btn ${esSeleccionado ? 'selected' : ''}`;
+    btn.innerHTML = `
+      <div class="cal-week-name">${d.diaNombre}</div>
+      <div class="cal-week-num">${d.diaNum}</div>
+      ${tieneEvs ? '<div class="cal-week-dot"></div>' : ''}
+    `;
+    btn.addEventListener('click', () => {
+      calEstado.diaSeleccionado = d.dateStr;
+      document.querySelectorAll('.cal-week-day-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      renderizarEventosSemanaDia(d.dateStr);
+    });
+    strip.appendChild(btn);
+  });
+
+  renderizarEventosSemanaDia(calEstado.diaSeleccionado);
+}
+
+function renderizarEventosSemanaDia(dateStr){
+  const list = document.getElementById('calWeekEventsList');
+  if (!list) return;
+  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(dateStr));
+  if (evs.length === 0) {
+    list.innerHTML = `<div class="empty" style="padding:20px 0;"><p>Sin eventos para el ${fmtFecha(dateStr)}.</p></div>`;
+    return;
+  }
+  list.innerHTML = evs.map(ev => renderizarTarjetaAgenda(ev)).join('');
+}
+
+// 3. RENDER VISTA DÍA
+function renderizarDia(){
+  const list = document.getElementById('calDiaEventsList');
+  if (!list) return;
+  const dSel = calEstado.diaSeleccionado;
+  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(dSel));
+  if (evs.length === 0) {
+    list.innerHTML = `<div class="empty" style="padding:30px 0;"><div class="big">📅</div><p>No tienes citas programadas para el ${fmtFecha(dSel)}.</p></div>`;
+    return;
+  }
+  list.innerHTML = evs.map(ev => renderizarTarjetaAgenda(ev)).join('');
+}
+
+function renderizarTarjetaAgenda(ev){
+  const esPropio = ev.usuario_id === currentUser.id;
+  const sem = semaforoAgenda(ev.fecha_inicio);
+  const nombreAsesor = ev.usuarios?.nombre ? `👤 ${escapeHtml(ev.usuarios.nombre)} · ` : '';
+
+  return `
+    <div class="card" style="border-left: 4px solid ${sem.color};">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${sem.label} ${escapeHtml(ev.titulo)}</p>
+          <p class="card-sub">${nombreAsesor}${new Date(ev.fecha_inicio).toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
+          ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
+          ${ev.resultado ? `<p class="card-sub" style="color:var(--ok); font-weight:600; margin-top:3px;">✓ Resultado: ${escapeHtml(ev.resultado)}</p>` : ''}
+        </div>
+        ${esPropio 
+          ? (ev.google_calendar_event_id ? '<span class="badge badge-completada" style="font-size:10px;">✓ En Calendar</span>' : '')
+          : '<span class="badge" style="background:#EDE8DC; color:#1A2332; font-size:10px;">Equipo</span>'
+        }
+      </div>
+      ${puedeEliminar ? `<div class="card-actions" style="margin-top:8px;"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️ Eliminar</button></div>` : ''}
+    </div>
+  `;
+}
+
+// Cargar Agenda Principal y actualizar vistas
 async function cargarAgenda(){
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
@@ -2438,35 +3416,14 @@ async function cargarAgenda(){
   }
 
   const { data } = await query;
-  const el = document.getElementById('listaAgenda');
-  if (!data || data.length === 0) { el.innerHTML = emptyState('📅', 'No tienes eventos en tu agenda.'); return; }
+  calEstado.eventos = data || [];
 
-  el.innerHTML = data.map(ev => {
-    const esPropio = ev.usuario_id === currentUser.id;
-    const sem = semaforoAgenda(ev.fecha_inicio);
-    const nombreUsuario = ev.usuarios?.nombre ? `👤 ${escapeHtml(ev.usuarios.nombre)} · ` : '';
+  actualizarTituloNavCal();
+  renderizarVistaActiva();
 
-    return `
-      <div class="card" style="border-left: 4px solid ${sem.color};">
-        <div class="card-row">
-          <div>
-            <p class="card-title">${sem.label} ${escapeHtml(ev.titulo)}</p>
-            <p class="card-sub">${nombreUsuario}${new Date(ev.fecha_inicio).toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
-            ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
-          </div>
-          ${esPropio 
-            ? (ev.google_calendar_event_id ? '<span class="badge badge-completada" style="font-size:10px;">✓ En tu Calendar</span>' : '')
-            : '<span class="badge" style="background:#EDE8DC; color:#1A2332; font-size:10px;">Equipo</span>'
-          }
-        </div>
-        ${puedeEliminar ? `<div class="card-actions" style="margin-top:8px;"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️ Eliminar</button></div>` : ''}
-      </div>
-    `;
-  }).join('');
-
-  // Sincronización automática de Google Calendar para eventos propios pendientes:
-  const pendientes = (data || []).filter(ev => ev.usuario_id === currentUser.id && !ev.google_calendar_event_id);
-  for (const ev of pendientes) {
+  // Sincronización automática de Google Calendar para eventos propios pendientes
+  const pendientesPropios = (data || []).filter(ev => ev.usuario_id === currentUser.id && !ev.google_calendar_event_id);
+  for (const ev of pendientesPropios) {
     sincronizarEventoCalendar(ev);
   }
 }
@@ -2587,6 +3544,30 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   }
 
   let { error } = await sb.from('agenda').update(payload).eq('id', id);
+
+  // Si la actividad fue REALIZADA, asegurar que se registre en actividades para que forme parte del reporte oficial
+  if (estado === 'realizada') {
+    try {
+      const { data: evAg } = await sb.from('agenda').select('*').eq('id', id).single();
+      if (evAg) {
+        const fProg = evAg.fecha_inicio ? evAg.fecha_inicio.slice(0, 10) : obtenerHoyLocal();
+        const hIni = evAg.fecha_inicio && evAg.fecha_inicio.includes('T') ? evAg.fecha_inicio.split('T')[1].slice(0, 5) : null;
+        await sb.from('actividades').insert({
+          usuario_id: currentUser.id,
+          titulo: evAg.titulo,
+          locacion: evAg.locacion || null,
+          fecha_programada: fProg,
+          hora_inicio: hIni,
+          hora_fin: null,
+          estado: 'completada',
+          descripcion: resultado ? `Resultado: ${resultado}` : null,
+          fecha_completada: new Date().toISOString()
+        });
+      }
+    } catch (eSyncAct) {
+      console.error('Error insertando en actividades:', eSyncAct);
+    }
+  }
   if (error && (error.message.includes('column') || error.message.includes('schema'))) {
     const desc = resultado ? `Resultado: ${resultado}` : `Motivo: ${motivo}`;
     const { error: errFallback } = await sb.from('agenda').update({ estado: payload.estado, descripcion: desc }).eq('id', id);
