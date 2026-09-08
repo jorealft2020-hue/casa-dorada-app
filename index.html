@@ -264,12 +264,13 @@
   }
 
   .cal-weekdays-header{
-    display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 700;
-    color: var(--ink-dim); text-transform: lowercase; margin-bottom: 6px;
+    display: flex; text-align: center; font-size: 11px; font-weight: 700;
+    color: var(--ink-dim); text-transform: lowercase; margin-bottom: 6px; gap: 4px;
   }
-  .cal-month-grid{
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 14px;
-  }
+  .cal-weekdays-header > div{ flex: 1 1 0; min-width: 0; }
+  .cal-month-grid{ display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+  .cal-week-row{ display: flex; gap: 4px; }
+  .cal-week-row > .cal-day-cell{ flex: 1 1 0; min-width: 0; }
   .cal-day-cell{
     min-height: 58px; background: #fff; border: 1.2px solid #EAE5D8; border-radius: 9px; padding: 4px 2px;
     display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; transition: all 0.15s;
@@ -4111,7 +4112,7 @@ function renderizarMes(){
     celdas.push({ diaNum: d, dateStr, esMesActual: false });
   }
 
-  celdas.forEach(c => {
+  celdas.forEach((c, idx) => {
     const esHoy = c.dateStr === hoyStr;
     const esSeleccionado = c.dateStr === calEstado.diaSeleccionado;
     
@@ -4138,7 +4139,13 @@ function renderizarMes(){
       renderizarEventosDiaSeleccionado();
     });
 
-    grid.appendChild(cellEl);
+    // Agrupar en filas de 7 (una fila = una semana), en vez de una sola grilla continua
+    if (idx % 7 === 0) {
+      const filaEl = document.createElement('div');
+      filaEl.className = 'cal-week-row';
+      grid.appendChild(filaEl);
+    }
+    grid.lastElementChild.appendChild(cellEl);
   });
 
   renderizarEventosDiaSeleccionado();
@@ -4394,6 +4401,7 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   if (estado === 'reprogramada') {
     payload.fecha_inicio = new Date(`${nuevaFecha}T${nuevaHora}:00`).toISOString();
     payload.estado = 'programada';
+    payload.google_calendar_event_id = null; // fuerza a resincronizar con la nueva fecha/hora
   }
 
   let { error } = await sb.from('agenda').update(payload).eq('id', id);
