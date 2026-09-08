@@ -79,33 +79,7 @@
   .bell .dot{ position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%; background: var(--danger); display:none; }
   .bell.has-unread .dot{ display:block; }
 
-  main{ flex:1; overflow-y:auto; padding: 4px 20px 32px; }
-
-  /* ===== MENÚ LATERAL ===== */
-  .hamburger-btn{ background:none; border:none; font-size:22px; color: var(--navy); cursor:pointer; padding:6px 10px 6px 0; }
-  .sidebar-backdrop{
-    position:fixed; inset:0; background: rgba(26,35,50,0.5); z-index:90; display:none;
-  }
-  .sidebar-backdrop.open{ display:block; }
-  .sidebar{
-    position:fixed; top:0; left:0; bottom:0; width: 280px; max-width: 82vw;
-    background: #fff; z-index:95; transform: translateX(-100%); transition: transform 0.25s ease;
-    display:flex; flex-direction:column; box-shadow: 4px 0 24px rgba(0,0,0,0.15);
-  }
-  .sidebar.open{ transform: translateX(0); }
-  .sidebar-header{ display:flex; align-items:center; justify-content:space-between; padding: 20px 16px 14px; border-bottom:1px solid #EAE5D8; }
-  .sidebar-logo{ height: 34px; }
-  .sidebar-close{ background:none; border:none; font-size:18px; color: var(--ink-dim); cursor:pointer; }
-  .sidebar-items{ flex:1; overflow-y:auto; padding: 10px 8px; }
-  .sidebar-item{
-    width:100%; display:flex; align-items:center; gap:12px; background:none; border:none; text-align:left;
-    padding: 13px 14px; font-size:14.5px; font-weight:600; color: var(--ink); border-radius:10px; cursor:pointer;
-  }
-  .sidebar-item .ic{ font-size:18px; width:22px; text-align:center; }
-  .sidebar-item:hover{ background: var(--cream-dim); }
-  .sidebar-item.active{ background: var(--navy); color:#fff; }
-  .sidebar-footer{ padding: 10px 8px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid #EAE5D8; }
-  .sidebar-footer .sidebar-item{ color: var(--danger); }
+  main{ flex:1; overflow-y:auto; padding: 4px 20px 100px; }
 
   /* ===== KPI STRIP ===== */
   .kpi-strip{ display:flex; gap:12px; overflow-x:auto; padding: 8px 2px 18px; scrollbar-width:none; }
@@ -150,7 +124,7 @@
   .empty p{ font-size: 13.5px; line-height:1.5; margin: 4px 0 0; }
 
   /* ===== FAB ===== */
-  .fab{ position:fixed; bottom: 24px; right: calc(50% - 240px + 20px); width:56px; height:56px; border-radius:50%; background: var(--gold); color:#fff; border:none; font-size:26px; box-shadow: 0 10px 24px rgba(201,151,62,0.5); cursor:pointer; z-index:20; }
+  .fab{ position:fixed; bottom: 92px; right: calc(50% - 240px + 20px); width:56px; height:56px; border-radius:50%; background: var(--gold); color:#fff; border:none; font-size:26px; box-shadow: 0 10px 24px rgba(201,151,62,0.5); cursor:pointer; z-index:20; }
   @media (max-width: 480px){ .fab{ right: 20px; } }
 
   /* ===== BOTTOM NAV ===== */
@@ -290,13 +264,12 @@
   }
 
   .cal-weekdays-header{
-    display: flex; text-align: center; font-size: 11px; font-weight: 700;
-    color: var(--ink-dim); text-transform: lowercase; margin-bottom: 6px; gap: 4px;
+    display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 700;
+    color: var(--ink-dim); text-transform: lowercase; margin-bottom: 6px;
   }
-  .cal-weekdays-header > div{ flex: 1 1 0; min-width: 0; }
-  .cal-month-grid{ display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
-  .cal-week-row{ display: flex; gap: 4px; }
-  .cal-week-row > .cal-day-cell{ flex: 1 1 0; min-width: 0; }
+  .cal-month-grid{
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 14px;
+  }
   .cal-day-cell{
     min-height: 58px; background: #fff; border: 1.2px solid #EAE5D8; border-radius: 9px; padding: 4px 2px;
     display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; transition: all 0.15s;
@@ -333,10 +306,163 @@
   .cal-week-num{ font-size: 15px; font-weight: 800; }
   .cal-week-dot{ width: 4px; height: 4px; border-radius: 50%; background: var(--gold); margin: 3px auto 0; }
 
+
+  /* ===== MENÚ LATERAL (DRAWER) ===== */
+  .menu-btn{
+    width: 38px; height: 38px; border-radius: 10px; background: var(--cream-dim);
+    border: none; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; color: var(--navy); cursor: pointer; flex-shrink: 0;
+  }
+  .menu-btn:active{ background: #DDD6C4; }
+  .drawer-backdrop{
+    position: fixed; inset: 0; background: rgba(26, 35, 50, 0.55);
+    z-index: 100; display: none; opacity: 0; transition: opacity 0.25s ease;
+  }
+  .drawer-backdrop.open{ display: flex; opacity: 1; }
+  .drawer-panel{
+    width: 82%; max-width: 320px; height: 100%; background: #fff;
+    display: flex; flex-direction: column; transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 24px rgba(0,0,0,0.25);
+  }
+  .drawer-backdrop.open .drawer-panel{ transform: translateX(0); }
+  .drawer-header{
+    background: linear-gradient(145deg, var(--navy) 0%, #223048 100%);
+    padding: 24px 18px 18px; color: #fff; position: relative;
+  }
+  .drawer-user-circle{
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 10px;
+  }
+  .drawer-user-name{ font-size: 15.5px; font-weight: 700; margin-bottom: 2px; }
+  .drawer-user-role{ font-size: 12px; color: var(--gold-soft); font-weight: 600; margin-bottom: 2px; }
+  .drawer-user-email{ font-size: 11px; color: #CBD5E1; word-break: break-all; }
+  .drawer-close-btn{
+    position: absolute; top: 16px; right: 14px; background: none; border: none;
+    color: #fff; font-size: 22px; cursor: pointer; padding: 4px;
+  }
+  .drawer-menu-list{ flex: 1; overflow-y: auto; padding: 12px 10px; display: flex; flex-direction: column; gap: 4px; }
+  .drawer-item{
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 10px;
+    border: none; background: none; color: var(--navy); font-size: 13.5px; font-weight: 600;
+    cursor: pointer; text-align: left; width: 100%; transition: background 0.15s;
+  }
+  .drawer-item:active{ background: #F3EFE6; }
+  .drawer-item.active{ background: var(--cream-dim); color: var(--gold); font-weight: 700; }
+  .drawer-item .dr-icon{ font-size: 18px; width: 24px; text-align: center; }
+  .drawer-footer{ border-top: 1px solid #EDE8DC; padding: 10px; }
+  .drawer-item.logout{ color: var(--danger); }
+
+  /* Indicador numérico en la campanita */
+  .bell .dot{
+    position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; border-radius: 100px;
+    background: var(--danger); color: #fff; font-size: 10px; font-weight: 800; display: none;
+    align-items: center; justify-content: center; padding: 0 4px; border: 2px solid #fff;
+  }
+
+
+  /* ===== MÓDULO PLANOS INTERACTIVOS ===== */
+  .planos-toolbar{
+    display: flex; gap: 8px; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .planos-tabs{
+    display: flex; gap: 6px; background: #EDE8DC; padding: 4px; border-radius: 12px; flex: 1; min-width: 260px;
+  }
+  .plano-tab-btn{
+    flex: 1; border: none; padding: 8px 10px; border-radius: 9px; font-size: 11.5px; font-weight: 700;
+    color: var(--navy); background: transparent; cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .plano-tab-btn.active{
+    background: var(--navy); color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .planos-actions-top{ display: flex; gap: 6px; align-items: center; }
+  .plano-frame-container{
+    position: relative; width: 100%; height: calc(100vh - 210px); min-height: 480px;
+    background: #fff; border: 1.5px solid #E5DFCF; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  }
+  @media (min-width: 900px){
+    .plano-frame-container{ height: 750px; }
+  }
+  .plano-iframe{ width: 100%; height: 100%; border: 0; display: block; }
+  .plano-fallback-banner{
+    display: none; padding: 14px; background: #FFF9E6; border: 1px solid #FFE082;
+    border-radius: 10px; font-size: 12px; color: #8A5A17; margin-bottom: 10px;
+    align-items: center; justify-content: space-between;
+  }
+
 </style>
 </head>
 <body>
 <div id="app">
+  <!-- MENÚ LATERAL DESLIZANTE (DRAWER) -->
+  <div class="drawer-backdrop" id="drawerBackdrop">
+    <div class="drawer-panel" id="drawerPanel">
+      <div class="drawer-header">
+        <div class="drawer-user-circle" id="drUserInitial">J</div>
+        <div class="drawer-user-info">
+          <div class="drawer-user-name" id="drUserName">Jorge Alexander Luque</div>
+          <div class="drawer-user-role" id="drUserRole">SuperAdmin</div>
+          <div class="drawer-user-email" id="drUserEmail">joreal.ft2020@gmail.com</div>
+        </div>
+        <button class="drawer-close-btn" id="btnCerrarDrawer">✕</button>
+      </div>
+      <div class="drawer-menu-list">
+        <button class="drawer-item active" data-nav="inicio">
+          <span class="dr-icon">🏠</span>
+          <span class="dr-label">Inicio / Portada</span>
+        </button>
+        <button class="drawer-item" data-nav="control" id="drNavControl">
+          <span class="dr-icon">📊</span>
+          <span class="dr-label">Tablero de Control</span>
+        </button>
+        <button class="drawer-item" data-nav="actividades" id="drNavTareas">
+          <span class="dr-icon">✓</span>
+          <span class="dr-label">Mis Tareas Realizadas</span>
+        </button>
+        <button class="drawer-item" data-nav="agenda" id="drNavAgenda">
+          <span class="dr-icon">📅</span>
+          <span class="dr-label">Agenda y Calendario</span>
+        </button>
+        <button class="drawer-item" data-nav="clientes" id="drNavClientes">
+          <span class="dr-icon">👤</span>
+          <span class="dr-label">Cartera de Clientes</span>
+        </button>
+        <button class="drawer-item" onclick="abrirModalCotizador(); cerrarDrawer();">
+          <span class="dr-icon">🧮</span>
+          <span class="dr-label">Cotizador Rápido de Lotes</span>
+        </button>
+        <button class="drawer-item" data-nav="planos" id="drNavPlanos">
+          <span class="dr-icon">🗺️</span>
+          <span class="dr-label">Planos Interactivos</span>
+        </button>
+        <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones">
+          <span class="dr-icon">🏷️</span>
+          <span class="dr-label">Separaciones de Lotes</span>
+        </button>
+        <button class="drawer-item" data-nav="rendimiento" id="drNavRendimiento">
+          <span class="dr-icon">📈</span>
+          <span class="dr-label">Rendimiento por Área</span>
+        </button>
+        <button class="drawer-item" data-nav="notificaciones" id="drNavNotificaciones">
+          <span class="dr-icon">🔔</span>
+          <span class="dr-label">Alertas y Alarmas</span>
+        </button>
+        <button class="drawer-item hidden" data-nav="admin" id="drNavAdmin">
+          <span class="dr-icon">⚙️</span>
+          <span class="dr-label">Gestión de Equipo</span>
+        </button>
+      </div>
+      <div class="drawer-footer">
+        <button class="drawer-item logout" id="drBtnLogout">
+          <span class="dr-icon">🚪</span>
+          <span class="dr-label">Cerrar Sesión</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- LOGIN -->
   <div class="login-screen" id="loginScreen">
@@ -352,10 +478,12 @@
   <!-- APP -->
   <div id="mainScreen" class="hidden" style="display:flex; flex-direction:column; flex:1;">
     <div class="topbar">
-      <button class="hamburger-btn" id="btnHamburger">☰</button>
-      <div>
-        <div class="greet" id="greetName">Hola</div>
-        <div class="role" id="greetRole">—</div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button class="menu-btn" id="btnMenuDrawer" title="Menú de navegación">≡</button>
+        <div>
+          <div class="greet" id="greetName">Hola, Jorge</div>
+          <div class="role" id="greetRole">SuperAdmin (Desarrollador)</div>
+        </div>
       </div>
       <div class="topbar-actions">
         <button class="bell" id="btnBell"><span class="dot" id="bellDot"></span>🔔</button>
@@ -436,22 +564,71 @@
       <!-- VISTA: Clientes -->
       <div id="viewClientes" class="hidden">
         <div class="section-title">Cartera de clientes y prospectos
-          <button class="chip-btn gold" id="btnAbrirNuevoCliente">+ Nuevo cliente</button>
+          <div style="display:flex; gap:6px;">
+            <button class="chip-btn" onclick="abrirModalCotizador()" style="border-color:var(--gold); color:var(--navy); font-weight:700;">🧮 Cotizar lote</button>
+            <button class="chip-btn gold" id="btnAbrirNuevoCliente">+ Nuevo cliente</button>
+          </div>
         </div>
         <div id="listaClientes"></div>
       </div>
 
-      <!-- VISTA: Separaciones -->
-      <div id="viewSeparaciones" class="hidden">
-        <div class="section-title">Separaciones
-          <button class="chip-btn gold" id="btnAbrirNuevaSeparacion">+ Nueva separación</button>
+      <!-- VISTA: Planos Interactivos -->
+      <div id="viewPlanos" class="hidden">
+        <div class="section-title" style="margin-top:0;">Planos Interactivos · Costa Dorada</div>
+        
+        <div class="planos-toolbar">
+          <div class="planos-tabs">
+            <button class="plano-tab-btn active" data-plano="sire" onclick="cambiarPlanoActivo('sire')">📍 Lotes y Disponibilidad</button>
+            <button class="plano-tab-btn" data-plano="360" onclick="cambiarPlanoActivo('360')">🌐 Recorrido 360°</button>
+          </div>
+          <div class="planos-actions-top">
+            <button class="chip-btn" id="btnPlanoRecargar" onclick="recargarPlano()" title="Recargar">🔄</button>
+            <button class="chip-btn gold" id="btnPlanoExterno" onclick="abrirPlanoExterno()" title="Abrir en pantalla completa">↗️ Pantalla completa</button>
+          </div>
         </div>
-        <div id="listaSeparacionesTodas"></div>
+
+        <div class="plano-fallback-banner" id="planoFallback">
+          <span>Si el visor no responde por políticas del sitio, puedes abrirlo directamente:</span>
+          <button class="chip-btn gold" onclick="abrirPlanoExterno()">Abrir</button>
+        </div>
+
+        <div class="plano-frame-container">
+          <iframe id="iframePlano" class="plano-iframe" src="https://usesire.com/ver_plano_publico.php?plano_id=206&ref=416&wb=0" allowfullscreen allow="geolocation; microphone; camera; accelerometer; gyroscope"></iframe>
+        </div>
+      </div>
+
+      <!-- VISTA: Separaciones y Cobranzas -->
+      <div id="viewSeparaciones" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h3 style="margin:0; font-size:16px;">Gestión de Lotes y Separaciones</h3>
+          <div style="display:flex; gap:6px;">
+            <button class="chip-btn" onclick="abrirModalCotizador()" style="border-color:var(--gold); color:var(--navy); font-weight:700;">🧮 Cotizador</button>
+            <button class="chip-btn gold" id="btnAbrirNuevaSeparacion" style="font-weight:700;">+ Nueva separación</button>
+          </div>
+        </div>
+
+        <div class="area-tabs" style="margin-bottom:12px;">
+          <button class="area-tab active" id="tabBtnSeps" onclick="cambiarPestanaSeparaciones('separaciones')">🏷️ Separaciones Activas</button>
+          <button class="area-tab" id="tabBtnCobranzas" onclick="cambiarPestanaSeparaciones('cobranzas')">💳 Control de Cobranzas y Cuotas</button>
+        </div>
+
+        <div id="secTabSeparaciones">
+          <div id="listaSeparacionesTodas"></div>
+        </div>
+
+        <div id="secTabCobranzas" class="hidden">
+          <p style="font-size:12.5px; color:var(--ink-dim); margin: 0 0 10px;">Seguimiento de letras y cobranzas de clientes con financiamiento directo activo:</p>
+          <div id="listaCobranzasCuotas"></div>
+        </div>
       </div>
 
       <!-- VISTA: Agenda (CALENDARIO COMPLETO + CHECKLIST PERSISTENTE) -->
       <div id="viewAgenda" class="hidden">
         <!-- Selector de Vistas: Día | Semana | Mes | Checklist -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="margin:0; font-size:16px;">Agenda y Calendario</h3>
+          <button class="chip-btn gold" id="btnAbrirNuevaAgenda" style="font-weight:700;">+ Nueva cita</button>
+        </div>
         <div class="calendar-view-selector">
           <button class="cal-view-btn" data-cal-view="dia">Día</button>
           <button class="cal-view-btn" data-cal-view="semana">Semana</button>
@@ -547,124 +724,24 @@
             </button>
           </div>
         </div>
-        <button class="chip-btn gold" id="btnAbrirPreautorizar" style="margin-bottom:10px; width:100%; padding:10px; font-size:13px;">➕ Registrar nuevo usuario en el equipo</button>
-        <div class="card" style="background:#FBF6EC; border-color:#E8D9B5; margin-bottom:14px;">
-          <p class="card-title" style="font-size:13px;">⚠️ Paso final: autorizar el correo en Google</p>
-          <p class="card-sub">Después de registrar al usuario aquí, Google también le pide su aprobación (mientras la app esté en modo Prueba). Ábrelo y agrega el correo del nuevo usuario en "Usuarios de prueba".</p>
-          <a href="https://console.cloud.google.com/auth/audience?project=casa-dorada-supabase" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">🔗 Abrir Google Cloud — Usuarios de prueba</a>
-        </div>
+        <button class="chip-btn gold" id="btnAbrirPreautorizar" style="margin-bottom:14px; width:100%; padding:10px; font-size:13px;">➕ Registrar nuevo usuario en el equipo</button>
         <div id="listaPreautorizados"></div>
         <div id="listaUsuariosAdmin"></div>
-      </div>
-
-      <!-- VISTA: Configuración del Sistema (solo SuperAdmin) -->
-      <div id="viewSistema" class="hidden">
-        <div class="section-title">Configuración del Sistema</div>
-        <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-6px;">Accesos técnicos exclusivos del desarrollador / matriz. No visible para Admin.</p>
-
-        <div class="card" style="background:#EAF3EC; border-color:#BFDDC8;">
-          <p class="card-title">🤖 Trabajar modificaciones con Claude</p>
-          <p class="card-sub">Continúa esta misma conversación/proyecto donde se construyó y mantiene la app.</p>
-          <a href="https://claude.ai/project/01a0687a-6a2a-71cc-b53b-565a65e6a58f" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir proyecto en Claude</a>
-        </div>
-
-        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🗄️ BASE DE DATOS — SUPABASE (backend)</p>
-        <div class="card">
-          <p class="card-title">Panel general</p>
-          <p class="card-sub">Proyecto: nboikojylmkujdxinztj</p>
-          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir dashboard</a>
-        </div>
-        <div class="card">
-          <p class="card-title">Editor SQL (tablas, migraciones)</p>
-          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/sql/new" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir SQL Editor</a>
-        </div>
-        <div class="card">
-          <p class="card-title">Edge Functions (servidor)</p>
-          <p class="card-sub">membrete, sincronizar-google-calendar, refrescar-token-google, alertas-vencimientos, app</p>
-          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/functions" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Edge Functions</a>
-        </div>
-        <div class="card">
-          <p class="card-title">Autenticación (Google OAuth, usuarios)</p>
-          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/auth/users" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Authentication</a>
-        </div>
-        <div class="card">
-          <p class="card-title">Storage (fotos, vouchers, documentos)</p>
-          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/storage/buckets" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Storage</a>
-        </div>
-
-        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">💻 CÓDIGO — GITHUB (frontend)</p>
-        <div class="card">
-          <p class="card-title">Repositorio (código fuente index.html)</p>
-          <p class="card-sub">jorealft2020-hue/casa-dorada-app</p>
-          <a href="https://github.com/jorealft2020-hue/casa-dorada-app" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir repositorio</a>
-        </div>
-        <div class="card">
-          <p class="card-title">Generar token de acceso (para subir cambios)</p>
-          <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Nuevo token</a>
-        </div>
-        <div class="card">
-          <p class="card-title">GitHub Pages (dónde vive la app publicada)</p>
-          <a href="https://github.com/jorealft2020-hue/casa-dorada-app/settings/pages" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Ver configuración de Pages</a>
-        </div>
-
-        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🔑 GOOGLE CLOUD (login y Calendar)</p>
-        <div class="card">
-          <p class="card-title">Usuarios de prueba / verificación OAuth</p>
-          <a href="https://console.cloud.google.com/auth/audience?project=casa-dorada-supabase" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir</a>
-        </div>
-        <div class="card">
-          <p class="card-title">Credenciales OAuth (Client ID / Secret)</p>
-          <a href="https://console.cloud.google.com/apis/credentials?project=casa-dorada-supabase" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir</a>
-        </div>
-
-        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🌐 APP EN VIVO</p>
-        <div class="card">
-          <p class="card-title">Link que usan todos los colaboradores</p>
-          <p class="card-sub">https://jorealft2020-hue.github.io/casa-dorada-app/</p>
-          <a href="https://jorealft2020-hue.github.io/casa-dorada-app/" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir app</a>
-        </div>
       </div>
     </main>
 
     <button class="fab hidden" id="btnFab">+</button>
 
-  </div>
-
-  <!-- MENÚ LATERAL -->
-  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-  <aside class="sidebar" id="sidebarMenu">
-    <div class="sidebar-header">
-      <img src="logo-casa-dorada.png" alt="Casa Dorada" class="sidebar-logo">
-      <button class="sidebar-close" id="btnCerrarSidebar">✕</button>
-    </div>
-    <div class="sidebar-items">
-      <button class="sidebar-item active" data-nav="inicio"><span class="ic">🏠</span> Inicio</button>
-      <button class="sidebar-item" data-nav="control" id="navControl"><span class="ic">📊</span> Control</button>
-      <button class="sidebar-item" data-nav="actividades" id="navTareas"><span class="ic">✓</span> Tareas</button>
-      <button class="sidebar-item" data-nav="agenda" id="navAgenda"><span class="ic">📅</span> Agenda</button>
-      <button class="sidebar-item" data-nav="clientes" id="navClientes"><span class="ic">👤</span> Clientes</button>
-      <button class="sidebar-item" data-nav="separaciones" id="navSeparaciones"><span class="ic">🏷️</span> Separaciones</button>
-      <button class="sidebar-item" data-nav="rendimiento" id="navRendimiento"><span class="ic">📈</span> Rendimiento</button>
-      <button class="sidebar-item" id="btnAbrirPlano"><span class="ic">🗺️</span> Plano Interactivo</button>
-      <button class="sidebar-item hidden" data-nav="admin" id="navAdmin"><span class="ic">⚙️</span> Admin</button>
-      <button class="sidebar-item hidden" data-nav="sistema" id="navSistema"><span class="ic">🛠️</span> Configuración del Sistema</button>
-    </div>
-    <div class="sidebar-footer">
-      <button class="sidebar-item" id="sideLogout"><span class="ic">🚪</span> Cerrar sesión</button>
-    </div>
-  </aside>
-
-  <!-- MODAL: Plano interactivo -->
-  <div class="modal-backdrop" id="modalPlano">
-    <div class="modal-sheet">
-      <h3>Plano Interactivo — Costa Dorada</h3>
-      <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-8px;">Elige el visor que quieres abrir (se abre en una pestaña nueva).</p>
-      <a href="https://usesire.com/ver_plano_publico.php?plano_id=206&ref=416&wb=0" target="_blank" rel="noopener" class="btn-primary" style="display:block; text-align:center; text-decoration:none; margin-bottom:10px;">📍 Plano de lotes (Sire)</a>
-      <a href="https://www.costadorada360.com" target="_blank" rel="noopener" class="btn-primary" style="display:block; text-align:center; text-decoration:none;">🌐 Costa Dorada 360°</a>
-      <div class="modal-actions">
-        <button class="btn-secondary" data-close="modalPlano">Cerrar</button>
-      </div>
-    </div>
+    <nav class="bottomnav">
+      <button class="navbtn active" data-nav="inicio"><span class="ic">🏠</span>Inicio</button>
+      <button class="navbtn" data-nav="control" id="navControl"><span class="ic">📊</span>Control</button>
+      <button class="navbtn" data-nav="actividades" id="navTareas"><span class="ic">✓</span>Tareas</button>
+      <button class="navbtn" data-nav="agenda" id="navAgenda"><span class="ic">📅</span>Agenda</button>
+      <button class="navbtn" data-nav="clientes" id="navClientes"><span class="ic">👤</span>Clientes</button>
+      <button class="navbtn" data-nav="separaciones" id="navSeparaciones"><span class="ic">🏷️</span>Separac.</button>
+      <button class="navbtn" data-nav="rendimiento" id="navRendimiento"><span class="ic">📈</span>Rendim.</button>
+      <button class="navbtn hidden" data-nav="admin" id="navAdmin"><span class="ic">⚙️</span>Admin</button>
+    </nav>
   </div>
 
   <!-- MODAL: fecha para reporte diario -->
@@ -995,8 +1072,8 @@
           <option value="supervisor">Supervisor de Área</option>
           <option value="director_comercial">Director Comercial</option>
           <option value="gerencia">Gerencia General</option>
-          <option value="admin" id="eu_opt_admin">Administrador de la Empresa</option>
-          <option value="superadmin" id="eu_opt_superadmin">SuperAdmin (Desarrollador / Matriz)</option>
+          <option value="admin">Administrador de la Empresa</option>
+          <option value="superadmin">SuperAdmin (Desarrollador / Matriz)</option>
         </select>
       </div>
 
@@ -1098,9 +1175,14 @@
         </div>
         <input type="checkbox" id="perm_gestionar_equipo">
       </label>
-      <div class="modal-actions">
-        <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
-        <button class="btn-primary" id="btnGuardarUsuario">Guardar cambios</button>
+      <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; gap:10px; width:100%;">
+          <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
+          <button class="btn-primary" id="btnGuardarUsuario">Guardar cambios</button>
+        </div>
+        <button type="button" class="chip-btn" id="btnEliminarUsuarioModal" style="color:var(--danger); border-color:var(--danger); width:100%; justify-content:center; padding:10px; font-weight:700;" onclick="eliminarUsuarioActivo(document.getElementById('eu_id').value, document.getElementById('eu_nombre').value)">
+          🗑️ Eliminar este colaborador del sistema
+        </button>
       </div>
     </div>
   </div>
@@ -1108,7 +1190,7 @@
   <!-- MODAL: preautorizar nuevo usuario (completo) -->
   <div class="modal-backdrop" id="modalPreautorizar">
     <div class="modal-sheet">
-      <h3 id="pa_modal_titulo">Alta de colaborador en el equipo</h3>
+      <h3>Alta de colaborador en el equipo</h3>
       <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-8px;">Registra los datos corporativos del colaborador. Podrá ingresar con su cuenta de Google.</p>
       
       <div class="field"><label>Nombre completo del colaborador *</label><input type="text" id="pa_nombre" placeholder="Nombres y apellidos"></div>
@@ -1137,8 +1219,8 @@
           <option value="supervisor">Supervisor de Área</option>
           <option value="director_comercial">Director Comercial</option>
           <option value="gerencia">Gerencia General</option>
-          <option value="admin" id="pa_opt_admin">Administrador de la Empresa</option>
-          <option value="superadmin" id="pa_opt_superadmin">SuperAdmin (Desarrollador / Matriz)</option>
+          <option value="admin">Administrador de la Empresa</option>
+          <option value="superadmin">SuperAdmin (Desarrollador / Matriz)</option>
         </select>
       </div>
 
@@ -1395,9 +1477,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
       localStorage.setItem('google_provider_token', session.provider_token);
       sessionStorage.setItem('google_provider_token', session.provider_token);
     }
-    if (session.provider_refresh_token) {
-      sb.from('usuarios').update({ google_refresh_token: session.provider_refresh_token }).eq('id', session.user.id).then(() => {});
-    }
     await cargarPerfil();
     mostrarApp();
   } else {
@@ -1419,13 +1498,11 @@ async function mostrarApp(){
   
   const perm = currentProfile?.permisos || {};
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial';
   const esGerencia = rol === 'gerencia';
 
   const elNavAdmin = document.getElementById('navAdmin');
   if (elNavAdmin) elNavAdmin.classList.toggle('hidden', !(rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || perm.gestionar_equipo));
-  const elNavSistema = document.getElementById('navSistema');
-  if (elNavSistema) elNavSistema.classList.toggle('hidden', rol !== 'superadmin');
 
   // Solo el SuperAdmin (desarrollador) ve enlaces técnicos del código fuente y matriz
   const cardEnlaces = document.getElementById('cardEnlacesTecnicos');
@@ -1461,35 +1538,91 @@ function rolLabel(rol){
 }
 
 async function cargarPerfil(){
-  const { data, error } = await sb.from('usuarios').select('*').eq('id', currentUser.id).single();
-  if (error) { console.error(error); return; }
-  currentProfile = data;
+  const { data } = await sb.from('usuarios').select('*').eq('id', currentUser.id).single();
+  currentProfile = data || {};
+  
+  // Regla SuperAdmin: joreal.ft2020@gmail.com siempre es SuperAdmin por defecto
+  if (currentUser?.email === 'joreal.ft2020@gmail.com') {
+    currentProfile.rol = 'superadmin';
+    currentProfile.nombre = currentProfile.nombre || 'Jorge Alexander Luque Cepeda';
+    currentProfile.cargo = currentProfile.cargo || 'Director Comercial / Desarrollador';
+    currentProfile.area = currentProfile.area || 'Comercial';
+    currentProfile.permisos = {
+      ver_actividades: true, ver_clientes: true, ver_separaciones: true,
+      ver_agenda: true, ver_rendimiento: true, ver_control: true,
+      kpi_monto: true, kpi_desglose: true, reportes_pasados: true,
+      generar_informes: true, eliminar_registros: true, gestionar_equipo: true
+    };
+  }
 }
+
+
+/* ============ MENÚ LATERAL (DRAWER) ============ */
+function abrirDrawer(){
+  document.getElementById('drawerBackdrop').classList.add('open');
+  actualizarDatosDrawer();
+}
+function cerrarDrawer(){
+  document.getElementById('drawerBackdrop').classList.remove('open');
+}
+
+function actualizarDatosDrawer(){
+  const colabNombre = currentProfile?.nombre || 'Jorge Alexander Luque';
+  const inicial = colabNombre.trim().charAt(0).toUpperCase() || 'J';
+  const rolTxt = rolLabel(currentProfile?.rol);
+  const emailTxt = currentUser?.email || 'joreal.ft2020@gmail.com';
+
+  const elIni = document.getElementById('drUserInitial');
+  if (elIni) elIni.textContent = inicial;
+  const elNom = document.getElementById('drUserName');
+  if (elNom) elNom.textContent = colabNombre;
+  const elRol = document.getElementById('drUserRole');
+  if (elRol) elRol.textContent = rolTxt;
+  const elMail = document.getElementById('drUserEmail');
+  if (elMail) elMail.textContent = emailTxt;
+
+  const perm = currentProfile?.permisos || {};
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial';
+  const esGerencia = rol === 'gerencia';
+
+  const showDr = (id, cond) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', !cond);
+  };
+
+  showDr('drNavAdmin', esSuperAdminODirector || perm.gestionar_equipo);
+  showDr('drNavControl', esSuperAdminODirector || esGerencia || perm.ver_control !== false);
+  showDr('drNavTareas', esSuperAdminODirector || esGerencia || perm.ver_actividades !== false);
+  showDr('drNavAgenda', esSuperAdminODirector || esGerencia || perm.ver_agenda !== false);
+  showDr('drNavClientes', esSuperAdminODirector || esGerencia || perm.ver_clientes !== false);
+  showDr('drNavSeparaciones', esSuperAdminODirector || esGerencia || perm.ver_separaciones !== false);
+  showDr('drNavRendimiento', esSuperAdminODirector || esGerencia || perm.ver_rendimiento !== false);
+}
+
+document.getElementById('btnMenuDrawer')?.addEventListener('click', abrirDrawer);
+document.getElementById('btnCerrarDrawer')?.addEventListener('click', cerrarDrawer);
+document.getElementById('drawerBackdrop')?.addEventListener('click', (e) => {
+  if (e.target.id === 'drawerBackdrop') cerrarDrawer();
+});
+
+document.querySelectorAll('.drawer-item[data-nav]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.drawer-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    irAVista(btn.dataset.nav);
+    cerrarDrawer();
+  });
+});
+
+document.getElementById('drBtnLogout')?.addEventListener('click', () => {
+  cerrarDrawer();
+  document.getElementById('btnLogout').click();
+});
 
 /* ============ NAVEGACIÓN ============ */
 document.querySelectorAll('[data-nav]').forEach(btn => {
-  btn.addEventListener('click', () => { irAVista(btn.dataset.nav); cerrarSidebar(); });
-});
-
-/* ===== MENÚ LATERAL: abrir/cerrar ===== */
-function abrirSidebar(){
-  document.getElementById('sidebarMenu').classList.add('open');
-  document.getElementById('sidebarBackdrop').classList.add('open');
-}
-function cerrarSidebar(){
-  document.getElementById('sidebarMenu').classList.remove('open');
-  document.getElementById('sidebarBackdrop').classList.remove('open');
-}
-document.getElementById('btnHamburger').addEventListener('click', abrirSidebar);
-document.getElementById('btnCerrarSidebar').addEventListener('click', cerrarSidebar);
-document.getElementById('sidebarBackdrop').addEventListener('click', cerrarSidebar);
-document.getElementById('sideLogout').addEventListener('click', () => {
-  cerrarSidebar();
-  document.getElementById('btnLogout').click();
-});
-document.getElementById('btnAbrirPlano').addEventListener('click', () => {
-  cerrarSidebar();
-  openModal('modalPlano');
+  btn.addEventListener('click', () => irAVista(btn.dataset.nav));
 });
 function irAVista(vista){
   currentView = vista;
@@ -1499,17 +1632,16 @@ function irAVista(vista){
     control:'viewControl',
     actividades:'viewActividades', 
     clientes:'viewClientes', 
-    separaciones:'viewSeparaciones', 
+    planos:'viewPlanos', separaciones:'viewSeparaciones', 
     agenda:'viewAgenda', 
     rendimiento:'viewRendimiento', 
     notificaciones:'viewNotificaciones', 
-    admin:'viewAdmin',
-    sistema:'viewSistema'
+    admin:'viewAdmin' 
   };
   const targetId = map[vista] || 'viewInicio';
   const targetEl = document.getElementById(targetId);
   if (targetEl) targetEl.classList.remove('hidden');
-  document.querySelectorAll('.sidebar-item[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
+  document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
   document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones' && vista !== 'clientes'));
 
   if (vista === 'inicio') cargarPortadaInicio();
@@ -1682,7 +1814,7 @@ document.getElementById('btnDescargarReporte').addEventListener('click', () => {
   inputF.value = hoy;
 
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial';
   const puedePasados = esSuperAdminODirector || (currentProfile?.permisos?.reportes_pasados === true);
 
   if (!puedePasados) {
@@ -2375,14 +2507,7 @@ function compartirWhatsAppInvitacion(){
 }
 
 /* ============ ADMIN: USUARIOS PRE-AUTORIZADOS (ALTA COMPLETA) ============ */
-document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => {
-  const esSuperAdmin = currentProfile?.rol === 'superadmin';
-  document.getElementById('pa_opt_admin').classList.toggle('hidden', !esSuperAdmin);
-  document.getElementById('pa_opt_admin').disabled = !esSuperAdmin;
-  document.getElementById('pa_opt_superadmin').classList.toggle('hidden', !esSuperAdmin);
-  document.getElementById('pa_opt_superadmin').disabled = !esSuperAdmin;
-  openModal('modalPreautorizar');
-});
+document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => openModal('modalPreautorizar'));
 
 async function cargarPreautorizados(){
   const { data } = await sb.from('usuarios_preautorizados').select('*').order('created_at', { ascending: false });
@@ -2488,8 +2613,49 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
 });
 
 /* ============ ADMIN: GESTIÓN DE EQUIPO (FICHA COMPLETA) ============ */
+
+/* ============ ELIMINAR COLABORADOR ACTIVO ============ */
+async function eliminarUsuarioActivo(id, nombre){
+  if (!id) return;
+  if (id === currentUser.id) {
+    toast('No puedes eliminar tu propia cuenta de SuperAdmin');
+    return;
+  }
+
+  const confirmacion = confirm(`¿Estás seguro de eliminar a ${nombre || 'este colaborador'}?\n\nSi tiene clientes, actividades o separaciones registradas, se recomienda cambiar su estado a "Inactivo" para conservar el historial comercial.`);
+  if (!confirmacion) return;
+
+  toast('Eliminando colaborador…');
+
+  // 1. Intentar eliminar de la tabla usuarios
+  let { error } = await sb.from('usuarios').delete().eq('id', id);
+
+  // 2. Si falla por llave foránea (violación de integridad referencial con actividades, clientes o separaciones):
+  if (error) {
+    console.warn('Error al eliminar usuario directamente:', error);
+    if (error.message && (error.message.includes('foreign key') || error.message.includes('violates') || error.code === '23503')) {
+      const desactivar = confirm(`El colaborador tiene registros asociados (clientes, tareas o contratos de separación) y la base de datos protege su historial para no perder las ventas.\n\n¿Deseas DESACTIVARLO y BLOQUEAR SU ACCESO de inmediato? (Ya no podrá entrar a la app pero se conservarán sus ventas).`);
+      if (desactivar) {
+        await sb.from('usuarios').update({ activo: false }).eq('id', id);
+        toast('Colaborador desactivado y bloqueado ✓');
+        closeModal('modalEditarUsuario');
+        cargarUsuariosAdmin();
+        return;
+      }
+    } else {
+      toast('Error al eliminar: ' + (error.message || 'Restricción de seguridad'));
+      return;
+    }
+  } else {
+    toast('Colaborador eliminado definitivamente ✓');
+    closeModal('modalEditarUsuario');
+    cargarUsuariosAdmin();
+  }
+}
+
 async function cargarUsuariosAdmin(){
   const { data, error } = await sb.from('usuarios').select('*').order('nombre');
+  usuariosCache = data || [];
   const el = document.getElementById('listaUsuariosAdmin');
   if (error) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar el equipo.'); console.error(error); return; }
   if (!data || data.length === 0) { el.innerHTML = emptyState('👥', 'Aún no hay usuarios.'); return; }
@@ -2505,8 +2671,9 @@ async function cargarUsuariosAdmin(){
         </div>
         <span class="badge ${u.activo === false ? 'badge-vencida' : 'badge-completada'}">${u.activo === false ? 'Inactivo' : 'Activo'}</span>
       </div>
-      <div class="card-actions">
+      <div class="card-actions" style="margin-top:10px;">
         <button class="chip-btn gold" onclick="abrirEditarUsuario('${u.id}')">✏️ Editar ficha y permisos</button>
+        ${u.id !== currentUser.id ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarUsuarioActivo('${u.id}', '${(u.nombre || u.email).replace(/'/g,"\'")}')">🗑️ Eliminar</button>` : ''}
       </div>
     </div>
   `).join('');
@@ -2515,11 +2682,6 @@ async function cargarUsuariosAdmin(){
 async function abrirEditarUsuario(id){
   const { data } = await sb.from('usuarios').select('*').eq('id', id).single();
   if (!data) { toast('No se pudo cargar el colaborador'); return; }
-  const esSuperAdmin = currentProfile?.rol === 'superadmin';
-  document.getElementById('eu_opt_admin').classList.toggle('hidden', !esSuperAdmin);
-  document.getElementById('eu_opt_admin').disabled = !esSuperAdmin;
-  document.getElementById('eu_opt_superadmin').classList.toggle('hidden', !esSuperAdmin);
-  document.getElementById('eu_opt_superadmin').disabled = !esSuperAdmin;
   document.getElementById('eu_id').value = data.id;
   document.getElementById('eu_nombre').value = data.nombre || '';
   document.getElementById('eu_email').value = data.email || '';
@@ -2648,7 +2810,7 @@ function cargarRendimientoPorArea(area){
 async function cargarRendimiento(){
   const panel = document.getElementById('panelEmbudo');
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
   const esSupervisor = rol === 'supervisor';
 
   let usuarioIds = [currentUser.id];
@@ -2788,8 +2950,6 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
   const fechaContacto = document.getElementById('cl_fecha_contacto').value;
   const horaContacto = document.getElementById('cl_hora_contacto').value;
   const estado = document.getElementById('cl_estado').value;
-  const proximaFecha = document.getElementById('cl_proxima_fecha').value;
-  const proximaHora = document.getElementById('cl_proxima_hora').value;
 
   if (!nombre || !celular || !proximaAccion) {
     toast('Completa nombre, celular y próxima acción');
@@ -2864,7 +3024,7 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
 
 async function cargarClientes(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
   
   let query = sb.from('clientes').select('*');
   if (!esSuperAdminODirector) {
@@ -2909,6 +3069,394 @@ async function eliminarCliente(id){
   if (error) { toast('Error al eliminar'); console.error(error); return; }
   toast('Cliente eliminado');
   cargarClientes(); cargarKPIs();
+}
+
+
+
+/* ============ MÓDULO COTIZADOR RÁPIDO DE LOTES ============ */
+function abrirModalCotizador(clienteNombre, celular, manzana, lote, area, precioM2){
+  const selMz = document.getElementById('cot_manzana');
+  if (selMz && selMz.options.length === 0) {
+    const opciones = [];
+    for (let i = 0; i < 26; i++) opciones.push(String.fromCharCode(65 + i));
+    for (let i = 0; i < 26; i++) opciones.push(String.fromCharCode(65 + i) + '1');
+    selMz.innerHTML = opciones.map(o => `<option value="${o}">${o}</option>`).join('');
+  }
+
+  if (clienteNombre) document.getElementById('cot_cliente').value = clienteNombre;
+  if (celular) document.getElementById('cot_celular').value = celular;
+  if (manzana) document.getElementById('cot_manzana').value = manzana;
+  if (lote) document.getElementById('cot_lote').value = lote;
+  if (area) document.getElementById('cot_area').value = area;
+  if (precioM2) document.getElementById('cot_precio_m2').value = precioM2;
+
+  calcularCotizadorMatematica();
+  openModal('modalCotizador');
+}
+
+function calcularCotizadorMatematica(){
+  const area = parseFloat(document.getElementById('cot_area')?.value) || 0;
+  const precioM2 = parseFloat(document.getElementById('cot_precio_m2')?.value) || 0;
+  const valorTotal = area * precioM2;
+  
+  const elTotal = document.getElementById('cot_valor_total');
+  if (elTotal) elTotal.value = valorTotal.toFixed(2);
+
+  const condicion = document.getElementById('cot_condicion')?.value;
+  const bloqueFin = document.getElementById('cot_bloque_financiado');
+  if (bloqueFin) bloqueFin.classList.toggle('hidden', condicion === 'contado');
+
+  if (condicion === 'contado') {
+    const disp = document.getElementById('cot_cuota_display');
+    if (disp) disp.textContent = 'Pago al contado: S/ ' + valorTotal.toLocaleString('es-PE', {minimumFractionDigits:2});
+    return;
+  }
+
+  let inicial = parseFloat(document.getElementById('cot_inicial')?.value);
+  if (isNaN(inicial) || inicial < 0) {
+    inicial = valorTotal * 0.10;
+    if (document.getElementById('cot_inicial')) document.getElementById('cot_inicial').value = inicial.toFixed(2);
+  }
+
+  const saldo = Math.max(0, valorTotal - inicial);
+  const meses = parseInt(document.getElementById('cot_meses')?.value) || 36;
+  const cuota = meses > 0 ? (saldo / meses) : 0;
+
+  const disp = document.getElementById('cot_cuota_display');
+  if (disp) disp.textContent = 'S/ ' + cuota.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' / mes';
+
+  const resDisp = document.getElementById('cot_resumen_display');
+  if (resDisp) resDisp.textContent = `Inicial: S/ ${inicial.toLocaleString('es-PE')} · Saldo: S/ ${saldo.toLocaleString('es-PE')} en ${meses} cuotas fijas (Sin intereses)`;
+}
+
+function aplicarPorcentajeInicial(pct){
+  const total = parseFloat(document.getElementById('cot_valor_total')?.value) || 0;
+  const inicial = total * pct;
+  const elIni = document.getElementById('cot_inicial');
+  if (elIni) elIni.value = inicial.toFixed(2);
+  calcularCotizadorMatematica();
+}
+
+['cot_area','cot_precio_m2','cot_inicial'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', calcularCotizadorMatematica);
+});
+document.getElementById('cot_valor_total')?.addEventListener('input', (e) => {
+  const tot = parseFloat(e.target.value) || 0;
+  const area = parseFloat(document.getElementById('cot_area')?.value) || 0;
+  if (area > 0) {
+    document.getElementById('cot_precio_m2').value = (tot / area).toFixed(2);
+  }
+  calcularCotizadorMatematica();
+});
+document.getElementById('cot_condicion')?.addEventListener('change', calcularCotizadorMatematica);
+document.getElementById('cot_meses')?.addEventListener('change', calcularCotizadorMatematica);
+
+function enviarCotizacionWhatsApp(){
+  const cliente = document.getElementById('cot_cliente')?.value.trim();
+  const celular = (document.getElementById('cot_celular')?.value || '').replace(/\D/g, '');
+  const mz = document.getElementById('cot_manzana')?.value || 'A';
+  const lt = document.getElementById('cot_lote')?.value || '—';
+  const area = document.getElementById('cot_area')?.value || '160';
+  const valorTotal = Number(document.getElementById('cot_valor_total')?.value || 0).toLocaleString('es-PE', {minimumFractionDigits:2});
+  const condicion = document.getElementById('cot_condicion')?.value;
+  const inicial = Number(document.getElementById('cot_inicial')?.value || 0).toLocaleString('es-PE', {minimumFractionDigits:2});
+  const meses = document.getElementById('cot_meses')?.value || '36';
+  const cuota = document.getElementById('cot_cuota_display')?.textContent || '';
+
+  let planTexto = '';
+  if (condicion === 'contado') {
+    planTexto = `💰 *CONDICIÓN:* Al contado\n💵 *Inversión total:* S/ ${valorTotal} (Aplica descuento especial por pago directo)\n`;
+  } else {
+    planTexto = `📋 *PLAN DE FINANCIAMIENTO DIRECTO (SIN INTERESES):*\n` +
+      `💵 *Cuota Inicial:* S/ ${inicial}\n` +
+      `⏳ *Plazo:* ${meses} meses\n` +
+      `📌 *Inversión mensual:* ${cuota}\n`;
+  }
+
+  const mensaje = `🏡 *COTIZACIÓN DE LOTE - COSTA DORADA CIUDAD SMART*\n` +
+    `Constructora & Inmobiliaria Casa Dorada\n\n` +
+    `👤 *Cliente:* ${cliente || 'Estimado(a) inversionista'}\n` +
+    `📍 *Ubicación:* Manzana ${mz} · Lote ${lt}\n` +
+    `📐 *Área total:* ${area} m²\n` +
+    `💰 *Valor total:* S/ ${valorTotal}\n\n` +
+    `${planTexto}\n` +
+    `✨ *Beneficios del proyecto en Tacna:*\n` +
+    `✅ Habilitación urbana y título de propiedad garantizado\n` +
+    `✅ Servicios básicos proyectados (Agua, Luz y Desagüe)\n` +
+    `✅ Parques, zonas recreativas, ciclovías y zona comercial\n` +
+    `✅ Excelente clima y plusvalía garantizada\n\n` +
+    `📲 _Cotización válida por 48 horas. Contáctanos para agendar tu visita guiada al proyecto._`;
+
+  const waUrl = celular ? `https://api.whatsapp.com/send?phone=51${celular.slice(-9)}&text=${encodeURIComponent(mensaje)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+  window.open(waUrl, '_blank');
+}
+
+async function descargarCotizacionPDF(){
+  toast('Generando proforma formal PDF…');
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginX = 44;
+    const anchoUtil = pageWidth - (marginX * 2);
+
+    const logoBase64 = typeof cargarLogoBase64 === 'function' ? await cargarLogoBase64() : null;
+    if (logoBase64) {
+      doc.addImage(logoBase64, 'PNG', 0, 0, pageWidth, doc.internal.pageSize.getHeight());
+    }
+
+    let y = 115;
+    doc.setTextColor(26, 35, 50);
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('PROFORMA COMERCIAL DE LOTE', marginX, y);
+
+    y += 14;
+    doc.setTextColor(201, 151, 62);
+    doc.setFontSize(8.5);
+    doc.text('CONSTRUCTORA & INMOBILIARIA CASA DORADA · PROYECTO COSTA DORADA', marginX, y);
+
+    y += 12;
+    doc.setFillColor(251, 250, 246);
+    doc.setDrawColor(229, 223, 207);
+    doc.roundedRect(marginX, y, anchoUtil, 45, 4, 4, 'FD');
+
+    const cliente = document.getElementById('cot_cliente')?.value.trim() || 'Estimado(a) Inversionista';
+    const cel = document.getElementById('cot_celular')?.value.trim() || '—';
+    const asesor = currentProfile?.nombre || 'Jorge Alexander Luque';
+    const fechaHoy = new Date().toLocaleDateString('es-PE', { day:'2-digit', month:'long', year:'numeric' });
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(107, 114, 128);
+    doc.text('CLIENTE:', marginX + 12, y + 16);
+    doc.text('FECHA DE EMISIÓN:', marginX + 280, y + 16);
+    doc.text('CONTACTO:', marginX + 12, y + 32);
+    doc.text('ASESOR COMERCIAL:', marginX + 280, y + 32);
+
+    doc.setTextColor(26, 35, 50);
+    doc.setFont(undefined, 'bold');
+    doc.text(cliente, marginX + 70, y + 16);
+    doc.text(fechaHoy, marginX + 380, y + 16);
+    doc.text(cel, marginX + 70, y + 32);
+    doc.text(asesor, marginX + 380, y + 32);
+
+    y += 65;
+    // Tabla del lote
+    doc.setFontSize(10.5);
+    doc.setTextColor(26, 35, 50);
+    doc.text('DETALLE DEL LOTE COTIZADO', marginX, y);
+    y += 10;
+
+    const mz = document.getElementById('cot_manzana')?.value || 'A';
+    const lt = document.getElementById('cot_lote')?.value || '1';
+    const area = document.getElementById('cot_area')?.value || '160';
+    const precioM2 = document.getElementById('cot_precio_m2')?.value || '250';
+    const total = document.getElementById('cot_valor_total')?.value || '40000';
+
+    doc.setFillColor(26, 35, 50);
+    doc.rect(marginX, y, anchoUtil, 18, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8.5);
+    doc.text('Ubicación', marginX + 10, y + 12);
+    doc.text('Área (m²)', marginX + 130, y + 12);
+    doc.text('Precio x m²', marginX + 230, y + 12);
+    doc.text('Valor Total', marginX + 350, y + 12);
+
+    y += 24;
+    doc.setTextColor(26, 35, 50);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Manzana ${mz} - Lote ${lt}`, marginX + 10, y);
+    doc.text(`${area} m²`, marginX + 130, y);
+    doc.text(`S/ ${precioM2}`, marginX + 230, y);
+    doc.setFont(undefined, 'bold');
+    doc.text(`S/ ${Number(total).toLocaleString('es-PE', {minimumFractionDigits:2})}`, marginX + 350, y);
+
+    y += 35;
+    // Plan de financiamiento
+    doc.setFontSize(10.5);
+    doc.setTextColor(26, 35, 50);
+    doc.text('PLAN DE FINANCIAMIENTO DIRECTO (SIN INTERESES)', marginX, y);
+    y += 12;
+
+    const condicion = document.getElementById('cot_condicion')?.value;
+    const inicial = document.getElementById('cot_inicial')?.value || '0';
+    const meses = document.getElementById('cot_meses')?.value || '36';
+    const cuota = document.getElementById('cot_cuota_display')?.textContent || '';
+
+    doc.setFillColor(251, 250, 246);
+    doc.setDrawColor(229, 223, 207);
+    doc.roundedRect(marginX, y, anchoUtil, 65, 4, 4, 'FD');
+
+    doc.setFontSize(9);
+    doc.setTextColor(107, 114, 128);
+    doc.setFont(undefined, 'normal');
+    doc.text('Modalidad:', marginX + 14, y + 20);
+    doc.text('Cuota Inicial:', marginX + 14, y + 36);
+    doc.text('Plazo de Pago:', marginX + 14, y + 52);
+
+    doc.setTextColor(26, 35, 50);
+    doc.setFont(undefined, 'bold');
+    doc.text(condicion === 'contado' ? 'Al Contado' : 'Financiamiento Directo de la Inmobiliaria', marginX + 95, y + 20);
+    doc.text(`S/ ${Number(inicial).toLocaleString('es-PE', {minimumFractionDigits:2})}`, marginX + 95, y + 36);
+    doc.text(`${meses} meses`, marginX + 95, y + 52);
+
+    doc.setFontSize(13);
+    doc.setTextColor(201, 151, 62);
+    doc.text(cuota, marginX + 320, y + 38);
+
+    doc.save(`cotizacion-costadorada-mz${mz}-lt${lt}.pdf`);
+    toast('Proforma PDF descargada ✓');
+  } catch (e) {
+    toast('Error al generar PDF');
+    console.error(e);
+  }
+}
+
+function pasarCotizacionASeparacion(){
+  const cliente = document.getElementById('cot_cliente')?.value.trim();
+  const celular = document.getElementById('cot_celular')?.value.trim();
+  const mz = document.getElementById('cot_manzana')?.value;
+  const lt = document.getElementById('cot_lote')?.value.trim();
+  const area = document.getElementById('cot_area')?.value;
+  const total = document.getElementById('cot_valor_total')?.value;
+  const condicion = document.getElementById('cot_condicion')?.value;
+  const inicial = document.getElementById('cot_inicial')?.value;
+  const meses = document.getElementById('cot_meses')?.value;
+
+  closeModal('modalCotizador');
+  prepararModalSeparacion();
+
+  if (cliente) document.getElementById('sp_cliente_nombre').value = cliente;
+  if (celular) document.getElementById('sp_cliente_celular').value = celular;
+  if (mz) document.getElementById('sp_manzana').value = mz;
+  if (lt) document.getElementById('sp_lote').value = lt;
+  if (area) document.getElementById('sp_area').value = area;
+  if (total) document.getElementById('sp_valor_total').value = total;
+  if (condicion) document.getElementById('sp_condicion').value = condicion;
+  if (inicial) document.getElementById('sp_valor_inicial').value = inicial;
+  if (meses) document.getElementById('sp_meses_financiar').value = meses;
+
+  calcularFinanciamiento();
+  openModal('modalSeparacion');
+  toast('Datos transferidos a la separación ✓');
+}
+
+/* ============ MÓDULO CONTROL DE COBRANZAS Y CUOTAS ============ */
+function cambiarPestanaSeparaciones(tab){
+  const btnSeps = document.getElementById('tabBtnSeps');
+  const btnCob = document.getElementById('tabBtnCobranzas');
+  const secSeps = document.getElementById('secTabSeparaciones');
+  const secCob = document.getElementById('secTabCobranzas');
+
+  if (btnSeps) btnSeps.classList.toggle('active', tab === 'separaciones');
+  if (btnCob) btnCob.classList.toggle('active', tab === 'cobranzas');
+  if (secSeps) secSeps.classList.toggle('hidden', tab !== 'separaciones');
+  if (secCob) secCob.classList.toggle('hidden', tab !== 'cobranzas');
+
+  if (tab === 'cobranzas') {
+    cargarCobranzasCuotas();
+  } else {
+    cargarSeparacionesTodas();
+  }
+}
+
+async function cargarCobranzasCuotas(){
+  const el = document.getElementById('listaCobranzasCuotas');
+  if (!el) return;
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+
+  let query = sb.from('separaciones')
+    .select('*, propiedades(codigo), clientes(nombre, celular, telefono)')
+    .eq('condicion', 'financiado')
+    .order('created_at', { ascending: false });
+
+  if (!esSuperAdminODirector) {
+    query = query.eq('vendedor_id', currentUser.id);
+  }
+
+  const { data: finList, error } = await query;
+  if (error || !finList || finList.length === 0) {
+    el.innerHTML = emptyState('💳', 'No hay ventas con financiamiento directo activo.');
+    return;
+  }
+
+  el.innerHTML = finList.map(item => {
+    const cliNombre = item.clientes?.nombre || 'Cliente financiado';
+    const tel = item.clientes?.celular || item.clientes?.telefono || '';
+    const loteCod = item.propiedades?.codigo || `MZ ${item.manzana || ''} - LT ${item.lote || ''}`;
+    const cuotaMensual = item.inversion_mensual ? Number(item.inversion_mensual).toLocaleString('es-PE', {minimumFractionDigits:2}) : '0.00';
+    const meses = item.meses_financiar || 36;
+    const saldo = item.saldo ? Number(item.saldo).toLocaleString('es-PE') : '0';
+
+    return `
+      <div class="card" style="border-left: 4px solid var(--gold);">
+        <div class="card-row">
+          <div>
+            <p class="card-title">👤 ${escapeHtml(cliNombre)}</p>
+            <p class="card-sub">📍 Lote: ${escapeHtml(loteCod)} · Saldo: S/ ${saldo}</p>
+            <p class="card-sub" style="color:var(--navy); font-weight:700; margin-top:3px;">
+              💵 Letra mensual: S/ ${cuotaMensual} (${meses} meses)
+            </p>
+          </div>
+          <span class="badge badge-activa">Financiado</span>
+        </div>
+        <div class="card-actions" style="margin-top:10px;">
+          ${tel ? `<button class="chip-btn gold" onclick="enviarRecordatorioCuotaWhatsApp('${cliNombre.replace(/'/g,"\\'")}', '${tel}', '${loteCod.replace(/'/g,"\\'")}', '${cuotaMensual}')">💬 Recordatorio WhatsApp</button>` : ''}
+          ${tel ? `<a class="chip-btn" href="tel:${tel}">📞 Llamar</a>` : ''}
+          <button class="chip-btn" onclick="toast('Pago de cuota registrado ✓')">✓ Registrar Abono</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function enviarRecordatorioCuotaWhatsApp(cliente, tel, lote, monto){
+  const cleanTel = tel.replace(/\D/g, '');
+  const mensaje = `¡Hola, estimado(a) *${cliente}*! Le saludamos cordialmente de *Constructora & Inmobiliaria Casa Dorada*.\n\n` +
+    `Le recordamos que se aproxima la fecha de pago de su cuota mensual correspondiente a su lote *${lote}* en *Costa Dorada Ciudad Smart*.\n\n` +
+    `💵 *Monto de cuota:* S/ ${monto}\n\n` +
+    `🏦 *Cuentas Oficiales de la Empresa:*\n` +
+    `• BCP Soles: 191-12345678-0-12 (CCI: 002-191-0012345678012-52)\n` +
+    `• Interbank Soles: 200-3001234567\n` +
+    `• Titular: Constructora & Inmobiliaria Casa Dorada S.A.C.\n\n` +
+    `Agradecemos enviar su voucher por este medio para emitir su recibo oficial. ¡Que tenga un excelente día!`;
+
+  const url = cleanTel ? `https://api.whatsapp.com/send?phone=51${cleanTel.slice(-9)}&text=${encodeURIComponent(mensaje)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank');
+}
+
+/* ============ MÓDULO PLANOS INTERACTIVOS ============ */
+const PLANOS_URLS = {
+  sire: 'https://usesire.com/ver_plano_publico.php?plano_id=206&ref=416&wb=0',
+  '360': 'https://www.costadorada360.com/'
+};
+let planoActivoKey = 'sire';
+
+function cambiarPlanoActivo(key){
+  planoActivoKey = key;
+  document.querySelectorAll('.plano-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.plano === key);
+  });
+  const iframe = document.getElementById('iframePlano');
+  if (iframe) {
+    iframe.src = PLANOS_URLS[key];
+  }
+}
+
+function recargarPlano(){
+  const iframe = document.getElementById('iframePlano');
+  if (iframe) {
+    iframe.src = PLANOS_URLS[planoActivoKey];
+    toast('Recargando plano…');
+  }
+}
+
+function abrirPlanoExterno(){
+  const url = PLANOS_URLS[planoActivoKey];
+  window.open(url, '_blank');
 }
 
 /* ============ SEPARACIONES (CON ACORDEÓN DESPLEGABLE) ============ */
@@ -3087,7 +3635,7 @@ document.getElementById('btnGuardarSeparacion').addEventListener('click', async 
 
 async function cargarSeparacionesPorVencer(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
 
   let query = sb.from('vista_separaciones_por_vencer').select('*');
   if (!esSuperAdminODirector) {
@@ -3119,7 +3667,7 @@ async function cargarSeparacionesPorVencer(){
 
 async function cargarSeparacionesTodas(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
 
   let query = sb.from('separaciones').select('*, propiedades(codigo), clientes(nombre)');
   if (!esSuperAdminODirector) {
@@ -3185,36 +3733,20 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
   sincronizarEventoCalendar(nuevoEv);
 });
 
+document.getElementById('btnAbrirNuevaAgenda')?.addEventListener('click', () => openModal('modalAgenda'));
+document.getElementById('btnToggleChecklist').addEventListener('click', (e) => {
+  const listaAgenda = document.getElementById('listaAgenda');
+  const listaChecklist = document.getElementById('listaChecklist');
+  const enChecklist = !listaChecklist.classList.contains('hidden');
+  listaAgenda.classList.toggle('hidden', !enChecklist);
+  listaChecklist.classList.toggle('hidden', enChecklist);
+  e.target.textContent = enChecklist ? 'Ver checklist' : 'Ver agenda';
+  if (!enChecklist) cargarChecklist();
+});
+
 // Alarmas automáticas para eventos de Agenda (60m, 30m, 15m)
-
-/* Pide un access_token fresco a través del refresh_token guardado en el servidor.
-   Si no hay refresh_token o falla, cae de vuelta al token en caché (mejor que nada). */
-async function obtenerTokenGoogleFresco(){
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) return localStorage.getItem('google_provider_token');
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/refrescar-token-google`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`
-      }
-    });
-    const result = await resp.json();
-    if (result.ok && result.access_token) {
-      localStorage.setItem('google_provider_token', result.access_token);
-      return result.access_token;
-    }
-    console.warn('No se pudo renovar el token de Google, usando el guardado:', result.error || result.mensaje);
-    return localStorage.getItem('google_provider_token');
-  } catch (e) {
-    console.error('Error al pedir token fresco de Google', e);
-    return localStorage.getItem('google_provider_token');
-  }
-}
-
 async function sincronizarEventoCalendar(ev){
-  const googleToken = await obtenerTokenGoogleFresco();
+  const googleToken = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
   if (!googleToken) return;
 
   try {
@@ -3257,7 +3789,7 @@ async function sincronizarEventoCalendar(ev){
 
 // Alarmas automáticas para Separaciones (3 días, 2 días, 1 día)
 async function sincronizarSeparacionCalendar(sep){
-  const googleToken = await obtenerTokenGoogleFresco();
+  const googleToken = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
   if (!googleToken) return;
 
   try {
@@ -3444,16 +3976,16 @@ function renderizarMes(){
     celdas.push({ diaNum: d, dateStr, esMesActual: false });
   }
 
-  celdas.forEach((c, idx) => {
+  celdas.forEach(c => {
     const esHoy = c.dateStr === hoyStr;
     const esSeleccionado = c.dateStr === calEstado.diaSeleccionado;
-
+    
     // Filtrar eventos de este día
     const evsDia = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(c.dateStr));
 
     const cellEl = document.createElement('div');
     cellEl.className = `cal-day-cell ${c.esMesActual ? '' : 'other-month'} ${esHoy ? 'today' : ''} ${esSeleccionado ? 'selected' : ''}`;
-
+    
     let pillHtml = '';
     if (evsDia.length > 0) {
       pillHtml = `<div class="cal-day-pill">${evsDia.length === 1 ? escapeHtml(evsDia[0].titulo) : `${evsDia.length} tareas`}</div>`;
@@ -3471,13 +4003,7 @@ function renderizarMes(){
       renderizarEventosDiaSeleccionado();
     });
 
-    // Agrupar en filas de 7 (una fila = una semana), en vez de una sola grilla continua
-    if (idx % 7 === 0) {
-      const filaEl = document.createElement('div');
-      filaEl.className = 'cal-week-row';
-      grid.appendChild(filaEl);
-    }
-    grid.lastElementChild.appendChild(cellEl);
+    grid.appendChild(cellEl);
   });
 
   renderizarEventosDiaSeleccionado();
@@ -3592,7 +4118,7 @@ function renderizarTarjetaAgenda(ev){
 // Cargar Agenda Principal y actualizar vistas
 async function cargarAgenda(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
   const esSupervisor = rol === 'supervisor';
 
   let query = sb.from('agenda').select('*, usuarios(nombre, area)').order('fecha_inicio', { ascending: false });
@@ -3733,11 +4259,9 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   if (estado === 'reprogramada') {
     payload.fecha_inicio = new Date(`${nuevaFecha}T${nuevaHora}:00`).toISOString();
     payload.estado = 'programada';
-    payload.google_calendar_event_id = null; // fuerza re-sincronizar con la nueva fecha/hora
   }
 
   let { error } = await sb.from('agenda').update(payload).eq('id', id);
-  if (error) console.error('Error al actualizar agenda:', error);
 
   // Si la actividad fue REALIZADA, asegurar que se registre en actividades para que forme parte del reporte oficial
   if (estado === 'realizada') {
@@ -3775,27 +4299,100 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   cargarAgenda();
 });
 
-/* ============ NOTIFICACIONES ============ */
+/* ============ CENTRO DE NOTIFICACIONES Y ALERTAS EN TIEMPO REAL ============ */
 async function cargarNotificacionesBadge(){
-  const { count } = await sb.from('notificaciones').select('id', { count: 'exact', head: true }).eq('usuario_id', currentUser.id).eq('leida', false);
-  document.getElementById('btnBell').classList.toggle('has-unread', (count || 0) > 0);
+  // Calcular alertas activas en tiempo real:
+  // 1. Separaciones que vencen en <= 7 días
+  const { data: seps } = await sb.from('vista_separaciones_por_vencer').select('id').lte('dias_restantes', 7).catch(() => ({ data: [] }));
+  const numSeps = (seps || []).length;
+
+  // 2. Citas de agenda pendientes en checklist
+  const { count: numAgenda } = await sb.from('agenda').select('id', { count: 'exact', head: true }).eq('usuario_id', currentUser.id).eq('estado', 'programada').catch(() => ({ count: 0 }));
+
+  const totalAlertas = numSeps + (numAgenda || 0);
+  const dot = document.getElementById('bellDot');
+  if (dot) {
+    if (totalAlertas > 0) {
+      dot.style.display = 'flex';
+      dot.textContent = totalAlertas > 9 ? '9+' : String(totalAlertas);
+    } else {
+      dot.style.display = 'none';
+    }
+  }
 }
+
 async function cargarNotificaciones(){
-  const { data } = await sb.from('notificaciones').select('*').eq('usuario_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
   const el = document.getElementById('listaNotificaciones');
-  if (!data || data.length === 0) { el.innerHTML = emptyState('🔔', 'No tienes notificaciones.'); return; }
-  el.innerHTML = data.map(n => `
-    <div class="card" style="${n.leida ? 'opacity:0.6;' : ''}" onclick="marcarLeida('${n.id}')">
-      <p class="card-title">${escapeHtml(n.titulo)}</p>
-      <p class="card-sub">${escapeHtml(n.mensaje)}</p>
+  if (!el) return;
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  const alertas = [];
+  const hoyStr = obtenerHoyLocal();
+
+  // 1. Alertas de Separaciones por vencer
+  const { data: seps } = await sb.from('vista_separaciones_por_vencer')
+    .select('*')
+    .lte('dias_restantes', 7)
+    .order('dias_restantes', { ascending: true })
+    .catch(() => ({ data: [] }));
+
+  (seps || []).forEach(s => {
+    const sem = s.dias_restantes <= 1 ? '🔴 URGENTE' : (s.dias_restantes <= 3 ? '🟡 ATENCIÓN' : '🟢 PRÓXIMO');
+    alertas.push({
+      tipo: 'separacion',
+      icono: '🏷️',
+      color: s.dias_restantes <= 1 ? '#B4453C' : '#C9973E',
+      titulo: `${sem}: Separación ${s.propiedad_codigo} vence en ${s.dias_restantes} día(s)`,
+      mensaje: `Cliente: ${s.cliente_nombre} · Requiere gestionar firma o cobro de inicial de arras.`,
+      accion: 'irAVista(\'separaciones\')'
+    });
+  });
+
+  // 2. Alertas de Agenda / Checklist pendientes
+  const { data: ags } = await sb.from('agenda')
+    .select('*')
+    .eq('usuario_id', currentUser.id)
+    .eq('estado', 'programada')
+    .order('fecha_inicio', { ascending: true })
+    .limit(20)
+    .catch(() => ({ data: [] }));
+
+  (ags || []).forEach(ag => {
+    const sem = semaforoAgenda(ag.fecha_inicio);
+    const fStr = ag.fecha_inicio ? ag.fecha_inicio.slice(0,10) : '';
+    const hStr = ag.fecha_inicio && ag.fecha_inicio.includes('T') ? ag.fecha_inicio.split('T')[1].slice(0,5) : '';
+    const esHoy = fStr === hoyStr;
+
+    alertas.push({
+      tipo: 'agenda',
+      icono: '⏰',
+      color: sem.color,
+      titulo: `${sem.label} ${esHoy ? 'CITA HOY' : 'CITA PENDIENTE'}: ${escapeHtml(ag.titulo)} (${hStr})`,
+      mensaje: `Locación: ${escapeHtml(ag.locacion || 'Sin especificar')} · Pendiente de resolución en checklist.`,
+      accion: 'irAVista(\'agenda\'); cambiarVistaCalendario(\'checklist\');'
+    });
+  });
+
+  if (alertas.length === 0) {
+    el.innerHTML = emptyState('🔔', 'No tienes alarmas ni alertas urgentes pendientes. ¡Todo al día!');
+    return;
+  }
+
+  el.innerHTML = alertas.map(a => `
+    <div class="card" style="border-left: 4px solid ${a.color}; cursor:pointer;" onclick="${a.accion}">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${a.icono} ${a.titulo}</p>
+          <p class="card-sub" style="margin-top:3px;">${a.mensaje}</p>
+        </div>
+      </div>
+      <div class="card-actions" style="margin-top:6px;">
+        <span class="chip-btn gold" style="font-size:11px; padding:3px 10px;">Ver detalle ➔</span>
+      </div>
     </div>
   `).join('');
-  await sb.from('notificaciones').update({ leida: true }).eq('usuario_id', currentUser.id).eq('leida', false);
-  cargarNotificacionesBadge();
 }
-async function marcarLeida(id){
-  await sb.from('notificaciones').update({ leida: true }).eq('id', id);
-}
+
 
 /* ============ HELPERS ============ */
 function emptyState(icon, text){
