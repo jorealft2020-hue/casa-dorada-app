@@ -290,12 +290,13 @@
   }
 
   .cal-weekdays-header{
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; font-weight: 700;
-    color: var(--ink-dim); text-transform: lowercase; margin-bottom: 6px;
+    display: flex; text-align: center; font-size: 11px; font-weight: 700;
+    color: var(--ink-dim); text-transform: lowercase; margin-bottom: 6px; gap: 4px;
   }
-  .cal-month-grid{
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 14px;
-  }
+  .cal-weekdays-header > div{ flex: 1 1 0; min-width: 0; }
+  .cal-month-grid{ display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+  .cal-week-row{ display: flex; gap: 4px; }
+  .cal-week-row > .cal-day-cell{ flex: 1 1 0; min-width: 0; }
   .cal-day-cell{
     min-height: 58px; background: #fff; border: 1.2px solid #EAE5D8; border-radius: 9px; padding: 4px 2px;
     display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; transition: all 0.15s;
@@ -546,9 +547,82 @@
             </button>
           </div>
         </div>
-        <button class="chip-btn gold" id="btnAbrirPreautorizar" style="margin-bottom:14px; width:100%; padding:10px; font-size:13px;">➕ Registrar nuevo usuario en el equipo</button>
+        <button class="chip-btn gold" id="btnAbrirPreautorizar" style="margin-bottom:10px; width:100%; padding:10px; font-size:13px;">➕ Registrar nuevo usuario en el equipo</button>
+        <div class="card" style="background:#FBF6EC; border-color:#E8D9B5; margin-bottom:14px;">
+          <p class="card-title" style="font-size:13px;">⚠️ Paso final: autorizar el correo en Google</p>
+          <p class="card-sub">Después de registrar al usuario aquí, Google también le pide su aprobación (mientras la app esté en modo Prueba). Ábrelo y agrega el correo del nuevo usuario en "Usuarios de prueba".</p>
+          <a href="https://console.cloud.google.com/auth/audience?project=casa-dorada-supabase" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">🔗 Abrir Google Cloud — Usuarios de prueba</a>
+        </div>
         <div id="listaPreautorizados"></div>
         <div id="listaUsuariosAdmin"></div>
+      </div>
+
+      <!-- VISTA: Configuración del Sistema (solo SuperAdmin) -->
+      <div id="viewSistema" class="hidden">
+        <div class="section-title">Configuración del Sistema</div>
+        <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-6px;">Accesos técnicos exclusivos del desarrollador / matriz. No visible para Admin.</p>
+
+        <div class="card" style="background:#EAF3EC; border-color:#BFDDC8;">
+          <p class="card-title">🤖 Trabajar modificaciones con Claude</p>
+          <p class="card-sub">Continúa esta misma conversación/proyecto donde se construyó y mantiene la app.</p>
+          <a href="https://claude.ai/project/01a0687a-6a2a-71cc-b53b-565a65e6a58f" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir proyecto en Claude</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🗄️ BASE DE DATOS — SUPABASE (backend)</p>
+        <div class="card">
+          <p class="card-title">Panel general</p>
+          <p class="card-sub">Proyecto: nboikojylmkujdxinztj</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir dashboard</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Editor SQL (tablas, migraciones)</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/sql/new" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir SQL Editor</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Edge Functions (servidor)</p>
+          <p class="card-sub">membrete, sincronizar-google-calendar, refrescar-token-google, alertas-vencimientos, app</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/functions" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Edge Functions</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Autenticación (Google OAuth, usuarios)</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/auth/users" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Authentication</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Storage (fotos, vouchers, documentos)</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/storage/buckets" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Storage</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">💻 CÓDIGO — GITHUB (frontend)</p>
+        <div class="card">
+          <p class="card-title">Repositorio (código fuente index.html)</p>
+          <p class="card-sub">jorealft2020-hue/casa-dorada-app</p>
+          <a href="https://github.com/jorealft2020-hue/casa-dorada-app" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir repositorio</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Generar token de acceso (para subir cambios)</p>
+          <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Nuevo token</a>
+        </div>
+        <div class="card">
+          <p class="card-title">GitHub Pages (dónde vive la app publicada)</p>
+          <a href="https://github.com/jorealft2020-hue/casa-dorada-app/settings/pages" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Ver configuración de Pages</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🔑 GOOGLE CLOUD (login y Calendar)</p>
+        <div class="card">
+          <p class="card-title">Usuarios de prueba / verificación OAuth</p>
+          <a href="https://console.cloud.google.com/auth/audience?project=casa-dorada-supabase" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Credenciales OAuth (Client ID / Secret)</p>
+          <a href="https://console.cloud.google.com/apis/credentials?project=casa-dorada-supabase" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🌐 APP EN VIVO</p>
+        <div class="card">
+          <p class="card-title">Link que usan todos los colaboradores</p>
+          <p class="card-sub">https://jorealft2020-hue.github.io/casa-dorada-app/</p>
+          <a href="https://jorealft2020-hue.github.io/casa-dorada-app/" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir app</a>
+        </div>
       </div>
     </main>
 
@@ -573,6 +647,7 @@
       <button class="sidebar-item" data-nav="rendimiento" id="navRendimiento"><span class="ic">📈</span> Rendimiento</button>
       <button class="sidebar-item" id="btnAbrirPlano"><span class="ic">🗺️</span> Plano Interactivo</button>
       <button class="sidebar-item hidden" data-nav="admin" id="navAdmin"><span class="ic">⚙️</span> Admin</button>
+      <button class="sidebar-item hidden" data-nav="sistema" id="navSistema"><span class="ic">🛠️</span> Configuración del Sistema</button>
     </div>
     <div class="sidebar-footer">
       <button class="sidebar-item" id="sideLogout"><span class="ic">🚪</span> Cerrar sesión</button>
@@ -920,8 +995,8 @@
           <option value="supervisor">Supervisor de Área</option>
           <option value="director_comercial">Director Comercial</option>
           <option value="gerencia">Gerencia General</option>
-          <option value="admin">Administrador de la Empresa</option>
-          <option value="superadmin">SuperAdmin (Desarrollador / Matriz)</option>
+          <option value="admin" id="eu_opt_admin">Administrador de la Empresa</option>
+          <option value="superadmin" id="eu_opt_superadmin">SuperAdmin (Desarrollador / Matriz)</option>
         </select>
       </div>
 
@@ -1062,8 +1137,8 @@
           <option value="supervisor">Supervisor de Área</option>
           <option value="director_comercial">Director Comercial</option>
           <option value="gerencia">Gerencia General</option>
-          <option value="admin">Administrador de la Empresa</option>
-          <option value="superadmin">SuperAdmin (Desarrollador / Matriz)</option>
+          <option value="admin" id="pa_opt_admin">Administrador de la Empresa</option>
+          <option value="superadmin" id="pa_opt_superadmin">SuperAdmin (Desarrollador / Matriz)</option>
         </select>
       </div>
 
@@ -1344,11 +1419,13 @@ async function mostrarApp(){
   
   const perm = currentProfile?.permisos || {};
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
   const esGerencia = rol === 'gerencia';
 
   const elNavAdmin = document.getElementById('navAdmin');
   if (elNavAdmin) elNavAdmin.classList.toggle('hidden', !(rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || perm.gestionar_equipo));
+  const elNavSistema = document.getElementById('navSistema');
+  if (elNavSistema) elNavSistema.classList.toggle('hidden', rol !== 'superadmin');
 
   // Solo el SuperAdmin (desarrollador) ve enlaces técnicos del código fuente y matriz
   const cardEnlaces = document.getElementById('cardEnlacesTecnicos');
@@ -1426,7 +1503,8 @@ function irAVista(vista){
     agenda:'viewAgenda', 
     rendimiento:'viewRendimiento', 
     notificaciones:'viewNotificaciones', 
-    admin:'viewAdmin' 
+    admin:'viewAdmin',
+    sistema:'viewSistema'
   };
   const targetId = map[vista] || 'viewInicio';
   const targetEl = document.getElementById(targetId);
@@ -1604,7 +1682,7 @@ document.getElementById('btnDescargarReporte').addEventListener('click', () => {
   inputF.value = hoy;
 
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
   const puedePasados = esSuperAdminODirector || (currentProfile?.permisos?.reportes_pasados === true);
 
   if (!puedePasados) {
@@ -2297,7 +2375,14 @@ function compartirWhatsAppInvitacion(){
 }
 
 /* ============ ADMIN: USUARIOS PRE-AUTORIZADOS (ALTA COMPLETA) ============ */
-document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => openModal('modalPreautorizar'));
+document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => {
+  const esSuperAdmin = currentProfile?.rol === 'superadmin';
+  document.getElementById('pa_opt_admin').classList.toggle('hidden', !esSuperAdmin);
+  document.getElementById('pa_opt_admin').disabled = !esSuperAdmin;
+  document.getElementById('pa_opt_superadmin').classList.toggle('hidden', !esSuperAdmin);
+  document.getElementById('pa_opt_superadmin').disabled = !esSuperAdmin;
+  openModal('modalPreautorizar');
+});
 
 async function cargarPreautorizados(){
   const { data } = await sb.from('usuarios_preautorizados').select('*').order('created_at', { ascending: false });
@@ -2430,6 +2515,11 @@ async function cargarUsuariosAdmin(){
 async function abrirEditarUsuario(id){
   const { data } = await sb.from('usuarios').select('*').eq('id', id).single();
   if (!data) { toast('No se pudo cargar el colaborador'); return; }
+  const esSuperAdmin = currentProfile?.rol === 'superadmin';
+  document.getElementById('eu_opt_admin').classList.toggle('hidden', !esSuperAdmin);
+  document.getElementById('eu_opt_admin').disabled = !esSuperAdmin;
+  document.getElementById('eu_opt_superadmin').classList.toggle('hidden', !esSuperAdmin);
+  document.getElementById('eu_opt_superadmin').disabled = !esSuperAdmin;
   document.getElementById('eu_id').value = data.id;
   document.getElementById('eu_nombre').value = data.nombre || '';
   document.getElementById('eu_email').value = data.email || '';
@@ -2558,7 +2648,7 @@ function cargarRendimientoPorArea(area){
 async function cargarRendimiento(){
   const panel = document.getElementById('panelEmbudo');
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
   const esSupervisor = rol === 'supervisor';
 
   let usuarioIds = [currentUser.id];
@@ -2774,7 +2864,7 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
 
 async function cargarClientes(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
   
   let query = sb.from('clientes').select('*');
   if (!esSuperAdminODirector) {
@@ -2997,7 +3087,7 @@ document.getElementById('btnGuardarSeparacion').addEventListener('click', async 
 
 async function cargarSeparacionesPorVencer(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
 
   let query = sb.from('vista_separaciones_por_vencer').select('*');
   if (!esSuperAdminODirector) {
@@ -3029,7 +3119,7 @@ async function cargarSeparacionesPorVencer(){
 
 async function cargarSeparacionesTodas(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
 
   let query = sb.from('separaciones').select('*, propiedades(codigo), clientes(nombre)');
   if (!esSuperAdminODirector) {
@@ -3354,16 +3444,16 @@ function renderizarMes(){
     celdas.push({ diaNum: d, dateStr, esMesActual: false });
   }
 
-  celdas.forEach(c => {
+  celdas.forEach((c, idx) => {
     const esHoy = c.dateStr === hoyStr;
     const esSeleccionado = c.dateStr === calEstado.diaSeleccionado;
-    
+
     // Filtrar eventos de este día
     const evsDia = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(c.dateStr));
 
     const cellEl = document.createElement('div');
     cellEl.className = `cal-day-cell ${c.esMesActual ? '' : 'other-month'} ${esHoy ? 'today' : ''} ${esSeleccionado ? 'selected' : ''}`;
-    
+
     let pillHtml = '';
     if (evsDia.length > 0) {
       pillHtml = `<div class="cal-day-pill">${evsDia.length === 1 ? escapeHtml(evsDia[0].titulo) : `${evsDia.length} tareas`}</div>`;
@@ -3381,7 +3471,13 @@ function renderizarMes(){
       renderizarEventosDiaSeleccionado();
     });
 
-    grid.appendChild(cellEl);
+    // Agrupar en filas de 7 (una fila = una semana), en vez de una sola grilla continua
+    if (idx % 7 === 0) {
+      const filaEl = document.createElement('div');
+      filaEl.className = 'cal-week-row';
+      grid.appendChild(filaEl);
+    }
+    grid.lastElementChild.appendChild(cellEl);
   });
 
   renderizarEventosDiaSeleccionado();
@@ -3496,7 +3592,7 @@ function renderizarTarjetaAgenda(ev){
 // Cargar Agenda Principal y actualizar vistas
 async function cargarAgenda(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
   const esSupervisor = rol === 'supervisor';
 
   let query = sb.from('agenda').select('*, usuarios(nombre, area)').order('fecha_inicio', { ascending: false });
@@ -3637,9 +3733,11 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   if (estado === 'reprogramada') {
     payload.fecha_inicio = new Date(`${nuevaFecha}T${nuevaHora}:00`).toISOString();
     payload.estado = 'programada';
+    payload.google_calendar_event_id = null; // fuerza re-sincronizar con la nueva fecha/hora
   }
 
   let { error } = await sb.from('agenda').update(payload).eq('id', id);
+  if (error) console.error('Error al actualizar agenda:', error);
 
   // Si la actividad fue REALIZADA, asegurar que se registre en actividades para que forme parte del reporte oficial
   if (estado === 'realizada') {
