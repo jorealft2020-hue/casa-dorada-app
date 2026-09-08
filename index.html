@@ -980,7 +980,7 @@
   <!-- MODAL: preautorizar nuevo usuario (completo) -->
   <div class="modal-backdrop" id="modalPreautorizar">
     <div class="modal-sheet">
-      <h3>Alta de colaborador en el equipo</h3>
+      <h3 id="pa_modal_titulo">Alta de colaborador en el equipo</h3>
       <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-8px;">Registra los datos corporativos del colaborador. Podrá ingresar con su cuenta de Google.</p>
       
       <div class="field"><label>Nombre completo del colaborador *</label><input type="text" id="pa_nombre" placeholder="Nombres y apellidos"></div>
@@ -1266,6 +1266,9 @@ sb.auth.onAuthStateChange(async (event, session) => {
     if (session.provider_token) {
       localStorage.setItem('google_provider_token', session.provider_token);
       sessionStorage.setItem('google_provider_token', session.provider_token);
+    }
+    if (session.provider_refresh_token) {
+      sb.from('usuarios').update({ google_refresh_token: session.provider_refresh_token }).eq('id', session.user.id).then(() => {});
     }
     await cargarPerfil();
     mostrarApp();
@@ -2621,6 +2624,8 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
   const fechaContacto = document.getElementById('cl_fecha_contacto').value;
   const horaContacto = document.getElementById('cl_hora_contacto').value;
   const estado = document.getElementById('cl_estado').value;
+  const proximaFecha = document.getElementById('cl_proxima_fecha').value;
+  const proximaHora = document.getElementById('cl_proxima_hora').value;
 
   if (!nombre || !celular || !proximaAccion) {
     toast('Completa nombre, celular y próxima acción');
@@ -3016,19 +3021,36 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
   sincronizarEventoCalendar(nuevoEv);
 });
 
-document.getElementById('btnToggleChecklist').addEventListener('click', (e) => {
-  const listaAgenda = document.getElementById('listaAgenda');
-  const listaChecklist = document.getElementById('listaChecklist');
-  const enChecklist = !listaChecklist.classList.contains('hidden');
-  listaAgenda.classList.toggle('hidden', !enChecklist);
-  listaChecklist.classList.toggle('hidden', enChecklist);
-  e.target.textContent = enChecklist ? 'Ver checklist' : 'Ver agenda';
-  if (!enChecklist) cargarChecklist();
-});
-
 // Alarmas automáticas para eventos de Agenda (60m, 30m, 15m)
+
+/* Pide un access_token fresco a través del refresh_token guardado en el servidor.
+   Si no hay refresh_token o falla, cae de vuelta al token en caché (mejor que nada). */
+async function obtenerTokenGoogleFresco(){
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return localStorage.getItem('google_provider_token');
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/refrescar-token-google`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      }
+    });
+    const result = await resp.json();
+    if (result.ok && result.access_token) {
+      localStorage.setItem('google_provider_token', result.access_token);
+      return result.access_token;
+    }
+    console.warn('No se pudo renovar el token de Google, usando el guardado:', result.error || result.mensaje);
+    return localStorage.getItem('google_provider_token');
+  } catch (e) {
+    console.error('Error al pedir token fresco de Google', e);
+    return localStorage.getItem('google_provider_token');
+  }
+}
+
 async function sincronizarEventoCalendar(ev){
-  const googleToken = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+  const googleToken = await obtenerTokenGoogleFresco();
   if (!googleToken) return;
 
   try {
@@ -3071,7 +3093,7 @@ async function sincronizarEventoCalendar(ev){
 
 // Alarmas automáticas para Separaciones (3 días, 2 días, 1 día)
 async function sincronizarSeparacionCalendar(sep){
-  const googleToken = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+  const googleToken = await obtenerTokenGoogleFresco();
   if (!googleToken) return;
 
   try {
