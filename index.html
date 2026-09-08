@@ -79,7 +79,33 @@
   .bell .dot{ position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%; background: var(--danger); display:none; }
   .bell.has-unread .dot{ display:block; }
 
-  main{ flex:1; overflow-y:auto; padding: 4px 20px 100px; }
+  main{ flex:1; overflow-y:auto; padding: 4px 20px 32px; }
+
+  /* ===== MENÚ LATERAL ===== */
+  .hamburger-btn{ background:none; border:none; font-size:22px; color: var(--navy); cursor:pointer; padding:6px 10px 6px 0; }
+  .sidebar-backdrop{
+    position:fixed; inset:0; background: rgba(26,35,50,0.5); z-index:90; display:none;
+  }
+  .sidebar-backdrop.open{ display:block; }
+  .sidebar{
+    position:fixed; top:0; left:0; bottom:0; width: 280px; max-width: 82vw;
+    background: #fff; z-index:95; transform: translateX(-100%); transition: transform 0.25s ease;
+    display:flex; flex-direction:column; box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  .sidebar.open{ transform: translateX(0); }
+  .sidebar-header{ display:flex; align-items:center; justify-content:space-between; padding: 20px 16px 14px; border-bottom:1px solid #EAE5D8; }
+  .sidebar-logo{ height: 34px; }
+  .sidebar-close{ background:none; border:none; font-size:18px; color: var(--ink-dim); cursor:pointer; }
+  .sidebar-items{ flex:1; overflow-y:auto; padding: 10px 8px; }
+  .sidebar-item{
+    width:100%; display:flex; align-items:center; gap:12px; background:none; border:none; text-align:left;
+    padding: 13px 14px; font-size:14.5px; font-weight:600; color: var(--ink); border-radius:10px; cursor:pointer;
+  }
+  .sidebar-item .ic{ font-size:18px; width:22px; text-align:center; }
+  .sidebar-item:hover{ background: var(--cream-dim); }
+  .sidebar-item.active{ background: var(--navy); color:#fff; }
+  .sidebar-footer{ padding: 10px 8px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid #EAE5D8; }
+  .sidebar-footer .sidebar-item{ color: var(--danger); }
 
   /* ===== KPI STRIP ===== */
   .kpi-strip{ display:flex; gap:12px; overflow-x:auto; padding: 8px 2px 18px; scrollbar-width:none; }
@@ -124,7 +150,7 @@
   .empty p{ font-size: 13.5px; line-height:1.5; margin: 4px 0 0; }
 
   /* ===== FAB ===== */
-  .fab{ position:fixed; bottom: 92px; right: calc(50% - 240px + 20px); width:56px; height:56px; border-radius:50%; background: var(--gold); color:#fff; border:none; font-size:26px; box-shadow: 0 10px 24px rgba(201,151,62,0.5); cursor:pointer; z-index:20; }
+  .fab{ position:fixed; bottom: 24px; right: calc(50% - 240px + 20px); width:56px; height:56px; border-radius:50%; background: var(--gold); color:#fff; border:none; font-size:26px; box-shadow: 0 10px 24px rgba(201,151,62,0.5); cursor:pointer; z-index:20; }
   @media (max-width: 480px){ .fab{ right: 20px; } }
 
   /* ===== BOTTOM NAV ===== */
@@ -264,7 +290,7 @@
   }
 
   .cal-weekdays-header{
-    display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 700;
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; font-weight: 700;
     color: var(--ink-dim); text-transform: lowercase; margin-bottom: 6px;
   }
   .cal-month-grid{
@@ -325,6 +351,7 @@
   <!-- APP -->
   <div id="mainScreen" class="hidden" style="display:flex; flex-direction:column; flex:1;">
     <div class="topbar">
+      <button class="hamburger-btn" id="btnHamburger">☰</button>
       <div>
         <div class="greet" id="greetName">Hola</div>
         <div class="role" id="greetRole">—</div>
@@ -527,16 +554,42 @@
 
     <button class="fab hidden" id="btnFab">+</button>
 
-    <nav class="bottomnav">
-      <button class="navbtn active" data-nav="inicio"><span class="ic">🏠</span>Inicio</button>
-      <button class="navbtn" data-nav="control" id="navControl"><span class="ic">📊</span>Control</button>
-      <button class="navbtn" data-nav="actividades" id="navTareas"><span class="ic">✓</span>Tareas</button>
-      <button class="navbtn" data-nav="agenda" id="navAgenda"><span class="ic">📅</span>Agenda</button>
-      <button class="navbtn" data-nav="clientes" id="navClientes"><span class="ic">👤</span>Clientes</button>
-      <button class="navbtn" data-nav="separaciones" id="navSeparaciones"><span class="ic">🏷️</span>Separac.</button>
-      <button class="navbtn" data-nav="rendimiento" id="navRendimiento"><span class="ic">📈</span>Rendim.</button>
-      <button class="navbtn hidden" data-nav="admin" id="navAdmin"><span class="ic">⚙️</span>Admin</button>
-    </nav>
+  </div>
+
+  <!-- MENÚ LATERAL -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebarMenu">
+    <div class="sidebar-header">
+      <img src="logo-casa-dorada.png" alt="Casa Dorada" class="sidebar-logo">
+      <button class="sidebar-close" id="btnCerrarSidebar">✕</button>
+    </div>
+    <div class="sidebar-items">
+      <button class="sidebar-item active" data-nav="inicio"><span class="ic">🏠</span> Inicio</button>
+      <button class="sidebar-item" data-nav="control" id="navControl"><span class="ic">📊</span> Control</button>
+      <button class="sidebar-item" data-nav="actividades" id="navTareas"><span class="ic">✓</span> Tareas</button>
+      <button class="sidebar-item" data-nav="agenda" id="navAgenda"><span class="ic">📅</span> Agenda</button>
+      <button class="sidebar-item" data-nav="clientes" id="navClientes"><span class="ic">👤</span> Clientes</button>
+      <button class="sidebar-item" data-nav="separaciones" id="navSeparaciones"><span class="ic">🏷️</span> Separaciones</button>
+      <button class="sidebar-item" data-nav="rendimiento" id="navRendimiento"><span class="ic">📈</span> Rendimiento</button>
+      <button class="sidebar-item" id="btnAbrirPlano"><span class="ic">🗺️</span> Plano Interactivo</button>
+      <button class="sidebar-item hidden" data-nav="admin" id="navAdmin"><span class="ic">⚙️</span> Admin</button>
+    </div>
+    <div class="sidebar-footer">
+      <button class="sidebar-item" id="sideLogout"><span class="ic">🚪</span> Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- MODAL: Plano interactivo -->
+  <div class="modal-backdrop" id="modalPlano">
+    <div class="modal-sheet">
+      <h3>Plano Interactivo — Costa Dorada</h3>
+      <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-8px;">Elige el visor que quieres abrir (se abre en una pestaña nueva).</p>
+      <a href="https://usesire.com/ver_plano_publico.php?plano_id=206&ref=416&wb=0" target="_blank" rel="noopener" class="btn-primary" style="display:block; text-align:center; text-decoration:none; margin-bottom:10px;">📍 Plano de lotes (Sire)</a>
+      <a href="https://www.costadorada360.com" target="_blank" rel="noopener" class="btn-primary" style="display:block; text-align:center; text-decoration:none;">🌐 Costa Dorada 360°</a>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalPlano">Cerrar</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: fecha para reporte diario -->
@@ -1338,7 +1391,28 @@ async function cargarPerfil(){
 
 /* ============ NAVEGACIÓN ============ */
 document.querySelectorAll('[data-nav]').forEach(btn => {
-  btn.addEventListener('click', () => irAVista(btn.dataset.nav));
+  btn.addEventListener('click', () => { irAVista(btn.dataset.nav); cerrarSidebar(); });
+});
+
+/* ===== MENÚ LATERAL: abrir/cerrar ===== */
+function abrirSidebar(){
+  document.getElementById('sidebarMenu').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('open');
+}
+function cerrarSidebar(){
+  document.getElementById('sidebarMenu').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('open');
+}
+document.getElementById('btnHamburger').addEventListener('click', abrirSidebar);
+document.getElementById('btnCerrarSidebar').addEventListener('click', cerrarSidebar);
+document.getElementById('sidebarBackdrop').addEventListener('click', cerrarSidebar);
+document.getElementById('sideLogout').addEventListener('click', () => {
+  cerrarSidebar();
+  document.getElementById('btnLogout').click();
+});
+document.getElementById('btnAbrirPlano').addEventListener('click', () => {
+  cerrarSidebar();
+  openModal('modalPlano');
 });
 function irAVista(vista){
   currentView = vista;
@@ -1357,7 +1431,7 @@ function irAVista(vista){
   const targetId = map[vista] || 'viewInicio';
   const targetEl = document.getElementById(targetId);
   if (targetEl) targetEl.classList.remove('hidden');
-  document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
+  document.querySelectorAll('.sidebar-item[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === vista));
   document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones' && vista !== 'clientes'));
 
   if (vista === 'inicio') cargarPortadaInicio();
