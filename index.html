@@ -454,6 +454,10 @@
           <span class="dr-icon">⚙️</span>
           <span class="dr-label">Gestión de Equipo</span>
         </button>
+        <button class="drawer-item hidden" data-nav="sistema" id="drNavSistema">
+          <span class="dr-icon">🛠️</span>
+          <span class="dr-label">Configuración del Sistema</span>
+        </button>
       </div>
       <div class="drawer-footer">
         <button class="drawer-item logout" id="drBtnLogout">
@@ -728,6 +732,74 @@
         <div id="listaPreautorizados"></div>
         <div id="listaUsuariosAdmin"></div>
       </div>
+
+      <!-- VISTA: Configuración del Sistema (solo SuperAdmin) -->
+      <div id="viewSistema" class="hidden">
+        <div class="section-title">Configuración del Sistema</div>
+        <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-6px;">Accesos técnicos exclusivos del desarrollador / matriz. No visible para Admin.</p>
+
+        <div class="card" style="background:#EAF3EC; border-color:#BFDDC8;">
+          <p class="card-title">🤖 Trabajar modificaciones con Claude</p>
+          <p class="card-sub">Continúa esta misma conversación/proyecto donde se construyó y mantiene la app.</p>
+          <a href="https://claude.ai/project/01a0687a-6a2a-71cc-b53b-565a65e6a58f" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir proyecto en Claude</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🗄️ BASE DE DATOS — SUPABASE (backend)</p>
+        <div class="card">
+          <p class="card-title">Panel general</p>
+          <p class="card-sub">Proyecto: nboikojylmkujdxinztj</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir dashboard</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Editor SQL (tablas, migraciones)</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/sql/new" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir SQL Editor</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Edge Functions (servidor)</p>
+          <p class="card-sub">membrete, sincronizar-google-calendar, refrescar-token-google, alertas-vencimientos, app</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/functions" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Edge Functions</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Autenticación (Google OAuth, usuarios)</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/auth/users" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Authentication</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Storage (fotos, vouchers, documentos)</p>
+          <a href="https://supabase.com/dashboard/project/nboikojylmkujdxinztj/storage/buckets" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir Storage</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">💻 CÓDIGO — GITHUB (frontend)</p>
+        <div class="card">
+          <p class="card-title">Repositorio (código fuente index.html)</p>
+          <p class="card-sub">jorealft2020-hue/casa-dorada-app</p>
+          <a href="https://github.com/jorealft2020-hue/casa-dorada-app" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir repositorio</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Generar token de acceso (para subir cambios)</p>
+          <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Nuevo token</a>
+        </div>
+        <div class="card">
+          <p class="card-title">GitHub Pages (dónde vive la app publicada)</p>
+          <a href="https://github.com/jorealft2020-hue/casa-dorada-app/settings/pages" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Ver configuración de Pages</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🔑 GOOGLE CLOUD (login y Calendar)</p>
+        <div class="card">
+          <p class="card-title">Usuarios de prueba / verificación OAuth</p>
+          <a href="https://console.cloud.google.com/auth/audience?project=casa-dorada-supabase" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir</a>
+        </div>
+        <div class="card">
+          <p class="card-title">Credenciales OAuth (Client ID / Secret)</p>
+          <a href="https://console.cloud.google.com/apis/credentials?project=casa-dorada-supabase" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🌐 APP EN VIVO</p>
+        <div class="card">
+          <p class="card-title">Link que usan todos los colaboradores</p>
+          <p class="card-sub">https://jorealft2020-hue.github.io/casa-dorada-app/</p>
+          <a href="https://jorealft2020-hue.github.io/casa-dorada-app/" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir app</a>
+        </div>
+      </div>
     </main>
 
     <button class="fab hidden" id="btnFab">+</button>
@@ -984,6 +1056,60 @@
   </div>
 
   <!-- MODAL: registro diario de rendimiento comercial -->
+  <!-- MODAL: Cotizador rápido -->
+  <div class="modal-backdrop" id="modalCotizador">
+    <div class="modal-sheet">
+      <h3>Cotizador rápido</h3>
+      <div class="field"><label>Cliente</label><input type="text" id="cot_cliente" placeholder="Nombre del cliente"></div>
+      <div class="field"><label>Celular / WhatsApp</label><input type="text" id="cot_celular" placeholder="9XXXXXXXX"></div>
+      <div class="field"><label>Manzana</label><select id="cot_manzana"></select></div>
+      <div class="field"><label>Lote</label><input type="text" id="cot_lote"></div>
+      <div class="field"><label>Área (m²)</label><input type="number" step="0.01" id="cot_area" value="160"></div>
+      <div class="field"><label>Precio por m² (S/)</label><input type="number" step="0.01" id="cot_precio_m2"></div>
+      <div class="field"><label>Valor total (S/)</label><input type="number" step="0.01" id="cot_valor_total"></div>
+      <div class="field">
+        <label>Condición</label>
+        <select id="cot_condicion">
+          <option value="contado">Al contado</option>
+          <option value="financiado" selected>Financiado</option>
+        </select>
+      </div>
+      <div id="cot_bloque_financiado">
+        <div class="field">
+          <label>Inicial (S/)</label>
+          <input type="number" step="0.01" id="cot_inicial">
+          <div style="display:flex; gap:6px; margin-top:6px;">
+            <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.10)">10%</button>
+            <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.20)">20%</button>
+            <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.30)">30%</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Meses a financiar</label>
+          <select id="cot_meses">
+            <option value="12">12</option>
+            <option value="24">24</option>
+            <option value="36" selected>36</option>
+            <option value="48">48</option>
+            <option value="60">60</option>
+          </select>
+        </div>
+      </div>
+      <div class="card" style="background:#FBF6EC; border-color:#E8D9B5;">
+        <p class="card-title" id="cot_cuota_display" style="font-size:18px;">—</p>
+        <p class="card-sub" id="cot_resumen_display">—</p>
+      </div>
+      <div class="modal-actions" style="flex-wrap:wrap;">
+        <button class="btn-secondary" data-close="modalCotizador">Cerrar</button>
+        <button class="btn-primary" onclick="enviarCotizacionWhatsApp()">📲 WhatsApp</button>
+      </div>
+      <div class="modal-actions" style="flex-wrap:wrap;">
+        <button class="btn-secondary" onclick="descargarCotizacionPDF()">📄 Descargar PDF</button>
+        <button class="btn-primary" onclick="pasarCotizacionASeparacion()">🏷️ Pasar a Separación</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="modalRendimiento">
     <div class="modal-sheet">
       <h3>Registro diario de leads</h3>
@@ -1190,7 +1316,7 @@
   <!-- MODAL: preautorizar nuevo usuario (completo) -->
   <div class="modal-backdrop" id="modalPreautorizar">
     <div class="modal-sheet">
-      <h3>Alta de colaborador en el equipo</h3>
+      <h3 id="pa_modal_titulo">Alta de colaborador en el equipo</h3>
       <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-8px;">Registra los datos corporativos del colaborador. Podrá ingresar con su cuenta de Google.</p>
       
       <div class="field"><label>Nombre completo del colaborador *</label><input type="text" id="pa_nombre" placeholder="Nombres y apellidos"></div>
@@ -1440,6 +1566,23 @@ function obtenerHoyLocal(){
   const dia = String(d.getDate()).padStart(2, '0');
   return `${anio}-${mes}-${dia}`;
 }
+/* Convierte un timestamp ISO (guardado en UTC) a la fecha/hora LOCAL del celular.
+   Sin esto, un evento nocturno puede aparecer registrado un día después. */
+function fechaLocalDeISO(iso){
+  if (!iso) return '';
+  const d = new Date(iso);
+  const anio = d.getFullYear();
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const dia = String(d.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
+function horaLocalDeISO(iso){
+  if (!iso) return null;
+  const d = new Date(iso);
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
+}
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', ()=> closeModal(b.dataset.close)));
@@ -1498,7 +1641,7 @@ async function mostrarApp(){
   
   const perm = currentProfile?.permisos || {};
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
   const esGerencia = rol === 'gerencia';
 
   const elNavAdmin = document.getElementById('navAdmin');
@@ -1592,6 +1735,7 @@ function actualizarDatosDrawer(){
   };
 
   showDr('drNavAdmin', esSuperAdminODirector || perm.gestionar_equipo);
+  showDr('drNavSistema', rol === 'superadmin');
   showDr('drNavControl', esSuperAdminODirector || esGerencia || perm.ver_control !== false);
   showDr('drNavTareas', esSuperAdminODirector || esGerencia || perm.ver_actividades !== false);
   showDr('drNavAgenda', esSuperAdminODirector || esGerencia || perm.ver_agenda !== false);
@@ -1636,7 +1780,8 @@ function irAVista(vista){
     agenda:'viewAgenda', 
     rendimiento:'viewRendimiento', 
     notificaciones:'viewNotificaciones', 
-    admin:'viewAdmin' 
+    admin:'viewAdmin',
+    sistema:'viewSistema'
   };
   const targetId = map[vista] || 'viewInicio';
   const targetEl = document.getElementById(targetId);
@@ -1814,7 +1959,7 @@ document.getElementById('btnDescargarReporte').addEventListener('click', () => {
   inputF.value = hoy;
 
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
   const puedePasados = esSuperAdminODirector || (currentProfile?.permisos?.reportes_pasados === true);
 
   if (!puedePasados) {
@@ -1852,7 +1997,7 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
     // 3. Unificar ambas fuentes para que el reporte sea 100% completo
     let actividades = [...(actsRegistradas || [])];
     (agendasRealizadas || []).forEach(ag => {
-      const hIni = ag.fecha_inicio && ag.fecha_inicio.includes('T') ? ag.fecha_inicio.split('T')[1].slice(0, 5) : null;
+      const hIni = ag.fecha_inicio ? horaLocalDeISO(ag.fecha_inicio) : null;
       const existe = actividades.some(a => a.titulo.trim().toLowerCase() === ag.titulo.trim().toLowerCase());
       if (!existe) {
         actividades.push({
@@ -2232,8 +2377,8 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
 
     let actividades = [...(acts1 || [])];
     (ags1 || []).forEach(ag => {
-      const fProg = ag.fecha_inicio ? ag.fecha_inicio.slice(0, 10) : fechaInicio;
-      const hIni = ag.fecha_inicio && ag.fecha_inicio.includes('T') ? ag.fecha_inicio.split('T')[1].slice(0, 5) : null;
+      const fProg = ag.fecha_inicio ? fechaLocalDeISO(ag.fecha_inicio) : fechaInicio;
+      const hIni = ag.fecha_inicio ? horaLocalDeISO(ag.fecha_inicio) : null;
       const existe = actividades.some(a => a.titulo.trim().toLowerCase() === ag.titulo.trim().toLowerCase() && a.fecha_programada === fProg);
       if (!existe) {
         const resultadoTxt = ag.resultado ? ` (Resultado: ${ag.resultado})` : '';
@@ -2810,7 +2955,7 @@ function cargarRendimientoPorArea(area){
 async function cargarRendimiento(){
   const panel = document.getElementById('panelEmbudo');
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
   const esSupervisor = rol === 'supervisor';
 
   let usuarioIds = [currentUser.id];
@@ -3024,7 +3169,7 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
 
 async function cargarClientes(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
   
   let query = sb.from('clientes').select('*');
   if (!esSuperAdminODirector) {
@@ -3635,7 +3780,7 @@ document.getElementById('btnGuardarSeparacion').addEventListener('click', async 
 
 async function cargarSeparacionesPorVencer(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
 
   let query = sb.from('vista_separaciones_por_vencer').select('*');
   if (!esSuperAdminODirector) {
@@ -3667,7 +3812,7 @@ async function cargarSeparacionesPorVencer(){
 
 async function cargarSeparacionesTodas(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
 
   let query = sb.from('separaciones').select('*, propiedades(codigo), clientes(nombre)');
   if (!esSuperAdminODirector) {
@@ -3734,16 +3879,6 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
 });
 
 document.getElementById('btnAbrirNuevaAgenda')?.addEventListener('click', () => openModal('modalAgenda'));
-document.getElementById('btnToggleChecklist').addEventListener('click', (e) => {
-  const listaAgenda = document.getElementById('listaAgenda');
-  const listaChecklist = document.getElementById('listaChecklist');
-  const enChecklist = !listaChecklist.classList.contains('hidden');
-  listaAgenda.classList.toggle('hidden', !enChecklist);
-  listaChecklist.classList.toggle('hidden', enChecklist);
-  e.target.textContent = enChecklist ? 'Ver checklist' : 'Ver agenda';
-  if (!enChecklist) cargarChecklist();
-});
-
 // Alarmas automáticas para eventos de Agenda (60m, 30m, 15m)
 async function sincronizarEventoCalendar(ev){
   const googleToken = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
@@ -3981,7 +4116,7 @@ function renderizarMes(){
     const esSeleccionado = c.dateStr === calEstado.diaSeleccionado;
     
     // Filtrar eventos de este día
-    const evsDia = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(c.dateStr));
+    const evsDia = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && fechaLocalDeISO(ev.fecha_inicio) === c.dateStr);
 
     const cellEl = document.createElement('div');
     cellEl.className = `cal-day-cell ${c.esMesActual ? '' : 'other-month'} ${esHoy ? 'today' : ''} ${esSeleccionado ? 'selected' : ''}`;
@@ -4017,7 +4152,7 @@ function renderizarEventosDiaSeleccionado(){
   const dSel = calEstado.diaSeleccionado;
   if (hdr) hdr.textContent = `Eventos del ${fmtFecha(dSel)}`;
 
-  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(dSel));
+  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && fechaLocalDeISO(ev.fecha_inicio) === dSel);
   if (evs.length === 0) {
     cont.innerHTML = `<div class="empty" style="padding:20px 0;"><p>Sin eventos programados para este día.</p></div>`;
     return;
@@ -4046,7 +4181,7 @@ function renderizarSemana(){
 
   diasSemana.forEach(d => {
     const esSeleccionado = d.dateStr === calEstado.diaSeleccionado;
-    const tieneEvs = (calEstado.eventos || []).some(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(d.dateStr));
+    const tieneEvs = (calEstado.eventos || []).some(ev => ev.fecha_inicio && fechaLocalDeISO(ev.fecha_inicio) === d.dateStr);
 
     const btn = document.createElement('div');
     btn.className = `cal-week-day-btn ${esSeleccionado ? 'selected' : ''}`;
@@ -4070,7 +4205,7 @@ function renderizarSemana(){
 function renderizarEventosSemanaDia(dateStr){
   const list = document.getElementById('calWeekEventsList');
   if (!list) return;
-  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(dateStr));
+  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && fechaLocalDeISO(ev.fecha_inicio) === dateStr);
   if (evs.length === 0) {
     list.innerHTML = `<div class="empty" style="padding:20px 0;"><p>Sin eventos para el ${fmtFecha(dateStr)}.</p></div>`;
     return;
@@ -4083,7 +4218,7 @@ function renderizarDia(){
   const list = document.getElementById('calDiaEventsList');
   if (!list) return;
   const dSel = calEstado.diaSeleccionado;
-  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && ev.fecha_inicio.startsWith(dSel));
+  const evs = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && fechaLocalDeISO(ev.fecha_inicio) === dSel);
   if (evs.length === 0) {
     list.innerHTML = `<div class="empty" style="padding:30px 0;"><div class="big">📅</div><p>No tienes citas programadas para el ${fmtFecha(dSel)}.</p></div>`;
     return;
@@ -4118,7 +4253,7 @@ function renderizarTarjetaAgenda(ev){
 // Cargar Agenda Principal y actualizar vistas
 async function cargarAgenda(){
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
   const esSupervisor = rol === 'supervisor';
 
   let query = sb.from('agenda').select('*, usuarios(nombre, area)').order('fecha_inicio', { ascending: false });
@@ -4268,8 +4403,8 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
     try {
       const { data: evAg } = await sb.from('agenda').select('*').eq('id', id).single();
       if (evAg) {
-        const fProg = evAg.fecha_inicio ? evAg.fecha_inicio.slice(0, 10) : obtenerHoyLocal();
-        const hIni = evAg.fecha_inicio && evAg.fecha_inicio.includes('T') ? evAg.fecha_inicio.split('T')[1].slice(0, 5) : null;
+        const fProg = evAg.fecha_inicio ? fechaLocalDeISO(evAg.fecha_inicio) : obtenerHoyLocal();
+        const hIni = evAg.fecha_inicio ? horaLocalDeISO(evAg.fecha_inicio) : null;
         await sb.from('actividades').insert({
           usuario_id: currentUser.id,
           titulo: evAg.titulo,
