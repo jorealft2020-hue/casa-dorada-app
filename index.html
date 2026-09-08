@@ -434,6 +434,7 @@
         <select id="eu_rol">
           <option value="usuario">Usuario</option>
           <option value="supervisor">Supervisor</option>
+          <option value="gerencia">Gerencia</option>
           <option value="admin">Administrador</option>
         </select>
       </div>
@@ -480,6 +481,7 @@
         <select id="pa_rol">
           <option value="usuario">Usuario</option>
           <option value="supervisor">Supervisor</option>
+          <option value="gerencia">Gerencia</option>
           <option value="admin">Administrador</option>
         </select>
       </div>
@@ -573,14 +575,25 @@ async function mostrarApp(){
     document.getElementById('navAdmin').classList.remove('hidden');
   }
   const esAdminGlobal = currentProfile?.rol === 'admin';
+  const esGerencia = currentProfile?.rol === 'gerencia';
   if (esAdminGlobal || perm.ver_clientes !== false) document.querySelector('[data-nav="clientes"]').classList.remove('hidden');
   if (!esAdminGlobal && perm.ver_separaciones === false) document.querySelector('[data-nav="separaciones"]').classList.add('hidden');
   if (!esAdminGlobal && perm.ver_agenda === false) document.querySelector('[data-nav="agenda"]').classList.add('hidden');
   puedeEliminar = (currentProfile?.rol === 'admin') || (perm.eliminar_registros === true);
+
+  if (esGerencia) {
+    // Gerencia: solo visualización de reportes/KPIs/actividades/conversión de todos, sin crear ni editar nada
+    document.querySelectorAll('.fab').forEach(f => f.classList.add('hidden'));
+    document.querySelector('[data-nav="clientes"]').classList.add('hidden');
+    document.querySelector('[data-nav="agenda"]').classList.add('hidden');
+    if (document.getElementById('btnAbrirRendimiento')) document.getElementById('btnAbrirRendimiento').classList.add('hidden');
+    puedeEliminar = false;
+  }
+
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
 }
 function rolLabel(rol){
-  return { admin: 'Administrador', supervisor: 'Supervisor', usuario: 'Usuario' }[rol] || 'Usuario';
+  return { admin: 'Administrador', supervisor: 'Supervisor', gerencia: 'Gerencia', usuario: 'Usuario' }[rol] || 'Usuario';
 }
 
 async function cargarPerfil(){
@@ -612,11 +625,47 @@ function irAVista(vista){
 document.getElementById('btnBell').addEventListener('click', () => irAVista('notificaciones'));
 
 /* ============ KPIs ============ */
+/* ============ ALCANCE DE DATOS SEGÚN ROL ============ */
+/* admin y gerencia ven TODO el equipo; supervisor ve su misma área; usuario ve solo lo propio */
+let alcanceCache = null;
+async function obtenerAlcanceUsuarios(){
+  if (alcanceCache) return alcanceCache;
+  const rol = currentProfile?.rol;
+  let ids = [currentUser.id];
+  let titulo = 'Tus datos';
+  let esVistaAmplia = false;
+  if (rol === 'admin' || rol === 'gerencia') {
+    const { data: todos } = await sb.from('usuarios').select('id').eq('rol', 'usuario');
+    ids = (todos || []).map(u => u.id);
+    if (ids.length === 0) ids = [currentUser.id];
+    titulo = 'Todo el equipo';
+    esVistaAmplia = true;
+  } else if (rol === 'supervisor') {
+    const { data: miArea } = await sb.from('usuarios').select('id').eq('area', currentProfile?.area || '__nada__');
+    ids = (miArea || []).map(u => u.id);
+    if (ids.length === 0) ids = [currentUser.id];
+    titulo = `Área: ${currentProfile?.area || '—'}`;
+    esVistaAmplia = true;
+  }
+  alcanceCache = { ids, titulo, esVistaAmplia };
+  return alcanceCache;
+}
+
 async function cargarKPIs(){
-  const { data, error } = await sb.from('vista_kpis_vendedor').select('*').eq('usuario_id', currentUser.id).maybeSingle();
+  const { ids } = await obtenerAlcanceUsuarios();
+  const { data, error } = await sb.from('vista_kpis_vendedor').select('*').in('usuario_id', ids);
   const el = document.getElementById('kpiStrip');
   if (error) { el.innerHTML = ''; console.error(error); return; }
-  const d = data || {};
+  const filas = data || [];
+  const suma = (campo) => filas.reduce((acc, f) => acc + (Number(f[campo]) || 0), 0);
+  const d = {
+    actividades_pendientes: suma('actividades_pendientes'),
+    actividades_completadas: suma('actividades_completadas'),
+    separaciones_activas: suma('separaciones_activas'),
+    ventas_cerradas: suma('ventas_cerradas'),
+    total_clientes: suma('total_clientes'),
+    monto_total_vendido: suma('monto_total_vendido'),
+  };
   const items = [
     { num: d.actividades_pendientes ?? 0, lbl: 'Pendientes', ic: '⏳', tone: 'warn' },
     { num: d.actividades_completadas ?? 0, lbl: 'Completadas', ic: '✅', tone: 'ok' },
@@ -636,11 +685,13 @@ async function cargarKPIs(){
 /* ============ ACTIVIDADES ============ */
 async function cargarActividadesHoy(){
   const hoy = obtenerHoyLocal();
-  const { data, error } = await sb.from('actividades').select('*').eq('usuario_id', currentUser.id).eq('fecha_programada', hoy).order('created_at');
+  const { ids } = await obtenerAlcanceUsuarios();
+  const { data, error } = await sb.from('actividades').select('*').in('usuario_id', ids).eq('fecha_programada', hoy).order('created_at');
   renderActividades(data || [], 'listaActividadesHoy', 'Sin actividades para hoy.');
 }
 async function cargarActividadesTodas(){
-  const { data } = await sb.from('actividades').select('*').eq('usuario_id', currentUser.id).order('fecha_programada', { ascending: true, nullsFirst: false });
+  const { ids } = await obtenerAlcanceUsuarios();
+  const { data } = await sb.from('actividades').select('*').in('usuario_id', ids).order('fecha_programada', { ascending: true, nullsFirst: false });
   renderActividades(data || [], 'listaActividadesTodas', 'No tienes actividades registradas.');
 }
 function renderActividades(items, contenedorId, mensajeVacio){
@@ -1510,7 +1561,7 @@ function pct(parte, total){ return total > 0 ? Math.round((parte/total)*100) : 0
 
 async function cargarRendimiento(){
   const panel = document.getElementById('panelEmbudo');
-  const esAdmin = currentProfile?.rol === 'admin';
+  const esAdmin = currentProfile?.rol === 'admin' || currentProfile?.rol === 'gerencia';
   const esSupervisor = currentProfile?.rol === 'supervisor';
 
   // Determinar el conjunto de usuarios a agregar según el rol de quien mira
@@ -1805,7 +1856,8 @@ document.getElementById('btnGuardarSeparacion').addEventListener('click', async 
 
 
 async function cargarSeparacionesPorVencer(){
-  const { data } = await sb.from('vista_separaciones_por_vencer').select('*').eq('vendedor_id', currentUser.id).lte('dias_restantes', 7);
+  const { ids } = await obtenerAlcanceUsuarios();
+  const { data } = await sb.from('vista_separaciones_por_vencer').select('*').in('vendedor_id', ids).lte('dias_restantes', 7);
   const el = document.getElementById('listaSeparacionesVencen');
   if (!data || data.length === 0) { el.innerHTML = emptyState('🏷️', 'Sin separaciones próximas a vencer.'); return; }
   el.innerHTML = data.map(s => {
@@ -1826,7 +1878,8 @@ async function cargarSeparacionesPorVencer(){
   }).join('');
 }
 async function cargarSeparacionesTodas(){
-  const { data } = await sb.from('separaciones').select('*, propiedades(codigo), clientes(nombre)').eq('vendedor_id', currentUser.id).order('fecha_vencimiento');
+  const { ids } = await obtenerAlcanceUsuarios();
+  const { data } = await sb.from('separaciones').select('*, propiedades(codigo), clientes(nombre)').in('vendedor_id', ids).order('fecha_vencimiento');
   const el = document.getElementById('listaSeparacionesTodas');
   if (!data || data.length === 0) { el.innerHTML = emptyState('🏷️', 'No tienes separaciones registradas.'); return; }
   el.innerHTML = data.map(s => `
