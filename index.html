@@ -4509,15 +4509,19 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   cargarAgenda();
 });
 
-/* ============ CENTRO DE NOTIFICACIONES Y ALERTAS EN TIEMPO REAL ============ */
+/* ============ CENTRO DE ALARMAS Y NOTIFICACIONES EN TIEMPO REAL ============ */
 async function cargarNotificacionesBadge(){
-  // Calcular alertas activas en tiempo real:
-  // 1. Separaciones que vencen en <= 7 días
+  // 1. Separaciones por vencer en <= 7 días
   const { data: seps } = await sb.from('vista_separaciones_por_vencer').select('id').lte('dias_restantes', 7).catch(() => ({ data: [] }));
   const numSeps = (seps || []).length;
 
-  // 2. Citas de agenda pendientes en checklist
-  const { count: numAgenda } = await sb.from('agenda').select('id', { count: 'exact', head: true }).eq('usuario_id', currentUser.id).eq('estado', 'programada').catch(() => ({ count: 0 }));
+  // 2. Citas de agenda pendientes
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  
+  let qAg = sb.from('agenda').select('id', { count: 'exact', head: true }).eq('estado', 'programada');
+  if (!esSuperAdminODirector) qAg = qAg.eq('usuario_id', currentUser.id);
+  const { count: numAgenda } = await qAg.catch(() => ({ count: 0 }));
 
   const totalAlertas = numSeps + (numAgenda || 0);
   const dot = document.getElementById('bellDot');
@@ -4537,9 +4541,15 @@ async function cargarNotificaciones(){
   el.innerHTML = `<div class="spinner"></div>`;
 
   const alertas = [];
+  const hoy = new Date();
   const hoyStr = obtenerHoyLocal();
 
-  // 1. Alertas de Separaciones por vencer
+  // Calcular exactamente la fecha de mañana en hora local de Tacna
+  const dManana = new Date(hoy);
+  dManana.setDate(dManana.getDate() + 1);
+  const mananaStr = `${dManana.getFullYear()}-${String(dManana.getMonth() + 1).padStart(2, '0')}-${String(dManana.getDate()).padStart(2, '0')}`;
+
+  // 1. Separaciones de lotes por vencer
   const { data: seps } = await sb.from('vista_separaciones_por_vencer')
     .select('*')
     .lte('dias_restantes', 7)
@@ -4553,38 +4563,62 @@ async function cargarNotificaciones(){
       icono: '🏷️',
       color: s.dias_restantes <= 1 ? '#B4453C' : '#C9973E',
       titulo: `${sem}: Separación ${s.propiedad_codigo} vence en ${s.dias_restantes} día(s)`,
-      mensaje: `Cliente: ${s.cliente_nombre} · Requiere gestionar firma o cobro de inicial de arras.`,
-      accion: 'irAVista(\'separaciones\')'
+      mensaje: `Cliente: ${s.cliente_nombre} · Gestionar firma de contrato o cobro de inicial.`,
+      accion: 'irAVista(\\'separaciones\\')'
     });
   });
 
-  // 2. Alertas de Agenda / Checklist pendientes
-  const { data: ags } = await sb.from('agenda')
-    .select('*')
-    .eq('usuario_id', currentUser.id)
+  // 2. Citas de Agenda (Hoy, Mañana y Próximas de toda la semana)
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+
+  let qAg = sb.from('agenda')
+    .select('*, usuarios(nombre)')
     .eq('estado', 'programada')
-    .order('fecha_inicio', { ascending: true })
-    .limit(20)
-    .catch(() => ({ data: [] }));
+    .order('fecha_inicio', { ascending: true });
+
+  if (!esSuperAdminODirector) {
+    qAg = qAg.eq('usuario_id', currentUser.id);
+  }
+
+  const { data: ags } = await qAg.limit(50).catch(() => ({ data: [] }));
 
   (ags || []).forEach(ag => {
-    const sem = semaforoAgenda(ag.fecha_inicio);
-    const fStr = ag.fecha_inicio ? ag.fecha_inicio.slice(0,10) : '';
-    const hStr = ag.fecha_inicio && ag.fecha_inicio.includes('T') ? ag.fecha_inicio.split('T')[1].slice(0,5) : '';
+    const fStr = ag.fecha_inicio ? fechaLocalDeISO(ag.fecha_inicio) : '';
+    const hStr = ag.fecha_inicio ? horaLocalDeISO(ag.fecha_inicio) : '';
+    
     const esHoy = fStr === hoyStr;
+    const esManana = fStr === mananaStr;
+
+    let etiqueta = '🗓️ CITA PROGRAMADA';
+    let colorBorde = '#C9973E';
+    let iconoAlerta = '📅';
+
+    if (esHoy) {
+      etiqueta = '🚨 CITA HOY';
+      colorBorde = '#B4453C';
+      iconoAlerta = '⏰';
+    } else if (esManana) {
+      etiqueta = '🔔 CITA MAÑANA';
+      colorBorde = '#C9973E';
+      iconoAlerta = '⏰';
+    }
+
+    const fechaLegible = esHoy ? 'Hoy' : (esManana ? 'Mañana' : fmtFecha(fStr));
+    const asesorTxt = ag.usuarios?.nombre ? ` · Asesor: ${escapeHtml(ag.usuarios.nombre)}` : '';
 
     alertas.push({
       tipo: 'agenda',
-      icono: '⏰',
-      color: sem.color,
-      titulo: `${sem.label} ${esHoy ? 'CITA HOY' : 'CITA PENDIENTE'}: ${escapeHtml(ag.titulo)} (${hStr})`,
-      mensaje: `Locación: ${escapeHtml(ag.locacion || 'Sin especificar')} · Pendiente de resolución en checklist.`,
-      accion: 'irAVista(\'agenda\'); cambiarVistaCalendario(\'checklist\');'
+      icono: iconoAlerta,
+      color: colorBorde,
+      titulo: `${etiqueta}: ${escapeHtml(ag.titulo)}`,
+      mensaje: `🗓️ ${fechaLegible} a las ${hStr || '--:--'} hrs · 📍 ${escapeHtml(ag.locacion || 'Oficina / Campo')}${asesorTxt}`,
+      accion: 'irAVista(\\'agenda\\')'
     });
   });
 
   if (alertas.length === 0) {
-    el.innerHTML = emptyState('🔔', 'No tienes alarmas ni alertas urgentes pendientes. ¡Todo al día!');
+    el.innerHTML = emptyState('🔔', 'No tienes alarmas ni citas pendientes. ¡Todo al día!');
     return;
   }
 
@@ -4596,8 +4630,8 @@ async function cargarNotificaciones(){
           <p class="card-sub" style="margin-top:3px;">${a.mensaje}</p>
         </div>
       </div>
-      <div class="card-actions" style="margin-top:6px;">
-        <span class="chip-btn gold" style="font-size:11px; padding:3px 10px;">Ver detalle ➔</span>
+      <div class="card-actions" style="margin-top:8px;">
+        <span class="chip-btn gold" style="font-size:11px; padding:3px 10px;">Ver cita en agenda ➔</span>
       </div>
     </div>
   `).join('');
