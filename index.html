@@ -291,6 +291,27 @@
   }
   .video-wrapper iframe{ position: absolute; top:0; left:0; width:100%; height:100%; border:0; }
 
+  /* ===== TARJETA: BALANCE DE GESTIÓN / RECOMENDACIÓN DEL DÍA ===== */
+  .daily-analysis-card{
+    background: #fff; border: 1px solid #EAE5D8; border-radius: var(--radius);
+    padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  }
+  .da-section-title{
+    display:flex; align-items:center; gap:8px; font-size: 13.5px; font-weight: 700;
+    color: var(--navy); margin: 0 0 10px;
+  }
+  .da-section-title:not(:first-child){ margin-top: 18px; }
+  .da-stats-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .da-stat-box{
+    background: var(--navy); color: var(--cream); border-radius: 12px; padding: 14px 12px; text-align:center;
+  }
+  .da-stat-num{ font-size: 22px; font-weight: 800; color: var(--gold-soft); line-height:1; }
+  .da-stat-lbl{ font-size: 11px; color: #A9B4C4; margin-top: 6px; font-weight:600; }
+  .da-plan-box{
+    background: #FBF6EC; border: 1px solid #E8D9B5; border-radius: 12px; padding: 12px 14px;
+    font-size: 13px; color: var(--ink); line-height: 1.5;
+  }
+
 
   /* ===== ESTILOS CALENDARIO (ESTILO GOOGLE CALENDAR) ===== */
   .calendar-view-selector{
@@ -416,6 +437,17 @@
     background: var(--danger); color: #fff; font-size: 10px; font-weight: 800; display: none;
     align-items: center; justify-content: center; padding: 0 4px; border: 2px solid #fff;
   }
+  /* La campana "vibra" mientras haya actividades pendientes por resolver */
+  @keyframes bellShake {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(14deg); }
+    20% { transform: rotate(-12deg); }
+    30% { transform: rotate(10deg); }
+    40% { transform: rotate(-8deg); }
+    50% { transform: rotate(6deg); }
+    60%, 100% { transform: rotate(0deg); }
+  }
+  .bell-shake{ animation: bellShake 2.2s ease-in-out infinite; animation-delay: 1s; transform-origin: 50% 20%; }
 
 
   /* ===== MÓDULO PLANOS INTERACTIVOS ===== */
@@ -599,6 +631,13 @@
           <div class="da-plan-box" id="da_plan_texto">
             Prioriza a primera hora el contacto de los nuevos prospectos ingresados y la confirmación de citas en campo para asegurar las visitas al Proyecto Costa Dorada.
           </div>
+        </div>
+
+        <!-- RANKING DEL EQUIPO (solo Admin/SuperAdmin o quien tenga el permiso) -->
+        <div class="daily-analysis-card hidden" id="cardRankingEquipo">
+          <div class="da-section-title"><span>🏆</span> Ranking del Equipo — Hoy</div>
+          <p style="font-size:11.5px; color:var(--ink-dim); margin:-6px 0 12px;">Metas diarias: 30 leads prospección · 10 referidos · 70 llamadas · 2 citas mín. · Meta semanal: 5 clientes filtrados al domingo.</p>
+          <div id="listaRankingEquipo"></div>
         </div>
       </div>
 
@@ -1357,6 +1396,13 @@
         </div>
         <input type="checkbox" id="perm_gestionar_equipo">
       </label>
+      <label class="perm-card">
+        <div class="perm-card-info">
+          <span class="perm-card-title">Ver Ranking del Equipo</span>
+          <span class="perm-card-desc">Ver las métricas y el ranking de TODOS los asesores (no solo las propias)</span>
+        </div>
+        <input type="checkbox" id="perm_ver_ranking_equipo">
+      </label>
       <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; gap:10px; width:100%;">
           <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
@@ -1695,8 +1741,7 @@ async function mostrarApp(){
   document.getElementById('greetName').textContent = 'Hola, ' + (currentProfile?.nombre?.split(' ')[0] || 'usuario');
   document.getElementById('greetRole').textContent = rolLabel(currentProfile?.rol);
   activarAlarmasPush();
-  
-  const perm = currentProfile?.permisos || {};
+
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
   const esGerencia = rol === 'gerencia';
@@ -1707,6 +1752,12 @@ async function mostrarApp(){
   // Solo el SuperAdmin (desarrollador) ve enlaces técnicos del código fuente y matriz
   const cardEnlaces = document.getElementById('cardEnlacesTecnicos');
   if (cardEnlaces) cardEnlaces.classList.toggle('hidden', rol !== 'superadmin');
+
+  const puedeVerRanking = rol === 'admin' || rol === 'superadmin' || perm.ver_ranking_equipo === true;
+  if (puedeVerRanking) {
+    document.getElementById('cardRankingEquipo').classList.remove('hidden');
+    cargarRankingEquipo();
+  }
 
   const showMod = (id, cond) => {
     const el = document.getElementById(id);
@@ -1724,6 +1775,51 @@ async function mostrarApp(){
 
   cargarPortadaInicio();
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
+}
+
+/* ============ RANKING DEL EQUIPO ============ */
+async function cargarRankingEquipo(){
+  const el = document.getElementById('listaRankingEquipo');
+  if (!el) return;
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  const { data, error } = await sb.from('vista_ranking_diario')
+    .select('*')
+    .order('total_leads', { ascending: false });
+
+  if (error) {
+    console.error('Error cargando ranking:', error);
+    el.innerHTML = emptyState('⚠️', 'No se pudo cargar el ranking.');
+    return;
+  }
+  if (!data || data.length === 0) {
+    el.innerHTML = emptyState('🏆', 'Aún no hay asesores con métricas registradas hoy.');
+    return;
+  }
+
+  const META = { prospeccion: 30, referidos: 10, llamadas: 70, citas: 2, clientesSemana: 5 };
+  const semaforo = (valor, meta) => valor >= meta ? '🟢' : (valor >= meta * 0.5 ? '🟡' : '🔴');
+
+  el.innerHTML = data.map((r, idx) => {
+    const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}°`;
+    return `
+    <div class="card" style="margin-bottom:10px;">
+      <div class="card-row" style="margin-bottom:8px;">
+        <p class="card-title" style="font-size:14px;">${medalla} ${escapeHtml(r.nombre)}</p>
+        <span class="badge badge-completada">${r.total_leads} leads</span>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; font-size:11.5px;">
+        <div>${semaforo(r.leads_prospeccion, META.prospeccion)} Prospección: <b>${r.leads_prospeccion}</b>/${META.prospeccion}</div>
+        <div>${semaforo(r.leads_referidos, META.referidos)} Referidos: <b>${r.leads_referidos}</b>/${META.referidos}</div>
+        <div>${semaforo(r.total_llamadas, META.llamadas)} Llamadas: <b>${r.total_llamadas}</b>/${META.llamadas}</div>
+        <div>${semaforo(r.total_citas_hoy, META.citas)} Citas hoy: <b>${r.total_citas_hoy}</b>/${META.citas}</div>
+        <div>📱 Leads RRSS: <b>${r.leads_rrss}</b></div>
+        <div>${semaforo(r.separaciones_semana, META.clientesSemana)} Clientes semana: <b>${r.separaciones_semana}</b>/${META.clientesSemana}</div>
+      </div>
+      <p style="font-size:10.5px; color:var(--ink-dim); margin:8px 0 0;">🏢 Oficina: ${r.citas_oficina} · 💻 MEET: ${r.citas_meet} · 🚗 Proyecto: ${r.visitas_proyecto}</p>
+    </div>
+  `;
+  }).join('');
 }
 
 function rolLabel(rol){
@@ -2903,6 +2999,7 @@ async function abrirEditarUsuario(id){
   document.getElementById('perm_generar_informes').checked = perm.generar_informes !== false;
   document.getElementById('perm_eliminar_registros').checked = perm.eliminar_registros === true;
   document.getElementById('perm_gestionar_equipo').checked = perm.gestionar_equipo === true;
+  document.getElementById('perm_ver_ranking_equipo').checked = perm.ver_ranking_equipo === true;
   openModal('modalEditarUsuario');
 }
 
@@ -2925,6 +3022,7 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
       generar_informes: document.getElementById('perm_generar_informes').checked,
       eliminar_registros: document.getElementById('perm_eliminar_registros').checked,
       gestionar_equipo: document.getElementById('perm_gestionar_equipo').checked,
+      ver_ranking_equipo: document.getElementById('perm_ver_ranking_equipo').checked,
     }
   };
   const { error } = await sb.from('usuarios').update(payload).eq('id', id);
@@ -4547,30 +4645,41 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   toast('Actividad actualizada ✓');
   cargarChecklist();
   cargarAgenda();
+  cargarNotificacionesBadge();
 });
 
 /* ============ CENTRO DE ALARMAS Y NOTIFICACIONES EN TIEMPO REAL ============ */
 async function cargarNotificacionesBadge(){
-  // 1. Separaciones por vencer en <= 7 días
-  const { data: seps } = await sb.from('vista_separaciones_por_vencer').select('id').lte('dias_restantes', 7).catch(() => ({ data: [] }));
-  const numSeps = (seps || []).length;
+  let totalAlertas = 0;
+  try {
+    // 1. Separaciones por vencer en <= 7 días
+    const { data: seps, error: errSeps } = await sb.from('vista_separaciones_por_vencer').select('id').lte('dias_restantes', 7);
+    if (errSeps) console.error('Error contando separaciones por vencer:', errSeps);
+    totalAlertas += (seps || []).length;
 
-  // 2. Citas de agenda pendientes
-  const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
-  
-  let qAg = sb.from('agenda').select('id', { count: 'exact', head: true }).eq('estado', 'programada');
-  if (!esSuperAdminODirector) qAg = qAg.eq('usuario_id', currentUser.id);
-  const { count: numAgenda } = await qAg.catch(() => ({ count: 0 }));
+    // 2. Citas de agenda futuras aún no resueltas (toda actividad pendiente: hoy, mañana, cualquier fecha futura)
+    const rol = currentProfile?.rol;
+    const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
 
-  const totalAlertas = numSeps + (numAgenda || 0);
+    let qAg = sb.from('agenda').select('id', { count: 'exact', head: true }).eq('estado', 'programada');
+    if (!esSuperAdminODirector) qAg = qAg.eq('usuario_id', currentUser.id);
+    const { count: numAgenda, error: errAg } = await qAg;
+    if (errAg) console.error('Error contando agenda pendiente:', errAg);
+    totalAlertas += (numAgenda || 0);
+  } catch (e) {
+    console.error('Error general en cargarNotificacionesBadge:', e);
+  }
+
   const dot = document.getElementById('bellDot');
+  const btnBell = document.getElementById('btnBell');
   if (dot) {
     if (totalAlertas > 0) {
       dot.style.display = 'flex';
       dot.textContent = totalAlertas > 9 ? '9+' : String(totalAlertas);
+      btnBell?.classList.add('bell-shake');
     } else {
       dot.style.display = 'none';
+      btnBell?.classList.remove('bell-shake');
     }
   }
 }
