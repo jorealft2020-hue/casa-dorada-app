@@ -4564,7 +4564,7 @@ async function cargarNotificaciones(){
       color: s.dias_restantes <= 1 ? '#B4453C' : '#C9973E',
       titulo: `${sem}: Separación ${s.propiedad_codigo} vence en ${s.dias_restantes} día(s)`,
       mensaje: `Cliente: ${s.cliente_nombre} · Gestionar firma de contrato o cobro de inicial.`,
-      accion: 'irAVista(\\'separaciones\\')'
+      accion: 'irAVista('separaciones')'
     });
   });
 
@@ -4613,7 +4613,7 @@ async function cargarNotificaciones(){
       color: colorBorde,
       titulo: `${etiqueta}: ${escapeHtml(ag.titulo)}`,
       mensaje: `🗓️ ${fechaLegible} a las ${hStr || '--:--'} hrs · 📍 ${escapeHtml(ag.locacion || 'Oficina / Campo')}${asesorTxt}`,
-      accion: 'irAVista(\\'agenda\\')'
+      accion: 'irAVista('agenda')'
     });
   });
 
