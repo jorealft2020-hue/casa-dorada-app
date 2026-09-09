@@ -1706,6 +1706,7 @@ async function mostrarApp(){
   document.getElementById('mainScreen').style.display = 'flex';
   document.getElementById('greetName').textContent = 'Hola, ' + (currentProfile?.nombre?.split(' ')[0] || 'usuario');
   document.getElementById('greetRole').textContent = rolLabel(currentProfile?.rol);
+  activarAlarmasPush();
   
   const perm = currentProfile?.permisos || {};
   const rol = currentProfile?.rol;
@@ -4691,15 +4692,46 @@ function escapeHtml(str){
   }
 })();
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(registrations => {
-    for (let registration of registrations) {
-      registration.unregister();
+/* ===== ALARMAS PROPIAS: registrar service worker + suscribirse a notificaciones push ===== */
+const VAPID_PUBLIC_KEY = 'BBXmb9mf_kQWsiwCfN9Rx9lDavEw_Gb5VbKv-g0lgL2lLYpEMwYveykg_BHRnquVhbBg3WYeOiQ9NJjMVOKoybc';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function activarAlarmasPush(){
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    const registration = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+
+    if (Notification.permission === 'default') {
+      await Notification.requestPermission();
     }
-  });
-  caches.keys().then(keys => {
-    keys.forEach(key => caches.delete(key));
-  });
+    if (Notification.permission !== 'granted') return;
+
+    let sub = await registration.pushManager.getSubscription();
+    if (!sub) {
+      sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+
+    const subJson = sub.toJSON();
+    await sb.from('push_subscriptions').upsert({
+      usuario_id: currentUser.id,
+      endpoint: subJson.endpoint,
+      p256dh: subJson.keys.p256dh,
+      auth_key: subJson.keys.auth,
+    }, { onConflict: 'endpoint' });
+  } catch (e) {
+    console.error('No se pudo activar las alarmas push', e);
+  }
 }
 </script>
 </body>
