@@ -9,6 +9,7 @@
 <link rel="apple-touch-icon" href="icono-apple-touch.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <style>
   :root{
     --navy: #1A2332;
@@ -466,6 +467,26 @@
     background: var(--navy); color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   }
   .planos-actions-top{ display: flex; gap: 6px; align-items: center; }
+
+  /* ===== PORTAFOLIO COMERCIAL ===== */
+  .pf-book{
+    position: relative; max-width: 480px; margin: 0 auto; perspective: 1800px; user-select: none;
+  }
+  .pf-page-canvas-wrap{
+    position: relative; width: 100%; background: #fff; border-radius: 6px;
+    box-shadow: 0 8px 30px rgba(26,35,50,0.25); overflow: hidden;
+    transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.4,0.1,0.2,1);
+    transform-origin: left center;
+  }
+  .pf-page-canvas-wrap.flipping-next{ transform: rotateY(-140deg); }
+  .pf-page-canvas-wrap.flipping-prev{ transform: rotateY(140deg); transform-origin: right center; }
+  .pf-page-canvas-wrap canvas{ display:block; width:100%; height:auto; }
+  .pf-book-controls{ display:flex; justify-content:space-between; align-items:center; margin-top:14px; }
+  .pf-book-page-indicator{ font-size:12.5px; color:var(--ink-dim); font-weight:700; }
+  .pf-doc-item{ background:#fff; border:1px solid #EAE5D8; border-radius:12px; padding:14px; margin-bottom:10px; }
+  .pf-doc-item .pf-doc-title{ font-weight:700; font-size:13.5px; margin-bottom:6px; }
+  .pf-doc-item .pf-doc-status{ font-size:12px; color:var(--ink-dim); margin-bottom:8px; }
+
   .plano-frame-container{
     position: relative; width: 100%; height: calc(100vh - 210px); min-height: 480px;
     background: #fff; border: 1.5px solid #E5DFCF; border-radius: 14px; overflow: hidden;
@@ -525,6 +546,10 @@
         <button class="drawer-item" data-nav="planos" id="drNavPlanos">
           <span class="dr-icon">🗺️</span>
           <span class="dr-label">Planos Interactivos</span>
+        </button>
+        <button class="drawer-item" data-nav="portafolio" id="drNavPortafolio">
+          <span class="dr-icon">📁</span>
+          <span class="dr-label">Portafolio Comercial</span>
         </button>
         <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones">
           <span class="dr-icon">🏷️</span>
@@ -675,6 +700,53 @@
 
         <div class="plano-frame-container">
           <iframe id="iframePlano" class="plano-iframe" src="https://usesire.com/ver_plano_publico.php?plano_id=206&ref=416&wb=0" allowfullscreen allow="geolocation; microphone; camera; accelerometer; gyroscope"></iframe>
+        </div>
+      </div>
+
+      <!-- VISTA: Portafolio Comercial -->
+      <div id="viewPortafolio" class="hidden">
+        <div class="section-title" style="margin-top:0;">Portafolio Comercial</div>
+
+        <div class="planos-tabs" style="margin-bottom:14px; flex-wrap:wrap;">
+          <button class="plano-tab-btn active" data-pf="brochure" onclick="cambiarPestanaPortafolio('brochure')">📖 Brochure</button>
+          <button class="plano-tab-btn" data-pf="video_costa_dorada" onclick="cambiarPestanaPortafolio('video_costa_dorada')">🎬 Video Costa Dorada</button>
+          <button class="plano-tab-btn" data-pf="testimonio" onclick="cambiarPestanaPortafolio('testimonio')">🗣️ Testimonios</button>
+          <button class="plano-tab-btn" data-pf="documento" onclick="cambiarPestanaPortafolio('documento')">📄 Documentación</button>
+        </div>
+
+        <!-- BROCHURE (tipo libro con deslice de hojas) -->
+        <div id="pfPanelBrochure" class="pf-panel">
+          <div id="pfBrochureSuperAdmin" class="card hidden" style="margin-bottom:14px;">
+            <p class="card-title" style="font-size:13px;">Subir/reemplazar Brochure (PDF)</p>
+            <input type="file" id="pfBrochureInput" accept="application/pdf" style="margin-top:8px;">
+          </div>
+          <div id="pfBrochureViewer"></div>
+        </div>
+
+        <!-- VIDEO COSTA DORADA -->
+        <div id="pfPanelVideoCD" class="pf-panel hidden">
+          <div id="pfVideoCDSuperAdmin" class="card hidden" style="margin-bottom:14px;">
+            <p class="card-title" style="font-size:13px;">Link de YouTube del video Costa Dorada</p>
+            <input type="text" id="pfVideoCDInput" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px; margin-top:8px;">
+            <button class="btn-primary" style="margin-top:8px;" onclick="guardarVideoCostaDorada()">Guardar</button>
+          </div>
+          <div id="pfVideoCDViewer"></div>
+        </div>
+
+        <!-- VIDEOS TESTIMONIO -->
+        <div id="pfPanelTestimonios" class="pf-panel hidden">
+          <div id="pfTestimoniosSuperAdmin" class="card hidden" style="margin-bottom:14px;">
+            <p class="card-title" style="font-size:13px;">Agregar testimonio (link de YouTube)</p>
+            <input type="text" id="pfTestimonioTitulo" placeholder="Título (ej: Familia Quispe)" style="width:100%; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px; margin-top:8px;">
+            <input type="text" id="pfTestimonioUrl" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px; margin-top:8px;">
+            <button class="btn-primary" style="margin-top:8px;" onclick="agregarTestimonio()">Agregar</button>
+          </div>
+          <div id="pfTestimoniosViewer"></div>
+        </div>
+
+        <!-- DOCUMENTACIÓN -->
+        <div id="pfPanelDocumentos" class="pf-panel hidden">
+          <div id="pfDocumentosLista"></div>
         </div>
       </div>
 
@@ -1911,7 +1983,7 @@ function irAVista(vista){
     control:'viewControl',
     actividades:'viewActividades', 
     clientes:'viewClientes', 
-    planos:'viewPlanos', separaciones:'viewSeparaciones', 
+    planos:'viewPlanos', portafolio:'viewPortafolio', separaciones:'viewSeparaciones', 
     agenda:'viewAgenda', 
     rendimiento:'viewRendimiento', 
     notificaciones:'viewNotificaciones', 
@@ -1933,6 +2005,7 @@ function irAVista(vista){
   if (vista === 'rendimiento') cargarRendimiento();
   if (vista === 'notificaciones') cargarNotificaciones();
   if (vista === 'admin') { cargarUsuariosAdmin(); cargarPreautorizados(); }
+  if (vista === 'portafolio') cargarPortafolio();
 }
 document.getElementById('btnBell').addEventListener('click', () => irAVista('notificaciones'));
 
@@ -3734,6 +3807,256 @@ function recargarPlano(){
     iframe.src = PLANOS_URLS[planoActivoKey];
     toast('Recargando plano…');
   }
+}
+
+/* ============ PORTAFOLIO COMERCIAL ============ */
+const DOC_SUBCATEGORIAS = [
+  { key: 'constitucion_empresa', label: 'Constitución de Empresa' },
+  { key: 'ficha_ruc', label: 'Ficha RUC' },
+  { key: 'partida_registral', label: 'Partida Registral' },
+  { key: 'viabilidad_proyecto', label: 'Viabilidad del Proyecto' },
+  { key: 'viabilidad_zonificacion', label: 'Viabilidad de Cambio de Zonificación' },
+  { key: 'factibilidades', label: 'Factibilidades' },
+  { key: 'cambio_uso_suelo', label: 'Cambio de Uso de Suelo' },
+  { key: 'resolucion_hab_urbana', label: 'Resolución de Hab. Urbana' },
+  { key: 'recibo_separacion', label: 'Recibo de Separación' },
+  { key: 'modelo_contrato', label: 'Modelo de Contrato' },
+];
+
+let pfPaginaActual = 0;
+let pfPdfDoc = null;
+let pfEsSuperAdmin = false;
+
+function cambiarPestanaPortafolio(tab){
+  document.querySelectorAll('[data-pf]').forEach(b => b.classList.toggle('active', b.dataset.pf === tab));
+  document.getElementById('pfPanelBrochure').classList.toggle('hidden', tab !== 'brochure');
+  document.getElementById('pfPanelVideoCD').classList.toggle('hidden', tab !== 'video_costa_dorada');
+  document.getElementById('pfPanelTestimonios').classList.toggle('hidden', tab !== 'testimonio');
+  document.getElementById('pfPanelDocumentos').classList.toggle('hidden', tab !== 'documento');
+}
+
+async function cargarPortafolio(){
+  pfEsSuperAdmin = currentProfile?.rol === 'superadmin';
+  document.getElementById('pfBrochureSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
+  document.getElementById('pfVideoCDSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
+  document.getElementById('pfTestimoniosSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
+
+  const { data, error } = await sb.from('portafolio_items').select('*').order('orden').order('created_at', { ascending: false });
+  if (error) { console.error('Error cargando portafolio:', error); return; }
+
+  const brochure = (data || []).find(i => i.categoria === 'brochure');
+  const videoCD = (data || []).find(i => i.categoria === 'video_costa_dorada');
+  const testimonios = (data || []).filter(i => i.categoria === 'testimonio');
+  const documentos = (data || []).filter(i => i.categoria === 'documento');
+
+  // Brochure
+  if (brochure) cargarBrochurePDF(brochure.url);
+  else document.getElementById('pfBrochureViewer').innerHTML = emptyState('📖', 'Aún no se ha subido el Brochure.');
+
+  // Video Costa Dorada
+  const elVCD = document.getElementById('pfVideoCDViewer');
+  if (videoCD) {
+    const embedUrl = urlYoutubeAEmbed(videoCD.url);
+    elVCD.innerHTML = embedUrl
+      ? `<div style="position:relative; padding-top:56.25%; border-radius:12px; overflow:hidden;"><iframe src="${embedUrl}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`
+      : emptyState('🎬', 'Link no válido.');
+  } else {
+    elVCD.innerHTML = emptyState('🎬', 'Aún no se ha agregado el video de Costa Dorada.');
+  }
+
+  // Testimonios
+  const elTest = document.getElementById('pfTestimoniosViewer');
+  if (testimonios.length === 0) {
+    elTest.innerHTML = emptyState('🗣️', 'Aún no hay testimonios cargados.');
+  } else {
+    elTest.innerHTML = testimonios.map(t => {
+      const embedUrl = urlYoutubeAEmbed(t.url);
+      return `
+      <div class="card" style="margin-bottom:12px;">
+        <p class="card-title" style="margin-bottom:8px;">${escapeHtml(t.titulo || 'Testimonio')}</p>
+        ${embedUrl ? `<div style="position:relative; padding-top:56.25%; border-radius:10px; overflow:hidden;"><iframe src="${embedUrl}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>` : ''}
+        ${pfEsSuperAdmin ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger); margin-top:8px;" onclick="eliminarItemPortafolio('${t.id}')">🗑️ Eliminar</button>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Documentación (9 subcategorías fijas)
+  const elDocs = document.getElementById('pfDocumentosLista');
+  elDocs.innerHTML = DOC_SUBCATEGORIAS.map(sub => {
+    const doc = documentos.find(d => d.subcategoria === sub.key);
+    return `
+    <div class="pf-doc-item">
+      <div class="pf-doc-title">📄 ${sub.label}</div>
+      <div class="pf-doc-status">${doc ? '✅ Documento cargado' : '⚪ Sin documento'}</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        ${doc ? `<a href="${doc.url}" target="_blank" rel="noopener" class="chip-btn gold" style="text-decoration:none;">👁️ Ver / Descargar</a>` : ''}
+        ${pfEsSuperAdmin ? `
+          <label class="chip-btn" style="cursor:pointer;">
+            📤 ${doc ? 'Reemplazar' : 'Subir'}
+            <input type="file" accept="application/pdf,image/*" style="display:none;" onchange="subirDocumentoPortafolio('${sub.key}', this.files[0])">
+          </label>
+        ` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function urlYoutubeAEmbed(url){
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{6,})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+}
+
+/* ---- Brochure: subir PDF ---- */
+document.getElementById('pfBrochureInput')?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  toast('Subiendo Brochure…');
+  try {
+    const path = `brochure/${Date.now()}.pdf`;
+    const { error: upErr } = await sb.storage.from('portafolio-comercial').upload(path, file, { upsert: true });
+    if (upErr) { toast('Error al subir'); console.error(upErr); return; }
+    const { data: pub } = sb.storage.from('portafolio-comercial').getPublicUrl(path);
+
+    // Borrar el brochure anterior (solo debe existir uno)
+    await sb.from('portafolio_items').delete().eq('categoria', 'brochure');
+    const { error: insErr } = await sb.from('portafolio_items').insert({
+      categoria: 'brochure', titulo: 'Brochure', url: pub.publicUrl, tipo: 'pdf', created_by: currentUser.id
+    });
+    if (insErr) { toast('Error al guardar'); console.error(insErr); return; }
+
+    toast('Brochure actualizado ✓');
+    cargarPortafolio();
+  } catch (err) {
+    toast('Error inesperado al subir');
+    console.error(err);
+  }
+});
+
+/* ---- Brochure: visor tipo libro con PDF.js ---- */
+async function cargarBrochurePDF(url){
+  const cont = document.getElementById('pfBrochureViewer');
+  cont.innerHTML = `<div class="spinner"></div>`;
+  try {
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    }
+    pfPdfDoc = await pdfjsLib.getDocument(url).promise;
+    pfPaginaActual = 1;
+    cont.innerHTML = `
+      <div class="pf-book">
+        <div class="pf-page-canvas-wrap" id="pfPageWrap">
+          <canvas id="pfPageCanvas"></canvas>
+        </div>
+        <div class="pf-book-controls">
+          <button class="chip-btn gold" onclick="pfPaginaAnterior()">⬅️ Anterior</button>
+          <span class="pf-book-page-indicator" id="pfPageIndicator">1 / ${pfPdfDoc.numPages}</span>
+          <button class="chip-btn gold" onclick="pfPaginaSiguiente()">Siguiente ➡️</button>
+        </div>
+      </div>
+    `;
+    await pfRenderizarPagina(pfPaginaActual);
+  } catch (e) {
+    console.error('Error al cargar el brochure:', e);
+    cont.innerHTML = emptyState('⚠️', 'No se pudo cargar el Brochure.');
+  }
+}
+
+async function pfRenderizarPagina(numPagina){
+  const page = await pfPdfDoc.getPage(numPagina);
+  const canvas = document.getElementById('pfPageCanvas');
+  if (!canvas) return;
+  const viewport = page.getViewport({ scale: 1.4 });
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  document.getElementById('pfPageIndicator').textContent = `${numPagina} / ${pfPdfDoc.numPages}`;
+}
+
+async function pfPaginaSiguiente(){
+  if (!pfPdfDoc || pfPaginaActual >= pfPdfDoc.numPages) return;
+  const wrap = document.getElementById('pfPageWrap');
+  wrap.classList.add('flipping-next');
+  setTimeout(async () => {
+    pfPaginaActual++;
+    await pfRenderizarPagina(pfPaginaActual);
+    wrap.classList.remove('flipping-next');
+  }, 280);
+}
+
+async function pfPaginaAnterior(){
+  if (!pfPdfDoc || pfPaginaActual <= 1) return;
+  const wrap = document.getElementById('pfPageWrap');
+  wrap.classList.add('flipping-prev');
+  setTimeout(async () => {
+    pfPaginaActual--;
+    await pfRenderizarPagina(pfPaginaActual);
+    wrap.classList.remove('flipping-prev');
+  }, 280);
+}
+
+/* ---- Video Costa Dorada ---- */
+async function guardarVideoCostaDorada(){
+  const url = document.getElementById('pfVideoCDInput').value.trim();
+  if (!url) { toast('Pega el link de YouTube'); return; }
+  await sb.from('portafolio_items').delete().eq('categoria', 'video_costa_dorada');
+  const { error } = await sb.from('portafolio_items').insert({
+    categoria: 'video_costa_dorada', titulo: 'Video Costa Dorada', url, tipo: 'video_youtube', created_by: currentUser.id
+  });
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  toast('Video actualizado ✓');
+  document.getElementById('pfVideoCDInput').value = '';
+  cargarPortafolio();
+}
+
+/* ---- Testimonios ---- */
+async function agregarTestimonio(){
+  const titulo = document.getElementById('pfTestimonioTitulo').value.trim();
+  const url = document.getElementById('pfTestimonioUrl').value.trim();
+  if (!url) { toast('Pega el link del testimonio'); return; }
+  const { error } = await sb.from('portafolio_items').insert({
+    categoria: 'testimonio', titulo: titulo || 'Testimonio', url, tipo: 'video_youtube', created_by: currentUser.id
+  });
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  toast('Testimonio agregado ✓');
+  document.getElementById('pfTestimonioTitulo').value = '';
+  document.getElementById('pfTestimonioUrl').value = '';
+  cargarPortafolio();
+}
+
+/* ---- Documentación (9 subcategorías) ---- */
+async function subirDocumentoPortafolio(subcategoria, file){
+  if (!file) return;
+  toast('Subiendo documento…');
+  try {
+    const ext = file.name.split('.').pop() || 'pdf';
+    const path = `documentos/${subcategoria}/${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('portafolio-comercial').upload(path, file, { upsert: true });
+    if (upErr) { toast('Error al subir'); console.error(upErr); return; }
+    const { data: pub } = sb.storage.from('portafolio-comercial').getPublicUrl(path);
+
+    await sb.from('portafolio_items').delete().eq('categoria', 'documento').eq('subcategoria', subcategoria);
+    const label = DOC_SUBCATEGORIAS.find(d => d.key === subcategoria)?.label || subcategoria;
+    const { error: insErr } = await sb.from('portafolio_items').insert({
+      categoria: 'documento', subcategoria, titulo: label, url: pub.publicUrl, tipo: 'pdf', created_by: currentUser.id
+    });
+    if (insErr) { toast('Error al guardar'); console.error(insErr); return; }
+
+    toast(`${label} actualizado ✓`);
+    cargarPortafolio();
+  } catch (err) {
+    toast('Error inesperado al subir');
+    console.error(err);
+  }
+}
+
+async function eliminarItemPortafolio(id){
+  if (!confirm('¿Eliminar este elemento del portafolio?')) return;
+  const { error } = await sb.from('portafolio_items').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Eliminado');
+  cargarPortafolio();
 }
 
 function abrirPlanoExterno(){
