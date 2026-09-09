@@ -4012,9 +4012,22 @@ async function sincronizarEventoCalendar(ev){
     if (resp.ok) {
       const gEvent = await resp.json();
       await sb.from('agenda').update({ google_calendar_event_id: gEvent.id }).eq('id', ev.id);
+    } else {
+      const errBody = await resp.json().catch(() => ({}));
+      const msg = `Google rechazó "${ev.titulo}" (código ${resp.status}): ${errBody?.error?.message || 'sin detalle'}`;
+      console.error(msg, errBody);
+      await sb.from('notificaciones').insert({
+        usuario_id: currentUser.id, tipo: 'error_sync_calendar',
+        titulo: '⚠️ Error al sincronizar con Google Calendar', mensaje: msg,
+      });
     }
   } catch (err) {
-    console.error('Error al sincronizar agenda con Google Calendar:', err);
+    const msg = `Error de conexión al sincronizar "${ev.titulo}" con Google Calendar: ${String(err)}`;
+    console.error(msg);
+    await sb.from('notificaciones').insert({
+      usuario_id: currentUser.id, tipo: 'error_sync_calendar',
+      titulo: '⚠️ Error de conexión con Google Calendar', mensaje: msg,
+    }).catch(() => {});
   }
 }
 
@@ -4568,101 +4581,122 @@ async function cargarNotificaciones(){
   if (!el) return;
   el.innerHTML = `<div class="spinner"></div>`;
 
-  const alertas = [];
-  const hoy = new Date();
-  const hoyStr = obtenerHoyLocal();
+  try {
+    const alertas = [];
+    const hoy = new Date();
+    const hoyStr = obtenerHoyLocal();
 
-  // Calcular exactamente la fecha de mañana en hora local de Tacna
-  const dManana = new Date(hoy);
-  dManana.setDate(dManana.getDate() + 1);
-  const mananaStr = `${dManana.getFullYear()}-${String(dManana.getMonth() + 1).padStart(2, '0')}-${String(dManana.getDate()).padStart(2, '0')}`;
+    const dManana = new Date(hoy);
+    dManana.setDate(dManana.getDate() + 1);
+    const mananaStr = `${dManana.getFullYear()}-${String(dManana.getMonth() + 1).padStart(2, '0')}-${String(dManana.getDate()).padStart(2, '0')}`;
 
-  // 1. Separaciones de lotes por vencer
-  const { data: seps } = await sb.from('vista_separaciones_por_vencer')
-    .select('*')
-    .lte('dias_restantes', 7)
-    .order('dias_restantes', { ascending: true })
-    .catch(() => ({ data: [] }));
+    // 0. Errores de sincronización con Google Calendar (para poder diagnosticarlos sin perder el mensaje)
+    const { data: errsSync, error: errErrsSync } = await sb.from('notificaciones')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .eq('tipo', 'error_sync_calendar')
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if (errErrsSync) console.error('Error cargando notificaciones de sync:', errErrsSync);
 
-  (seps || []).forEach(s => {
-    const sem = s.dias_restantes <= 1 ? '🔴 URGENTE' : (s.dias_restantes <= 3 ? '🟡 ATENCIÓN' : '🟢 PRÓXIMO');
-    alertas.push({
-      tipo: 'separacion',
-      icono: '🏷️',
-      color: s.dias_restantes <= 1 ? '#B4453C' : '#C9973E',
-      titulo: `${sem}: Separación ${s.propiedad_codigo} vence en ${s.dias_restantes} día(s)`,
-      mensaje: `Cliente: ${s.cliente_nombre} · Gestionar firma de contrato o cobro de inicial.`,
-      accion: "irAVista('separaciones')"
+    (errsSync || []).forEach(n => {
+      alertas.push({
+        tipo: 'error_sync', icono: '⚠️', color: '#B4453C',
+        titulo: escapeHtml(n.titulo), mensaje: escapeHtml(n.mensaje), accion: '',
+      });
     });
-  });
 
-  // 2. Citas de Agenda (Hoy, Mañana y Próximas de toda la semana)
-  const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+    // 1. Separaciones de lotes por vencer
+    const { data: seps, error: errSeps } = await sb.from('vista_separaciones_por_vencer')
+      .select('*')
+      .lte('dias_restantes', 7)
+      .order('dias_restantes', { ascending: true });
+    if (errSeps) console.error('Error cargando separaciones por vencer:', errSeps);
 
-  let qAg = sb.from('agenda')
-    .select('*, usuarios(nombre)')
-    .eq('estado', 'programada')
-    .order('fecha_inicio', { ascending: true });
+    (seps || []).forEach(s => {
+      const sem = s.dias_restantes <= 1 ? '🔴 URGENTE' : (s.dias_restantes <= 3 ? '🟡 ATENCIÓN' : '🟢 PRÓXIMO');
+      alertas.push({
+        tipo: 'separacion',
+        icono: '🏷️',
+        color: s.dias_restantes <= 1 ? '#B4453C' : '#C9973E',
+        titulo: `${sem}: Separación ${s.propiedad_codigo} vence en ${s.dias_restantes} día(s)`,
+        mensaje: `Cliente: ${s.cliente_nombre} · Gestionar firma de contrato o cobro de inicial.`,
+        accion: "irAVista('separaciones')"
+      });
+    });
 
-  if (!esSuperAdminODirector) {
-    qAg = qAg.eq('usuario_id', currentUser.id);
-  }
+    // 2. Citas de Agenda (Hoy, Mañana y Próximas de toda la semana)
+    const rol = currentProfile?.rol;
+    const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
 
-  const { data: ags } = await qAg.limit(50).catch(() => ({ data: [] }));
+    let qAg = sb.from('agenda')
+      .select('*, usuarios(nombre)')
+      .eq('estado', 'programada')
+      .order('fecha_inicio', { ascending: true });
 
-  (ags || []).forEach(ag => {
-    const fStr = ag.fecha_inicio ? fechaLocalDeISO(ag.fecha_inicio) : '';
-    const hStr = ag.fecha_inicio ? horaLocalDeISO(ag.fecha_inicio) : '';
-    
-    const esHoy = fStr === hoyStr;
-    const esManana = fStr === mananaStr;
-
-    let etiqueta = '🗓️ CITA PROGRAMADA';
-    let colorBorde = '#C9973E';
-    let iconoAlerta = '📅';
-
-    if (esHoy) {
-      etiqueta = '🚨 CITA HOY';
-      colorBorde = '#B4453C';
-      iconoAlerta = '⏰';
-    } else if (esManana) {
-      etiqueta = '🔔 CITA MAÑANA';
-      colorBorde = '#C9973E';
-      iconoAlerta = '⏰';
+    if (!esSuperAdminODirector) {
+      qAg = qAg.eq('usuario_id', currentUser.id);
     }
 
-    const fechaLegible = esHoy ? 'Hoy' : (esManana ? 'Mañana' : fmtFecha(fStr));
-    const asesorTxt = ag.usuarios?.nombre ? ` · Asesor: ${escapeHtml(ag.usuarios.nombre)}` : '';
+    const { data: ags, error: errAgs } = await qAg.limit(50);
+    if (errAgs) console.error('Error cargando agenda para notificaciones:', errAgs);
 
-    alertas.push({
-      tipo: 'agenda',
-      icono: iconoAlerta,
-      color: colorBorde,
-      titulo: `${etiqueta}: ${escapeHtml(ag.titulo)}`,
-      mensaje: `🗓️ ${fechaLegible} a las ${hStr || '--:--'} hrs · 📍 ${escapeHtml(ag.locacion || 'Oficina / Campo')}${asesorTxt}`,
-      accion: "irAVista('agenda')"
+    (ags || []).forEach(ag => {
+      const fStr = ag.fecha_inicio ? fechaLocalDeISO(ag.fecha_inicio) : '';
+      const hStr = ag.fecha_inicio ? horaLocalDeISO(ag.fecha_inicio) : '';
+
+      const esHoy = fStr === hoyStr;
+      const esManana = fStr === mananaStr;
+
+      let etiqueta = '🗓️ CITA PROGRAMADA';
+      let colorBorde = '#C9973E';
+      let iconoAlerta = '📅';
+
+      if (esHoy) {
+        etiqueta = '🚨 CITA HOY';
+        colorBorde = '#B4453C';
+        iconoAlerta = '⏰';
+      } else if (esManana) {
+        etiqueta = '🔔 CITA MAÑANA';
+        colorBorde = '#C9973E';
+        iconoAlerta = '⏰';
+      }
+
+      const fechaLegible = esHoy ? 'Hoy' : (esManana ? 'Mañana' : fmtFecha(fStr));
+      const asesorTxt = ag.usuarios?.nombre ? ` · Asesor: ${escapeHtml(ag.usuarios.nombre)}` : '';
+
+      alertas.push({
+        tipo: 'agenda',
+        icono: iconoAlerta,
+        color: colorBorde,
+        titulo: `${etiqueta}: ${escapeHtml(ag.titulo)}`,
+        mensaje: `🗓️ ${fechaLegible} a las ${hStr || '--:--'} hrs · 📍 ${escapeHtml(ag.locacion || 'Oficina / Campo')}${asesorTxt}`,
+        accion: "irAVista('agenda')"
+      });
     });
-  });
 
-  if (alertas.length === 0) {
-    el.innerHTML = emptyState('🔔', 'No tienes alarmas ni citas pendientes. ¡Todo al día!');
-    return;
-  }
+    if (alertas.length === 0) {
+      el.innerHTML = emptyState('🔔', 'No tienes alarmas ni citas pendientes. ¡Todo al día!');
+      return;
+    }
 
-  el.innerHTML = alertas.map(a => `
-    <div class="card" style="border-left: 4px solid ${a.color}; cursor:pointer;" onclick="${a.accion}">
-      <div class="card-row">
-        <div>
-          <p class="card-title">${a.icono} ${a.titulo}</p>
-          <p class="card-sub" style="margin-top:3px;">${a.mensaje}</p>
+    el.innerHTML = alertas.map(a => `
+      <div class="card" style="border-left: 4px solid ${a.color}; cursor:pointer;" onclick="${a.accion}">
+        <div class="card-row">
+          <div>
+            <p class="card-title">${a.icono} ${a.titulo}</p>
+            <p class="card-sub" style="margin-top:3px;">${a.mensaje}</p>
+          </div>
+        </div>
+        <div class="card-actions" style="margin-top:8px;">
+          <span class="chip-btn gold" style="font-size:11px; padding:3px 10px;">Ver más ➔</span>
         </div>
       </div>
-      <div class="card-actions" style="margin-top:8px;">
-        <span class="chip-btn gold" style="font-size:11px; padding:3px 10px;">Ver cita en agenda ➔</span>
-      </div>
-    </div>
-  `).join('');
+    `).join('');
+  } catch (e) {
+    console.error('Error general al cargar notificaciones:', e);
+    el.innerHTML = emptyState('⚠️', 'No se pudieron cargar las notificaciones. Vuelve a intentar.');
+  }
 }
 
 
