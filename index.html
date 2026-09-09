@@ -3947,9 +3947,36 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
 });
 
 document.getElementById('btnAbrirNuevaAgenda')?.addEventListener('click', () => openModal('modalAgenda'));
+
+/* Pide un access_token fresco mediante el refresh_token guardado en el servidor.
+   Sin esto, el token dejaba de funcionar pasada 1 hora y la sincronización fallaba en silencio. */
+async function obtenerTokenGoogleFresco(){
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/refrescar-token-google`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      }
+    });
+    const result = await resp.json();
+    if (result.ok && result.access_token) {
+      localStorage.setItem('google_provider_token', result.access_token);
+      return result.access_token;
+    }
+    console.warn('No se pudo renovar el token de Google, usando el guardado:', result.error || result.mensaje);
+    return localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+  } catch (e) {
+    console.error('Error al pedir token fresco de Google', e);
+    return localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+  }
+}
+
 // Alarmas automáticas para eventos de Agenda (60m, 30m, 15m)
 async function sincronizarEventoCalendar(ev){
-  const googleToken = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+  const googleToken = await obtenerTokenGoogleFresco();
   if (!googleToken) return;
 
   try {
@@ -3992,7 +4019,7 @@ async function sincronizarEventoCalendar(ev){
 
 // Alarmas automáticas para Separaciones (3 días, 2 días, 1 día)
 async function sincronizarSeparacionCalendar(sep){
-  const googleToken = localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+  const googleToken = await obtenerTokenGoogleFresco();
   if (!googleToken) return;
 
   try {
