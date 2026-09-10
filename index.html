@@ -648,7 +648,7 @@
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.96 10.71A5.4 5.4 0 013.68 9c0-.6.1-1.18.28-1.71V4.96H.96A9 9 0 000 9c0 1.45.35 2.83.96 4.04l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3 2.33C4.67 5.16 6.66 3.58 9 3.58z"/></svg>
       Continuar con Google
     </button>
-    <img src="logo-crm-majo-icono.png" alt="CRM Majo" style="width:26px; height:26px; object-fit:contain; margin-top:32px; opacity:0.6;">
+    <img src="logo-crm-majo-icono.png" alt="CRM Majo" style="width:44px; height:44px; object-fit:contain; margin-top:32px; opacity:0.9;">
     <p style="font-size:10.5px; color:#9A9384; margin-top:4px; letter-spacing:0.03em;">Powered by CRM MAJO</p>
   </div>
 
@@ -787,9 +787,12 @@
         <!-- VIDEO COSTA DORADA -->
         <div id="pfPanelVideoCD" class="pf-panel hidden">
           <div id="pfVideoCDSuperAdmin" class="card hidden" style="margin-bottom:14px;">
-            <p class="card-title" style="font-size:13px;">Link de YouTube del video Costa Dorada</p>
+            <p class="card-title" style="font-size:13px;">Opción A — Link de YouTube</p>
             <input type="text" id="pfVideoCDInput" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px; margin-top:8px;">
-            <button class="btn-primary" style="margin-top:8px;" onclick="guardarVideoCostaDorada()">Guardar</button>
+            <button class="btn-primary" style="margin-top:8px;" onclick="guardarVideoCostaDorada()">Guardar link</button>
+            <p class="card-title" style="font-size:13px; margin-top:16px;">Opción B — Subir el video directo (archivo)</p>
+            <input type="file" id="pfVideoCDArchivo" accept="video/*" style="margin-top:8px;">
+            <div id="pfVideoCDSubiendo" class="hidden" style="font-size:12px; color:var(--ink-dim); margin-top:6px;">Subiendo video, espera un momento…</div>
           </div>
           <div id="pfVideoCDViewer"></div>
         </div>
@@ -797,10 +800,15 @@
         <!-- VIDEOS TESTIMONIO -->
         <div id="pfPanelTestimonios" class="pf-panel hidden">
           <div id="pfTestimoniosSuperAdmin" class="card hidden" style="margin-bottom:14px;">
-            <p class="card-title" style="font-size:13px;">Agregar testimonio (link de YouTube)</p>
+            <p class="card-title" style="font-size:13px;">Título del testimonio</p>
             <input type="text" id="pfTestimonioTitulo" placeholder="Título (ej: Familia Quispe)" style="width:100%; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px; margin-top:8px;">
+            <p class="card-title" style="font-size:13px; margin-top:14px;">Opción A — Link de YouTube</p>
             <input type="text" id="pfTestimonioUrl" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px; margin-top:8px;">
-            <button class="btn-primary" style="margin-top:8px;" onclick="agregarTestimonio()">Agregar</button>
+            <button class="btn-primary" style="margin-top:8px;" onclick="agregarTestimonio()">Agregar con link</button>
+            <p class="card-title" style="font-size:13px; margin-top:16px;">Opción B — Subir el video directo (archivo)</p>
+            <input type="file" id="pfTestimonioArchivo" accept="video/*" style="margin-top:8px;">
+            <button class="btn-secondary" style="margin-top:8px;" onclick="agregarTestimonioArchivo()">Agregar video subido</button>
+            <div id="pfTestimonioSubiendo" class="hidden" style="font-size:12px; color:var(--ink-dim); margin-top:6px;">Subiendo video, espera un momento…</div>
           </div>
           <div id="pfTestimoniosViewer"></div>
         </div>
@@ -1600,6 +1608,18 @@
   <!-- MODAL: Configuración rápida (⚙️ junto al nombre) -->
   <!-- MODAL: Nueva Solicitud/Requerimiento -->
   <!-- MODAL: Nuevo/Editar Speech (Manual de Ventas) -->
+  <!-- MODAL: Visor de Documentos (zoom tactil + descargar + WhatsApp) -->
+  <div class="modal-backdrop" id="modalVisorDocumento">
+    <div class="modal-sheet" style="max-width:100%; height:92vh; max-height:92vh; display:flex; flex-direction:column; padding:16px 12px;">
+      <h3 id="visdoc_titulo" style="margin-bottom:8px;">Documento</h3>
+      <div id="visdoc_contenedor" style="flex:1; overflow:auto; background:#F2EFE6; border-radius:10px; touch-action:pinch-zoom pan-x pan-y; display:flex; align-items:center; justify-content:center;"></div>
+      <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+        <a id="visdoc_btn_descargar" href="#" download class="btn-secondary" style="flex:1; text-align:center; text-decoration:none;">⬇️ Descargar</a>
+        <a id="visdoc_btn_whatsapp" href="#" target="_blank" rel="noopener" class="btn-primary" style="flex:1; text-align:center; text-decoration:none; background:#25D366; border-color:#25D366;">📲 Enviar por WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="modalNuevoSpeech">
     <div class="modal-sheet">
       <h3 id="mv_titulo_modal">Nuevo Speech</h3>
@@ -4112,9 +4132,13 @@ async function cargarPortafolio(){
   const elVCD = document.getElementById('pfVideoCDViewer');
   if (videoCD) {
     const embedUrl = urlYoutubeAEmbed(videoCD.url);
-    elVCD.innerHTML = embedUrl
+    const reproductor = embedUrl
       ? `<div style="position:relative; padding-top:56.25%; border-radius:12px; overflow:hidden;"><iframe src="${embedUrl}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`
-      : emptyState('🎬', 'Link no válido.');
+      : `<video src="${videoCD.url}" controls style="width:100%; border-radius:12px; background:#000;"></video>`;
+    elVCD.innerHTML = `
+      ${reproductor}
+      <a href="https://wa.me/?text=${encodeURIComponent('Video Costa Dorada: ' + videoCD.url)}" target="_blank" rel="noopener" class="chip-btn" style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; background:#25D366; color:#fff; border-color:#25D366; text-decoration:none;">📲 Enviar por WhatsApp</a>
+    `;
   } else {
     elVCD.innerHTML = emptyState('🎬', 'Aún no se ha agregado el video de Costa Dorada.');
   }
@@ -4126,11 +4150,17 @@ async function cargarPortafolio(){
   } else {
     elTest.innerHTML = testimonios.map(t => {
       const embedUrl = urlYoutubeAEmbed(t.url);
+      const reproductor = embedUrl
+        ? `<div style="position:relative; padding-top:56.25%; border-radius:10px; overflow:hidden;"><iframe src="${embedUrl}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`
+        : `<video src="${t.url}" controls style="width:100%; border-radius:10px; background:#000;"></video>`;
       return `
       <div class="card" style="margin-bottom:12px;">
         <p class="card-title" style="margin-bottom:8px;">${escapeHtml(t.titulo || 'Testimonio')}</p>
-        ${embedUrl ? `<div style="position:relative; padding-top:56.25%; border-radius:10px; overflow:hidden;"><iframe src="${embedUrl}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>` : ''}
-        ${pfEsSuperAdmin ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger); margin-top:8px;" onclick="eliminarItemPortafolio('${t.id}')">🗑️ Eliminar</button>` : ''}
+        ${reproductor}
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+          <a href="https://wa.me/?text=${encodeURIComponent((t.titulo || 'Testimonio') + ': ' + t.url)}" target="_blank" rel="noopener" class="chip-btn" style="display:inline-flex; align-items:center; gap:6px; background:#25D366; color:#fff; border-color:#25D366; text-decoration:none;">📲 WhatsApp</a>
+          ${pfEsSuperAdmin ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarItemPortafolio('${t.id}')">🗑️ Eliminar</button>` : ''}
+        </div>
       </div>`;
     }).join('');
   }
@@ -4144,7 +4174,7 @@ async function cargarPortafolio(){
       <div class="pf-doc-title">📄 ${sub.label}</div>
       <div class="pf-doc-status">${doc ? '✅ Documento cargado' : '⚪ Sin documento'}</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        ${doc ? `<a href="${doc.url}" target="_blank" rel="noopener" class="chip-btn gold" style="text-decoration:none;">👁️ Ver / Descargar</a>` : ''}
+        ${doc ? `<button class="chip-btn gold" onclick='abrirVisorDocumento(${JSON.stringify({url: doc.url, titulo: sub.label}).replace(/'/g, "&apos;")})'>👁️ Ver</button>` : ''}
         ${pfEsSuperAdmin ? `
           <label class="chip-btn" style="cursor:pointer;">
             📤 ${doc ? 'Reemplazar' : 'Subir'}
@@ -4154,6 +4184,29 @@ async function cargarPortafolio(){
       </div>
     </div>`;
   }).join('');
+}
+
+function abrirVisorDocumento({ url, titulo }){
+  document.getElementById('visdoc_titulo').textContent = titulo;
+  document.getElementById('visdoc_btn_descargar').href = url;
+  document.getElementById('visdoc_btn_whatsapp').href = `https://wa.me/?text=${encodeURIComponent(titulo + ': ' + url)}`;
+
+  const cont = document.getElementById('visdoc_contenedor');
+  const esPDF = /\.pdf(\?|$)/i.test(url);
+  if (esPDF) {
+    cont.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:0;"></iframe>`;
+  } else {
+    cont.innerHTML = `<img src="${url}" style="max-width:none; touch-action:pinch-zoom; cursor:zoom-in;" id="visdoc_img">`;
+    let escala = 1;
+    const img = document.getElementById('visdoc_img');
+    img.style.width = '100%';
+    img.addEventListener('click', () => {
+      escala = escala === 1 ? 2.2 : 1;
+      img.style.width = escala === 1 ? '100%' : `${escala * 100}%`;
+      img.style.cursor = escala === 1 ? 'zoom-in' : 'zoom-out';
+    });
+  }
+  openModal('modalVisorDocumento');
 }
 
 function urlYoutubeAEmbed(url){
@@ -4279,6 +4332,54 @@ async function agregarTestimonio(){
   document.getElementById('pfTestimonioUrl').value = '';
   cargarPortafolio();
 }
+
+async function agregarTestimonioArchivo(){
+  const titulo = document.getElementById('pfTestimonioTitulo').value.trim();
+  const file = document.getElementById('pfTestimonioArchivo').files[0];
+  if (!file) { toast('Selecciona un video primero'); return; }
+  const cargando = document.getElementById('pfTestimonioSubiendo');
+  cargando.classList.remove('hidden');
+  try {
+    const ext = file.name.split('.').pop() || 'mp4';
+    const path = `testimonios/${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('portafolio-comercial').upload(path, file);
+    if (upErr) { toast('Error al subir el video'); console.error(upErr); return; }
+    const { data: pub } = sb.storage.from('portafolio-comercial').getPublicUrl(path);
+    const { error } = await sb.from('portafolio_items').insert({
+      categoria: 'testimonio', titulo: titulo || 'Testimonio', url: pub.publicUrl, tipo: 'video_url', created_by: currentUser.id
+    });
+    if (error) { toast('Error al guardar'); console.error(error); return; }
+    toast('Testimonio subido ✓');
+    document.getElementById('pfTestimonioTitulo').value = '';
+    document.getElementById('pfTestimonioArchivo').value = '';
+    cargarPortafolio();
+  } finally {
+    cargando.classList.add('hidden');
+  }
+}
+
+document.getElementById('pfVideoCDArchivo')?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const cargando = document.getElementById('pfVideoCDSubiendo');
+  cargando.classList.remove('hidden');
+  try {
+    const ext = file.name.split('.').pop() || 'mp4';
+    const path = `video-costa-dorada/${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('portafolio-comercial').upload(path, file);
+    if (upErr) { toast('Error al subir el video'); console.error(upErr); return; }
+    const { data: pub } = sb.storage.from('portafolio-comercial').getPublicUrl(path);
+    await sb.from('portafolio_items').delete().eq('categoria', 'video_costa_dorada');
+    const { error } = await sb.from('portafolio_items').insert({
+      categoria: 'video_costa_dorada', titulo: 'Video Costa Dorada', url: pub.publicUrl, tipo: 'video_url', created_by: currentUser.id
+    });
+    if (error) { toast('Error al guardar'); console.error(error); return; }
+    toast('Video actualizado ✓');
+    cargarPortafolio();
+  } finally {
+    cargando.classList.add('hidden');
+  }
+});
 
 /* ---- Documentación (9 subcategorías) ---- */
 async function subirDocumentoPortafolio(subcategoria, file){
