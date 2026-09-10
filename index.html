@@ -41,24 +41,26 @@
   /* ===== VISTA COMPUTADORA / LAPTOP: PÁGINA PROFESIONAL, ANCHA, TIPO INMOBILIARIA CORPORATIVA ===== */
   @media (min-width: 900px){
     html, body{
-      background: #EAE6DA !important;
+      background: #F7F5EF !important;
       background-image: none !important;
     }
     #app{
-      max-width: 1160px !important;
-      margin: 0 auto !important;
+      max-width: 100% !important;
+      margin: 0 !important;
       background: #F7F5EF !important;
-      box-shadow: 0 10px 50px rgba(20,42,77,0.10);
+      box-shadow: none !important;
+      border: none !important;
       min-height: 100vh;
-      border-left: 1px solid #E5DFCF;
-      border-right: 1px solid #E5DFCF;
     }
+    /* Barra superior a todo el ancho, contenido centrado adentro (como una web corporativa real) */
     .topbar{
-      padding: 26px 44px 18px !important;
+      padding: 22px 5vw 16px !important;
+      max-width: 1400px; margin: 0 auto; width: 100%;
     }
     .topbar .greet{ font-size: 24px !important; }
     main{
-      padding: 8px 44px 80px !important;
+      padding: 8px 5vw 80px !important;
+      max-width: 1400px; margin: 0 auto; width: 100%;
     }
     /* Tira de KPIs como cuadrícula ejecutiva, aprovechando el ancho */
     .kpi-strip{
