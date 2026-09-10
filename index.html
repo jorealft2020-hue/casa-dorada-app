@@ -1776,6 +1776,9 @@ sb.auth.onAuthStateChange(async (event, session) => {
       localStorage.setItem('google_provider_token', session.provider_token);
       sessionStorage.setItem('google_provider_token', session.provider_token);
     }
+    if (session.provider_refresh_token) {
+      await sb.from('usuarios').update({ google_refresh_token: session.provider_refresh_token }).eq('id', session.user.id);
+    }
     await cargarPerfil();
     mostrarApp();
   } else {
@@ -5149,6 +5152,9 @@ function escapeHtml(str){
     if (session.provider_token) {
       localStorage.setItem('google_provider_token', session.provider_token);
       sessionStorage.setItem('google_provider_token', session.provider_token);
+    }
+    if (session.provider_refresh_token) {
+      await sb.from('usuarios').update({ google_refresh_token: session.provider_refresh_token }).eq('id', session.user.id);
     }
     await cargarPerfil();
     mostrarApp();
