@@ -45,66 +45,12 @@
       background-image: none !important;
     }
     #app{
-      max-width: 100% !important;
-      margin: 0 !important;
+      max-width: 480px !important;
+      margin: 0 auto !important;
       background: #F7F5EF !important;
-      box-shadow: none !important;
+      box-shadow: 0 0 40px rgba(0,0,0,0.08);
       min-height: 100vh;
     }
-    /* Barra lateral fija a la izquierda en computadoras */
-    .drawer-backdrop{
-      display: block !important;
-      opacity: 1 !important;
-      background: transparent !important;
-      pointer-events: none !important;
-      position: static !important;
-      z-index: 50 !important;
-    }
-    .drawer-panel{
-      position: fixed !important;
-      top: 0; left: 0; bottom: 0;
-      width: 270px !important;
-      max-width: 270px !important;
-      transform: translateX(0) !important;
-      pointer-events: auto !important;
-      border-right: 1.5px solid #E5DFCF;
-      box-shadow: 3px 0 18px rgba(26,35,50,0.06) !important;
-      z-index: 80 !important;
-      background: #fff !important;
-      display: flex !important; flex-direction: column !important;
-    }
-    .drawer-menu-list{
-      flex: 1 1 auto !important; overflow-y: auto !important; min-height: 0 !important;
-    }
-    .menu-btn, .drawer-close-btn{
-      display: none !important; /* En PC la barra ya está fija, se oculta el botón hamburguesa */
-    }
-    /* Contenido principal amplio a la derecha */
-    #mainScreen{
-      margin-left: 270px !important;
-      width: calc(100% - 270px) !important;
-      min-height: 100vh;
-      background: #F7F5EF !important;
-    }
-    .topbar{
-      max-width: 1300px; margin: 0 auto; width: 100%;
-      padding: 24px 40px 14px !important;
-      background: transparent !important;
-      border-bottom: 1px solid #EAE5D8;
-    }
-    main{
-      max-width: 1300px; margin: 0 auto; width: 100%;
-      padding: 20px 40px 60px !important;
-    }
-    /* Tira de KPIs en cuadrícula ejecutiva */
-    .kpi-strip{
-      display: grid !important;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
-      gap: 16px !important;
-      overflow: visible !important;
-      padding: 10px 0 22px !important;
-    }
-    .kpi-card{ min-width: 0 !important; }
     /* Modales centrados en pantalla en escritorio */
     .modal-backdrop{
       align-items: center !important;
@@ -112,13 +58,9 @@
     }
     .modal-sheet{
       border-radius: 18px !important;
-      max-width: 540px !important;
+      max-width: 440px !important;
       max-height: 86vh !important;
       box-shadow: 0 24px 60px rgba(26,35,50,0.28) !important;
-    }
-    .fab{
-      right: 48px !important;
-      bottom: 40px !important;
     }
   }
 
