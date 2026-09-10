@@ -204,7 +204,12 @@
   /* ===== MODAL ===== */
   .modal-backdrop{ position:fixed; inset:0; background: rgba(26,35,50,0.55); z-index:50; display:none; align-items:flex-end; justify-content:center; }
   .modal-backdrop.open{ display:flex; }
-  .modal-sheet{ background:#fff; width:100%; max-width:480px; border-radius: 20px 20px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); max-height:85vh; overflow-y:auto; }
+  .modal-sheet{ background:#fff; width:100%; max-width:480px; border-radius: 20px 20px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); max-height:85vh; overflow-y:auto; position: relative; }
+  .modal-x-close{
+    position: sticky; top: -4px; float: right; margin: -8px -6px 0 8px; z-index: 5;
+    width: 32px; height: 32px; border-radius: 50%; border: none; background: #F2EEE3; color: var(--ink);
+    font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
   .modal-sheet h3{ margin:0 0 16px; font-size:18px; }
   .field{ margin-bottom:14px; }
   .field label{ display:block; font-size:12.5px; font-weight:600; color: var(--ink-dim); margin-bottom:6px; }
@@ -603,6 +608,7 @@
         </div>
       </div>
       <div class="topbar-actions">
+        <button class="bell" id="btnRefrescarApp" title="Refrescar aplicación">🔄</button>
         <button class="bell" id="btnBell"><span class="dot" id="bellDot"></span>🔔</button>
         <button class="bell" id="btnLogout" title="Cerrar sesión">🚪</button>
       </div>
@@ -1740,6 +1746,19 @@ function horaLocalDeISO(iso){
   return `${h}:${m}`;
 }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
+
+/* Agrega automáticamente una X arriba a la derecha en TODOS los modales, sin tener que editar cada uno.
+   (El script ya corre al final del <body>, así que el DOM ya está listo — no hace falta esperar DOMContentLoaded) */
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+  const sheet = backdrop.querySelector('.modal-sheet');
+  if (!sheet || sheet.querySelector('.modal-x-close')) return;
+  const btn = document.createElement('button');
+  btn.className = 'modal-x-close';
+  btn.innerHTML = '✕';
+  btn.type = 'button';
+  btn.onclick = () => backdrop.classList.remove('open');
+  sheet.insertBefore(btn, sheet.firstChild);
+});
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', ()=> closeModal(b.dataset.close)));
 
@@ -2011,6 +2030,10 @@ function irAVista(vista){
   if (vista === 'portafolio') cargarPortafolio();
 }
 document.getElementById('btnBell').addEventListener('click', () => irAVista('notificaciones'));
+document.getElementById('btnRefrescarApp').addEventListener('click', () => {
+  toast('Actualizando...');
+  setTimeout(() => location.reload(), 300);
+});
 
 /* ============ KPIs ============ */
 async function cargarKPIs(){
@@ -4975,6 +4998,14 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
 });
 
 /* ============ CENTRO DE ALARMAS Y NOTIFICACIONES EN TIEMPO REAL ============ */
+async function eliminarNotificacion(id){
+  const { error } = await sb.from('notificaciones').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Notificación eliminada');
+  cargarNotificaciones();
+  cargarNotificacionesBadge();
+}
+
 async function cargarNotificacionesBadge(){
   let totalAlertas = 0;
   try {
@@ -5035,7 +5066,7 @@ async function cargarNotificaciones(){
 
     (errsSync || []).forEach(n => {
       alertas.push({
-        tipo: 'error_sync', icono: '⚠️', color: '#B4453C',
+        tipo: 'error_sync', icono: '⚠️', color: '#B4453C', id: n.id,
         titulo: escapeHtml(n.titulo), mensaje: escapeHtml(n.mensaje), accion: '',
       });
     });
@@ -5115,15 +5146,16 @@ async function cargarNotificaciones(){
     }
 
     el.innerHTML = alertas.map(a => `
-      <div class="card" style="border-left: 4px solid ${a.color}; cursor:pointer;" onclick="${a.accion}">
-        <div class="card-row">
+      <div class="card" style="border-left: 4px solid ${a.color};">
+        <div class="card-row" style="cursor:pointer;" onclick="${a.accion}">
           <div>
             <p class="card-title">${a.icono} ${a.titulo}</p>
             <p class="card-sub" style="margin-top:3px;">${a.mensaje}</p>
           </div>
         </div>
         <div class="card-actions" style="margin-top:8px;">
-          <span class="chip-btn gold" style="font-size:11px; padding:3px 10px;">Ver más ➔</span>
+          ${a.accion ? `<span class="chip-btn gold" style="font-size:11px; padding:3px 10px; cursor:pointer;" onclick="${a.accion}">Ver más ➔</span>` : ''}
+          ${a.id ? `<button class="chip-btn" style="font-size:11px; padding:3px 10px; color:var(--danger); border-color:var(--danger);" onclick="eliminarNotificacion('${a.id}')">🗑️ Eliminar</button>` : ''}
         </div>
       </div>
     `).join('');
