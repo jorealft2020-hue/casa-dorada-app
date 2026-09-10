@@ -4427,7 +4427,8 @@ async function sincronizarEventoCalendar(ev){
       await sb.from('agenda').update({ sync_calendar_intentos: intentosActuales }).eq('id', ev.id);
       // Solo se avisa en el PRIMER intento fallido, para no repetir la misma alerta 3 veces
       if (intentosActuales === 1) {
-        const msg = `Google rechazó "${ev.titulo}" (código ${resp.status}): ${errBody?.error?.message || 'sin detalle'}`;
+        const pistaToken = googleToken ? `${googleToken.slice(0,12)}...(${googleToken.length} caracteres)` : 'VACÍO';
+        const msg = `Google rechazó "${ev.titulo}" (código ${resp.status}): ${errBody?.error?.message || 'sin detalle'} · Token usado: ${pistaToken}`;
         console.error(msg, errBody);
         await sb.from('notificaciones').insert({
           usuario_id: currentUser.id, tipo: 'error_sync_calendar',
