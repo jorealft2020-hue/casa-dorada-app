@@ -12,13 +12,13 @@
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <style>
   :root{
-    --navy: #1A2332;
-    --navy-soft: #26334A;
-    --gold: #C9973E;
-    --gold-soft: #E4C583;
-    --cream: #F7F4EE;
-    --cream-dim: #EDE8DC;
-    --ink: #1A2332;
+    --navy: #142A4D;
+    --navy-soft: #1F3A63;
+    --gold: #C89B3C;
+    --gold-soft: #E8CE8F;
+    --cream: #F2EFE6;
+    --cream-dim: #E8E2D2;
+    --ink: #142A4D;
     --ink-dim: #6B7280;
     --danger: #B4453C;
     --ok: #4C7A5E;
@@ -71,6 +71,10 @@
       box-shadow: 3px 0 18px rgba(26,35,50,0.06) !important;
       z-index: 80 !important;
       background: #fff !important;
+      display: flex !important; flex-direction: column !important;
+    }
+    .drawer-menu-list{
+      flex: 1 1 auto !important; overflow-y: auto !important; min-height: 0 !important;
     }
     .menu-btn, .drawer-close-btn{
       display: none !important; /* En PC la barra ya está fija, se oculta el botón hamburguesa */
@@ -169,7 +173,8 @@
   .kpi-card .lbl{ font-size: 11.5px; color: #A9B4C4; margin-top:8px; font-weight:600; letter-spacing:0.01em; }
 
   /* ===== SECTION ===== */
-  .section-title{ font-size: 15px; font-weight:700; margin: 22px 0 12px; display:flex; justify-content:space-between; align-items:center; }
+  .section-title{ font-size: 15px; font-weight:700; margin: 22px 0 12px; display:flex; justify-content:space-between; align-items:center; position:relative; padding-left:12px; }
+  .section-title::before{ content:''; position:absolute; left:0; top:2px; bottom:2px; width:4px; border-radius:3px; background: linear-gradient(180deg, var(--gold) 0%, var(--navy) 100%); }
   .section-title .see-all{ font-size: 13px; font-weight:600; color: var(--gold); background:none; border:none; cursor:pointer; }
 
   /* ===== CARDS ===== */
@@ -426,6 +431,18 @@
     color: #fff; font-size: 22px; cursor: pointer; padding: 4px;
   }
   .drawer-menu-list{ flex: 1; overflow-y: auto; padding: 12px 10px; display: flex; flex-direction: column; gap: 4px; }
+  .dr-dept-group{ margin: 6px 0; }
+  .dr-dept-group[data-dept]:not([data-dept="comercial"]) .dr-dept-toggle,
+  .dr-dept-group .dr-dept-toggle{
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    background: none; border: none; padding: 8px 12px; cursor: pointer;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: var(--ink-dim);
+  }
+  .dr-dept-items{ display: flex; flex-direction: column; gap: 4px; max-height: 800px; overflow: hidden; transition: max-height 0.25s ease; }
+  .dr-dept-group.cerrado .dr-dept-items{ max-height: 0 !important; }
+  .dr-dept-group.cerrado .dr-dept-arrow{ transform: rotate(-90deg); }
+  .dr-dept-arrow{ transition: transform 0.2s; }
+  .dr-dept-group.dr-dept-vacio{ display: none; }
   .drawer-item{
     display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 10px;
     border: none; background: none; color: var(--navy); font-size: 13.5px; font-weight: 600;
@@ -521,6 +538,7 @@
           <div class="drawer-user-role" id="drUserRole">SuperAdmin</div>
           <div class="drawer-user-email" id="drUserEmail">joreal.ft2020@gmail.com</div>
         </div>
+        <button class="drawer-close-btn" id="btnConfigRapida" style="right:52px;" title="Configuración rápida">⚙️</button>
         <button class="drawer-close-btn" id="btnCerrarDrawer">✕</button>
       </div>
       <div class="drawer-menu-list">
@@ -528,42 +546,72 @@
           <span class="dr-icon">🏠</span>
           <span class="dr-label">Inicio / Portada</span>
         </button>
-        <button class="drawer-item" data-nav="control" id="drNavControl">
+
+        <div class="dr-dept-group" data-dept="comercial">
+          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')">
+            <span>💼 COMERCIAL</span><span class="dr-dept-arrow">▾</span>
+          </button>
+          <div class="dr-dept-items">
+        <button class="drawer-item" data-nav="control" id="drNavControl" data-modkey="control">
           <span class="dr-icon">📊</span>
           <span class="dr-label">Tablero de Control</span>
         </button>
-        <button class="drawer-item" data-nav="actividades" id="drNavTareas">
+        <button class="drawer-item" data-nav="actividades" id="drNavTareas" data-modkey="actividades">
           <span class="dr-icon">✓</span>
           <span class="dr-label">Mis Tareas Realizadas</span>
         </button>
-        <button class="drawer-item" data-nav="agenda" id="drNavAgenda">
+        <button class="drawer-item" data-nav="agenda" id="drNavAgenda" data-modkey="agenda">
           <span class="dr-icon">📅</span>
           <span class="dr-label">Agenda y Calendario</span>
         </button>
-        <button class="drawer-item" data-nav="clientes" id="drNavClientes">
+        <button class="drawer-item" data-nav="clientes" id="drNavClientes" data-modkey="clientes">
           <span class="dr-icon">👤</span>
           <span class="dr-label">Cartera de Clientes</span>
         </button>
-        <button class="drawer-item" onclick="abrirModalCotizador(); cerrarDrawer();">
+        <button class="drawer-item" id="drNavCotizador" data-modkey="cotizador" onclick="abrirModalCotizador(); cerrarDrawer();">
           <span class="dr-icon">🧮</span>
           <span class="dr-label">Cotizador Rápido de Lotes</span>
         </button>
-        <button class="drawer-item" data-nav="planos" id="drNavPlanos">
+        <button class="drawer-item" data-nav="planos" id="drNavPlanos" data-modkey="planos">
           <span class="dr-icon">🗺️</span>
           <span class="dr-label">Planos Interactivos</span>
         </button>
-        <button class="drawer-item" data-nav="portafolio" id="drNavPortafolio">
+        <button class="drawer-item" data-nav="portafolio" id="drNavPortafolio" data-modkey="portafolio">
           <span class="dr-icon">📁</span>
           <span class="dr-label">Portafolio Comercial</span>
         </button>
-        <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones">
+        <button class="drawer-item" data-nav="manualventas" id="drNavManualVentas" data-modkey="manualventas">
+          <span class="dr-icon">🎯</span>
+          <span class="dr-label">Manual de Ventas</span>
+        </button>
+        <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones" data-modkey="separaciones">
           <span class="dr-icon">🏷️</span>
           <span class="dr-label">Separaciones de Lotes</span>
         </button>
-        <button class="drawer-item" data-nav="rendimiento" id="drNavRendimiento">
+        <button class="drawer-item" data-nav="rendimiento" id="drNavRendimiento" data-modkey="rendimiento">
           <span class="dr-icon">📈</span>
           <span class="dr-label">Rendimiento por Área</span>
         </button>
+        <button class="drawer-item" data-nav="solicitudes" id="drNavSolicitudes" data-modkey="solicitudes">
+          <span class="dr-icon">📋</span>
+          <span class="dr-label">Solicitudes y Requerimientos</span>
+        </button>
+          </div>
+        </div>
+
+        <div class="dr-dept-group dr-dept-vacio" data-dept="marketing">
+          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>📣 MARKETING</span><span class="dr-dept-arrow">▾</span></button>
+          <div class="dr-dept-items"></div>
+        </div>
+        <div class="dr-dept-group dr-dept-vacio" data-dept="administracion">
+          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>🗂️ ADMINISTRACIÓN</span><span class="dr-dept-arrow">▾</span></button>
+          <div class="dr-dept-items"></div>
+        </div>
+        <div class="dr-dept-group dr-dept-vacio" data-dept="legal">
+          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>⚖️ LEGAL</span><span class="dr-dept-arrow">▾</span></button>
+          <div class="dr-dept-items"></div>
+        </div>
+
         <button class="drawer-item" data-nav="notificaciones" id="drNavNotificaciones">
           <span class="dr-icon">🔔</span>
           <span class="dr-label">Alertas y Alarmas</span>
@@ -576,6 +624,11 @@
           <span class="dr-icon">🛠️</span>
           <span class="dr-label">Configuración del Sistema</span>
         </button>
+        <div class="hidden" id="drMarcaMajo" style="text-align:center; padding:16px 8px 4px; border-top:1px solid #EAE5D8; margin-top:8px;">
+          <img src="logo-crm-majo-icono.png" alt="CRM Majo" style="width:56px; height:56px; margin-bottom:6px; object-fit:contain;">
+          <p style="font-size:10.5px; font-weight:800; letter-spacing:0.06em; color:var(--ink-dim); margin:0;">CRM MAJO</p>
+          <p style="font-size:8.5px; color:#B8B2A0; margin:2px 0 0;">Plataforma · Panel del Desarrollador</p>
+        </div>
       </div>
       <div class="drawer-footer">
         <button class="drawer-item logout" id="drBtnLogout">
@@ -595,6 +648,8 @@
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.96 10.71A5.4 5.4 0 013.68 9c0-.6.1-1.18.28-1.71V4.96H.96A9 9 0 000 9c0 1.45.35 2.83.96 4.04l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3 2.33C4.67 5.16 6.66 3.58 9 3.58z"/></svg>
       Continuar con Google
     </button>
+    <img src="logo-crm-majo-icono.png" alt="CRM Majo" style="width:26px; height:26px; object-fit:contain; margin-top:32px; opacity:0.6;">
+    <p style="font-size:10.5px; color:#9A9384; margin-top:4px; letter-spacing:0.03em;">Powered by CRM MAJO</p>
   </div>
 
   <!-- APP -->
@@ -854,8 +909,34 @@
       </div>
 
       <!-- VISTA: Notificaciones -->
+      <!-- VISTA: Solicitudes y Requerimientos -->
+      <!-- VISTA: Manual de Ventas -->
+      <div id="viewManualVentas" class="hidden">
+        <div class="section-title" style="margin-top:0;">Manual de Ventas</div>
+        <div class="planos-tabs" style="margin-bottom:14px;">
+          <button class="plano-tab-btn active" data-mv="speech_llamadas" onclick="cambiarPestanaManualVentas('speech_llamadas')">📞 Speech de Llamadas</button>
+          <button class="plano-tab-btn" data-mv="speech_prospeccion_frio" onclick="cambiarPestanaManualVentas('speech_prospeccion_frio')">🧊 Prospección en Frío</button>
+        </div>
+        <div id="mvSuperAdminBtn" class="hidden" style="margin-bottom:12px;">
+          <button class="btn-primary" style="width:100%;" onclick="abrirModalNuevoSpeech()">➕ Agregar Speech</button>
+        </div>
+        <div id="listaManualVentas"></div>
+      </div>
+
+      <div id="viewSolicitudes" class="hidden">
+        <div class="section-title" style="margin-top:0;">Solicitudes y Requerimientos</div>
+        <button class="btn-primary" style="width:100%; margin-bottom:14px;" onclick="abrirModalNuevaSolicitud(); openModal('modalNuevaSolicitud');">➕ Nueva Solicitud</button>
+        <div class="planos-tabs" style="margin-bottom:12px;">
+          <button class="plano-tab-btn active" data-sol="pendiente" onclick="cambiarFiltroSolicitudes('pendiente')">⚪ Pendientes</button>
+          <button class="plano-tab-btn" data-sol="en_proceso" onclick="cambiarFiltroSolicitudes('en_proceso')">🟡 En Proceso</button>
+          <button class="plano-tab-btn" data-sol="realizado" onclick="cambiarFiltroSolicitudes('realizado')">🟢 Realizadas</button>
+        </div>
+        <div id="listaSolicitudes"></div>
+      </div>
+
       <div id="viewNotificaciones" class="hidden">
         <div class="section-title">Notificaciones</div>
+        <select id="notifAsesorSelector" class="hidden" style="width:100%; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px; margin-bottom:12px; font-size:13px;"></select>
         <div id="listaNotificaciones"></div>
       </div>
 
@@ -892,6 +973,13 @@
       <div id="viewSistema" class="hidden">
         <div class="section-title">Configuración del Sistema</div>
         <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-6px;">Accesos técnicos exclusivos del desarrollador / matriz. No visible para Admin.</p>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🏢 ORGANIZACIÓN POR DEPARTAMENTOS</p>
+        <div class="card">
+          <p class="card-title">Asignar módulos a cada departamento</p>
+          <p class="card-sub">Decide en qué departamento (Comercial, Marketing, Administración, Legal) aparece cada módulo del menú.</p>
+          <div id="listaConfigDepartamentos" style="margin-top:10px;"></div>
+        </div>
 
         <div class="card" style="background:#EAF3EC; border-color:#BFDDC8;">
           <p class="card-title">🤖 Trabajar modificaciones con Claude</p>
@@ -1030,6 +1118,23 @@
       <div class="field" id="mra_bloque_resultado">
         <label>Resultado de la actividad realizada</label>
         <textarea id="mra_resultado" placeholder="Describe acuerdos, compromisos o avances logrados..."></textarea>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <div class="field" style="flex:1; margin:0;">
+            <label>Hora inicio</label>
+            <input type="time" id="mra_hora_inicio">
+          </div>
+          <div class="field" style="flex:1; margin:0;">
+            <label>Hora fin</label>
+            <input type="time" id="mra_hora_fin">
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:10px;">
+          <label>📷 Evidencia (foto)</label>
+          <input type="file" id="mra_evidencia_input" accept="image/*" capture="environment">
+          <div id="mra_evidencia_preview" style="margin-top:8px;"></div>
+        </div>
       </div>
 
       <!-- Campo Motivo si es Reprogramada o Cancelada -->
@@ -1345,6 +1450,18 @@
       </div>
 
       <div class="field"><label>Cargo específico</label><input type="text" id="eu_cargo" placeholder="Ej: Asesor Comercial, Asistente Contable..."></div>
+      <div class="field">
+        <label>Supervisor (recibe copia del reporte diario 9pm)</label>
+        <select id="eu_supervisor_id"><option value="">— Sin supervisor —</option></select>
+      </div>
+      <div class="field">
+        <label>Correo adicional para el reporte diario (opcional)</label>
+        <input type="email" id="eu_reporte_email_adicional" placeholder="otro-correo@ejemplo.com">
+      </div>
+      <label class="perm-card">
+        <div class="perm-card-info"><span class="perm-card-title">Recibir Reporte Diario (9pm)</span></div>
+        <input type="checkbox" id="eu_reporte_diario_activo" checked>
+      </label>
 
       <div class="field">
         <label>Rol en el sistema</label>
@@ -1463,6 +1580,10 @@
         </div>
         <input type="checkbox" id="perm_ver_ranking_equipo">
       </label>
+      <p style="font-size:11.5px; font-weight:800; color:var(--ink-dim); margin:18px 0 6px; text-transform:uppercase; letter-spacing:0.04em;">Otros Módulos</p>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🗺️ Planos Interactivos</span></div><input type="checkbox" id="perm_ver_planos"></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧮 Cotizador</span></div><input type="checkbox" id="perm_ver_cotizador"></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📁 Portafolio Comercial</span></div><input type="checkbox" id="perm_ver_portafolio"></label>
       <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; gap:10px; width:100%;">
           <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
@@ -1476,6 +1597,71 @@
   </div>
 
   <!-- MODAL: preautorizar nuevo usuario (completo) -->
+  <!-- MODAL: Configuración rápida (⚙️ junto al nombre) -->
+  <!-- MODAL: Nueva Solicitud/Requerimiento -->
+  <!-- MODAL: Nuevo/Editar Speech (Manual de Ventas) -->
+  <div class="modal-backdrop" id="modalNuevoSpeech">
+    <div class="modal-sheet">
+      <h3 id="mv_titulo_modal">Nuevo Speech</h3>
+      <input type="hidden" id="mv_id">
+      <input type="hidden" id="mv_categoria">
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="mv_titulo" placeholder="Ej: Apertura de llamada en frío">
+      </div>
+      <div class="field">
+        <label>Contenido del speech</label>
+        <textarea id="mv_contenido" style="min-height:180px;" placeholder="Escribe el guion completo aquí..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalNuevoSpeech">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarSpeech">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalNuevaSolicitud">
+    <div class="modal-sheet">
+      <h3>Nueva Solicitud</h3>
+      <div class="field">
+        <label>¿Quién la pide? (jefe, área, persona)</label>
+        <input type="text" id="sol_solicitante" placeholder="Ej: Gerencia Comercial, Jorge Luque...">
+      </div>
+      <div class="field">
+        <label>Título de la solicitud</label>
+        <input type="text" id="sol_titulo" placeholder="Ej: Enviar comunicado a Marketing">
+      </div>
+      <div class="field">
+        <label>Detalle</label>
+        <textarea id="sol_descripcion" placeholder="Describe qué se pide exactamente..."></textarea>
+      </div>
+      <div class="field">
+        <label>Asignar a</label>
+        <select id="sol_asignado_a"></select>
+      </div>
+      <div class="field">
+        <label>Fecha límite (opcional)</label>
+        <input type="date" id="sol_fecha_limite">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modalNuevaSolicitud">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarSolicitud">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalConfigRapida">
+    <div class="modal-sheet">
+      <h3>Configuración Rápida</h3>
+      <button class="chip-btn gold" style="width:100%; text-align:left; padding:14px; margin-top:10px;" onclick="closeModal('modalConfigRapida'); irAVista('admin'); setTimeout(()=>document.getElementById('btnAbrirPreautorizar')?.click(), 200);">
+        ➕ Crear nuevo usuario
+      </button>
+      <button class="chip-btn gold hidden" id="btnConfigModoServidor" style="width:100%; text-align:left; padding:14px; margin-top:10px;" onclick="closeModal('modalConfigRapida'); irAVista('sistema');">
+        🖥️ Modo Servidor (Panel del Desarrollador)
+      </button>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="modalPreautorizar">
     <div class="modal-sheet">
       <h3 id="pa_modal_titulo">Alta de colaborador en el equipo</h3>
@@ -1595,6 +1781,10 @@
         </div>
         <input type="checkbox" id="pa_perm_eliminar_registros">
       </label>
+      <p style="font-size:11.5px; font-weight:800; color:var(--ink-dim); margin:18px 0 6px; text-transform:uppercase; letter-spacing:0.04em;">Otros Módulos</p>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🗺️ Planos Interactivos</span></div><input type="checkbox" id="pa_perm_ver_planos" checked></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧮 Cotizador</span></div><input type="checkbox" id="pa_perm_ver_cotizador" checked></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📁 Portafolio Comercial</span></div><input type="checkbox" id="pa_perm_ver_portafolio" checked></label>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalPreautorizar">Cancelar</button>
         <button class="btn-primary" id="btnGuardarPreautorizado">Agregar colaborador</button>
@@ -1875,6 +2065,10 @@ async function cargarRankingEquipo(){
 
   const META = { prospeccion: 30, referidos: 10, llamadas: 70, citas: 2, clientesSemana: 5 };
   const semaforo = (valor, meta) => valor >= meta ? '🟢' : (valor >= meta * 0.5 ? '🟡' : '🔴');
+  const barra = (valor, meta, color) => {
+    const pct = Math.min(100, Math.round((valor / meta) * 100));
+    return `<div style="background:#EFEAE0; border-radius:6px; height:6px; margin-top:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:${color};"></div></div>`;
+  };
 
   el.innerHTML = data.map((r, idx) => {
     const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}°`;
@@ -1884,13 +2078,13 @@ async function cargarRankingEquipo(){
         <p class="card-title" style="font-size:14px;">${medalla} ${escapeHtml(r.nombre)}</p>
         <span class="badge badge-completada">${r.total_leads} leads</span>
       </div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; font-size:11.5px;">
-        <div>${semaforo(r.leads_prospeccion, META.prospeccion)} Prospección: <b>${r.leads_prospeccion}</b>/${META.prospeccion}</div>
-        <div>${semaforo(r.leads_referidos, META.referidos)} Referidos: <b>${r.leads_referidos}</b>/${META.referidos}</div>
-        <div>${semaforo(r.total_llamadas, META.llamadas)} Llamadas: <b>${r.total_llamadas}</b>/${META.llamadas}</div>
-        <div>${semaforo(r.total_citas_hoy, META.citas)} Citas hoy: <b>${r.total_citas_hoy}</b>/${META.citas}</div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:11.5px;">
+        <div>${semaforo(r.leads_prospeccion, META.prospeccion)} Prospección: <b>${r.leads_prospeccion}</b>/${META.prospeccion}${barra(r.leads_prospeccion, META.prospeccion, '#3D8B5F')}</div>
+        <div>${semaforo(r.leads_referidos, META.referidos)} Referidos: <b>${r.leads_referidos}</b>/${META.referidos}${barra(r.leads_referidos, META.referidos, '#3D8B5F')}</div>
+        <div>${semaforo(r.total_llamadas, META.llamadas)} Llamadas: <b>${r.total_llamadas}</b>/${META.llamadas}${barra(r.total_llamadas, META.llamadas, '#C9973E')}</div>
+        <div>${semaforo(r.total_citas_hoy, META.citas)} Citas hoy: <b>${r.total_citas_hoy}</b>/${META.citas}${barra(r.total_citas_hoy, META.citas, '#C9973E')}</div>
         <div>📱 Leads RRSS: <b>${r.leads_rrss}</b></div>
-        <div>${semaforo(r.separaciones_semana, META.clientesSemana)} Clientes semana: <b>${r.separaciones_semana}</b>/${META.clientesSemana}</div>
+        <div>${semaforo(r.separaciones_semana, META.clientesSemana)} Clientes semana: <b>${r.separaciones_semana}</b>/${META.clientesSemana}${barra(r.separaciones_semana, META.clientesSemana, '#1A2332')}</div>
       </div>
       <p style="font-size:10.5px; color:var(--ink-dim); margin:8px 0 0;">🏢 Oficina: ${r.citas_oficina} · 💻 MEET: ${r.citas_meet} · 🚗 Proyecto: ${r.visitas_proyecto}</p>
     </div>
@@ -1965,16 +2159,26 @@ function actualizarDatosDrawer(){
 
   showDr('drNavAdmin', esSuperAdminODirector || perm.gestionar_equipo);
   showDr('drNavSistema', rol === 'superadmin');
+  document.getElementById('drMarcaMajo')?.classList.toggle('hidden', rol !== 'superadmin');
   showDr('drNavControl', esSuperAdminODirector || esGerencia || perm.ver_control !== false);
   showDr('drNavTareas', esSuperAdminODirector || esGerencia || perm.ver_actividades !== false);
   showDr('drNavAgenda', esSuperAdminODirector || esGerencia || perm.ver_agenda !== false);
   showDr('drNavClientes', esSuperAdminODirector || esGerencia || perm.ver_clientes !== false);
   showDr('drNavSeparaciones', esSuperAdminODirector || esGerencia || perm.ver_separaciones !== false);
   showDr('drNavRendimiento', esSuperAdminODirector || esGerencia || perm.ver_rendimiento !== false);
+  showDr('drNavPlanos', esSuperAdminODirector || esGerencia || perm.ver_planos !== false);
+  showDr('drNavCotizador', esSuperAdminODirector || esGerencia || perm.ver_cotizador !== false);
+  showDr('drNavPortafolio', esSuperAdminODirector || esGerencia || perm.ver_portafolio !== false);
+  reorganizarDrawerPorDepartamentos();
 }
 
 document.getElementById('btnMenuDrawer')?.addEventListener('click', abrirDrawer);
 document.getElementById('btnCerrarDrawer')?.addEventListener('click', cerrarDrawer);
+document.getElementById('btnConfigRapida')?.addEventListener('click', () => {
+  const esSA = currentProfile?.rol === 'superadmin';
+  document.getElementById('btnConfigModoServidor')?.classList.toggle('hidden', !esSA);
+  openModal('modalConfigRapida');
+});
 document.getElementById('drawerBackdrop')?.addEventListener('click', (e) => {
   if (e.target.id === 'drawerBackdrop') cerrarDrawer();
 });
@@ -2008,7 +2212,7 @@ function irAVista(vista){
     planos:'viewPlanos', portafolio:'viewPortafolio', separaciones:'viewSeparaciones', 
     agenda:'viewAgenda', 
     rendimiento:'viewRendimiento', 
-    notificaciones:'viewNotificaciones', 
+    notificaciones:'viewNotificaciones', solicitudes:'viewSolicitudes', manualventas:'viewManualVentas', 
     admin:'viewAdmin',
     sistema:'viewSistema'
   };
@@ -2026,7 +2230,10 @@ function irAVista(vista){
   if (vista === 'agenda') cargarAgenda();
   if (vista === 'rendimiento') cargarRendimiento();
   if (vista === 'notificaciones') cargarNotificaciones();
+  if (vista === 'solicitudes') cargarSolicitudes('pendiente');
+  if (vista === 'manualventas') cargarManualVentas();
   if (vista === 'admin') { cargarUsuariosAdmin(); cargarPreautorizados(); }
+  if (vista === 'sistema') cargarConfigDepartamentos();
   if (vista === 'portafolio') cargarPortafolio();
 }
 document.getElementById('btnBell').addEventListener('click', () => irAVista('notificaciones'));
@@ -2979,7 +3186,10 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
       ver_agenda: document.getElementById('pa_perm_ver_agenda').checked,
       reportes_pasados: document.getElementById('pa_perm_reportes_pasados').checked,
       generar_informes: document.getElementById('pa_perm_generar_informes').checked,
-      eliminar_registros: document.getElementById('pa_perm_eliminar_registros').checked
+      eliminar_registros: document.getElementById('pa_perm_eliminar_registros').checked,
+      ver_planos: document.getElementById('pa_perm_ver_planos').checked,
+      ver_cotizador: document.getElementById('pa_perm_ver_cotizador').checked,
+      ver_portafolio: document.getElementById('pa_perm_ver_portafolio').checked
     }
   };
 
@@ -3070,6 +3280,16 @@ async function abrirEditarUsuario(id){
   document.getElementById('eu_cargo').value = data.cargo || '';
   document.getElementById('eu_rol').value = data.rol || 'usuario';
   document.getElementById('eu_activo').value = (data.activo === false) ? 'false' : 'true';
+  document.getElementById('eu_reporte_email_adicional').value = data.reporte_email_adicional || '';
+  document.getElementById('eu_reporte_diario_activo').checked = data.reporte_diario_activo !== false;
+
+  const selSup = document.getElementById('eu_supervisor_id');
+  if (!selSup.dataset.cargado) {
+    const { data: posibles } = await sb.from('usuarios').select('id, nombre').neq('id', id).order('nombre');
+    selSup.innerHTML = '<option value="">— Sin supervisor —</option>' + (posibles || []).map(p => `<option value="${p.id}">${escapeHtml(p.nombre)}</option>`).join('');
+    selSup.dataset.cargado = '1';
+  }
+  selSup.value = data.supervisor_id || '';
   
   const perm = data.permisos || {};
   document.getElementById('perm_ver_actividades').checked = perm.ver_actividades !== false;
@@ -3081,6 +3301,9 @@ async function abrirEditarUsuario(id){
   document.getElementById('perm_eliminar_registros').checked = perm.eliminar_registros === true;
   document.getElementById('perm_gestionar_equipo').checked = perm.gestionar_equipo === true;
   document.getElementById('perm_ver_ranking_equipo').checked = perm.ver_ranking_equipo === true;
+  document.getElementById('perm_ver_planos').checked = perm.ver_planos !== false;
+  document.getElementById('perm_ver_cotizador').checked = perm.ver_cotizador !== false;
+  document.getElementById('perm_ver_portafolio').checked = perm.ver_portafolio !== false;
   openModal('modalEditarUsuario');
 }
 
@@ -3094,6 +3317,9 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
     cargo: document.getElementById('eu_cargo').value.trim() || null,
     rol: document.getElementById('eu_rol').value,
     activo: document.getElementById('eu_activo').value === 'true',
+    supervisor_id: document.getElementById('eu_supervisor_id').value || null,
+    reporte_email_adicional: document.getElementById('eu_reporte_email_adicional').value.trim() || null,
+    reporte_diario_activo: document.getElementById('eu_reporte_diario_activo').checked,
     permisos: {
       ver_actividades: document.getElementById('perm_ver_actividades').checked,
       ver_clientes: document.getElementById('perm_ver_clientes').checked,
@@ -3104,6 +3330,9 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
       eliminar_registros: document.getElementById('perm_eliminar_registros').checked,
       gestionar_equipo: document.getElementById('perm_gestionar_equipo').checked,
       ver_ranking_equipo: document.getElementById('perm_ver_ranking_equipo').checked,
+      ver_planos: document.getElementById('perm_ver_planos').checked,
+      ver_cotizador: document.getElementById('perm_ver_cotizador').checked,
+      ver_portafolio: document.getElementById('perm_ver_portafolio').checked,
     }
   };
   const { error } = await sb.from('usuarios').update(payload).eq('id', id);
@@ -4924,6 +5153,13 @@ function abrirResolverAgenda(id, estado){
   openModal('modalResolverAgenda');
 }
 
+document.getElementById('mra_evidencia_input')?.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const prev = document.getElementById('mra_evidencia_preview');
+  if (file && prev) {
+    prev.innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:100%; max-height:180px; border-radius:10px;">`;
+  }
+});
 document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', async () => {
   const id = document.getElementById('mra_id').value;
   const estado = document.getElementById('mra_estado').value;
@@ -4931,6 +5167,9 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   const motivo = document.getElementById('mra_motivo').value.trim();
   const nuevaFecha = document.getElementById('mra_nueva_fecha').value;
   const nuevaHora = document.getElementById('mra_nueva_hora').value;
+  const horaInicioReal = document.getElementById('mra_hora_inicio').value;
+  const horaFinReal = document.getElementById('mra_hora_fin').value;
+  const archivoEvidencia = document.getElementById('mra_evidencia_input').files[0];
 
   if (estado === 'realizada' && !resultado) {
     toast('Por favor, indica el resultado de la actividad');
@@ -4951,6 +5190,24 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   const payload = { estado };
   if (resultado) payload.resultado = resultado;
   if (motivo) payload.motivo = motivo;
+  if (estado === 'realizada' && horaInicioReal) payload.hora_inicio_real = horaInicioReal;
+  if (estado === 'realizada' && horaFinReal) payload.hora_fin_real = horaFinReal;
+
+  if (estado === 'realizada' && archivoEvidencia) {
+    try {
+      const ext = archivoEvidencia.name.split('.').pop() || 'jpg';
+      const path = `${currentUser.id}/${id}-${Date.now()}.${ext}`;
+      const { error: upErr } = await sb.storage.from('evidencias-agenda').upload(path, archivoEvidencia);
+      if (!upErr) {
+        const { data: pub } = sb.storage.from('evidencias-agenda').getPublicUrl(path);
+        payload.evidencia_url = pub.publicUrl;
+      } else {
+        console.error('Error subiendo evidencia:', upErr);
+      }
+    } catch (e) {
+      console.error('Error inesperado subiendo evidencia:', e);
+    }
+  }
 
   if (estado === 'reprogramada') {
     payload.fecha_inicio = new Date(`${nuevaFecha}T${nuevaHora}:00`).toISOString();
@@ -5006,6 +5263,253 @@ async function eliminarNotificacion(id){
   cargarNotificacionesBadge();
 }
 
+/* ============ SOLICITUDES Y REQUERIMIENTOS ============ */
+let solicitudesFiltroActual = 'pendiente';
+
+function cambiarFiltroSolicitudes(estado){
+  solicitudesFiltroActual = estado;
+  document.querySelectorAll('[data-sol]').forEach(b => b.classList.toggle('active', b.dataset.sol === estado));
+  cargarSolicitudes(estado);
+}
+
+async function cargarSolicitudes(estado){
+  const el = document.getElementById('listaSolicitudes');
+  if (!el) return;
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  const { data, error } = await sb.from('solicitudes')
+    .select('*, usuarios!solicitudes_asignado_a_fkey(nombre)')
+    .eq('estado', estado || 'pendiente')
+    .order('fecha_limite', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error cargando solicitudes:', error);
+    el.innerHTML = emptyState('⚠️', 'No se pudieron cargar las solicitudes.');
+    return;
+  }
+  if (!data || data.length === 0) {
+    el.innerHTML = emptyState('📋', 'No hay solicitudes en este estado.');
+    return;
+  }
+
+  const colorEstado = { pendiente: '#B4453C', en_proceso: '#C9973E', realizado: '#3D8B5F' };
+  const siguienteEstado = { pendiente: 'en_proceso', en_proceso: 'realizado', realizado: null };
+  const labelSiguiente = { pendiente: '▶️ Marcar En Proceso', en_proceso: '✅ Marcar Realizado', realizado: null };
+
+  el.innerHTML = data.map(s => {
+    const limite = s.fecha_limite ? `📅 Vence: ${fmtFecha(s.fecha_limite)}` : '';
+    const sig = siguienteEstado[s.estado];
+    return `
+    <div class="card" style="border-left:4px solid ${colorEstado[s.estado]}; margin-bottom:10px;">
+      <p class="card-title" style="font-size:14px;">${escapeHtml(s.titulo)}</p>
+      <p class="card-sub" style="margin-top:4px;">👤 Pide: ${escapeHtml(s.solicitante_nombre)} · Asignado a: ${escapeHtml(s.usuarios?.nombre || '—')}</p>
+      ${s.descripcion ? `<p class="card-sub" style="margin-top:4px;">${escapeHtml(s.descripcion)}</p>` : ''}
+      ${limite ? `<p class="card-sub" style="margin-top:4px; font-weight:700;">${limite}</p>` : ''}
+      <div class="card-actions" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        ${sig ? `<button class="chip-btn gold" onclick="cambiarEstadoSolicitud('${s.id}','${sig}')">${labelSiguiente[s.estado]}</button>` : ''}
+        <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarSolicitud('${s.id}')">🗑️ Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function cambiarEstadoSolicitud(id, nuevoEstado){
+  const payload = { estado: nuevoEstado };
+  if (nuevoEstado === 'realizado') payload.completado_at = new Date().toISOString();
+  const { error } = await sb.from('solicitudes').update(payload).eq('id', id);
+  if (error) { toast('Error al actualizar'); console.error(error); return; }
+  toast('Solicitud actualizada ✓');
+  cargarSolicitudes(solicitudesFiltroActual);
+}
+
+async function eliminarSolicitud(id){
+  if (!confirm('¿Eliminar esta solicitud?')) return;
+  const { error } = await sb.from('solicitudes').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Solicitud eliminada');
+  cargarSolicitudes(solicitudesFiltroActual);
+}
+
+async function abrirModalNuevaSolicitud(){
+  const sel = document.getElementById('sol_asignado_a');
+  if (!sel.dataset.cargado) {
+    const { data: usuarios } = await sb.from('usuarios').select('id, nombre').eq('activo', true).order('nombre');
+    sel.innerHTML = (usuarios || []).map(u => `<option value="${u.id}" ${u.id === currentUser.id ? 'selected' : ''}>${escapeHtml(u.nombre)}</option>`).join('');
+    sel.dataset.cargado = '1';
+  }
+}
+
+document.getElementById('btnGuardarSolicitud')?.addEventListener('click', async () => {
+  const solicitante = document.getElementById('sol_solicitante').value.trim();
+  const titulo = document.getElementById('sol_titulo').value.trim();
+  const descripcion = document.getElementById('sol_descripcion').value.trim();
+  const asignadoA = document.getElementById('sol_asignado_a').value;
+  const fechaLimite = document.getElementById('sol_fecha_limite').value;
+
+  if (!solicitante || !titulo || !asignadoA) {
+    toast('Completa quién la pide, el título y a quién se asigna');
+    return;
+  }
+
+  const { error } = await sb.from('solicitudes').insert({
+    solicitante_nombre: solicitante,
+    titulo,
+    descripcion: descripcion || null,
+    asignado_a: asignadoA,
+    fecha_limite: fechaLimite || null,
+    created_by: currentUser.id,
+  });
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+
+  toast('Solicitud creada ✓');
+  closeModal('modalNuevaSolicitud');
+  document.getElementById('sol_solicitante').value = '';
+  document.getElementById('sol_titulo').value = '';
+  document.getElementById('sol_descripcion').value = '';
+  document.getElementById('sol_fecha_limite').value = '';
+  cargarSolicitudes(solicitudesFiltroActual);
+});
+
+/* ============ MANUAL DE VENTAS ============ */
+let manualVentasPestanaActual = 'speech_llamadas';
+
+function cambiarPestanaManualVentas(categoria){
+  manualVentasPestanaActual = categoria;
+  document.querySelectorAll('[data-mv]').forEach(b => b.classList.toggle('active', b.dataset.mv === categoria));
+  cargarManualVentas();
+}
+
+async function cargarManualVentas(){
+  const el = document.getElementById('listaManualVentas');
+  if (!el) return;
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  const esSuperAdmin = currentProfile?.rol === 'superadmin';
+  document.getElementById('mvSuperAdminBtn')?.classList.toggle('hidden', !esSuperAdmin);
+
+  const { data, error } = await sb.from('manual_ventas_items')
+    .select('*')
+    .eq('categoria', manualVentasPestanaActual)
+    .order('orden')
+    .order('updated_at', { ascending: false });
+
+  if (error) { console.error('Error cargando manual de ventas:', error); el.innerHTML = emptyState('⚠️', 'No se pudo cargar.'); return; }
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🎯', 'Aún no hay speeches cargados en esta categoría.'); return; }
+
+  el.innerHTML = data.map(item => `
+    <div class="card" style="margin-bottom:10px;">
+      <p class="card-title" style="font-size:14px;">${escapeHtml(item.titulo)}</p>
+      <p class="card-sub" style="margin-top:8px; white-space:pre-wrap; line-height:1.5;">${escapeHtml(item.contenido)}</p>
+      ${currentProfile?.rol === 'superadmin' ? `
+        <div class="card-actions" style="margin-top:10px; display:flex; gap:8px;">
+          <button class="chip-btn gold" onclick='abrirModalEditarSpeech(${JSON.stringify(item).replace(/'/g, "&apos;")})'>✏️ Editar</button>
+          <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarSpeech('${item.id}')">🗑️ Eliminar</button>
+        </div>` : ''}
+    </div>
+  `).join('');
+}
+
+function abrirModalNuevoSpeech(){
+  document.getElementById('mv_titulo_modal').textContent = 'Nuevo Speech';
+  document.getElementById('mv_id').value = '';
+  document.getElementById('mv_categoria').value = manualVentasPestanaActual;
+  document.getElementById('mv_titulo').value = '';
+  document.getElementById('mv_contenido').value = '';
+  openModal('modalNuevoSpeech');
+}
+
+function abrirModalEditarSpeech(item){
+  document.getElementById('mv_titulo_modal').textContent = 'Editar Speech';
+  document.getElementById('mv_id').value = item.id;
+  document.getElementById('mv_categoria').value = item.categoria;
+  document.getElementById('mv_titulo').value = item.titulo;
+  document.getElementById('mv_contenido').value = item.contenido;
+  openModal('modalNuevoSpeech');
+}
+
+document.getElementById('btnGuardarSpeech')?.addEventListener('click', async () => {
+  const id = document.getElementById('mv_id').value;
+  const categoria = document.getElementById('mv_categoria').value;
+  const titulo = document.getElementById('mv_titulo').value.trim();
+  const contenido = document.getElementById('mv_contenido').value.trim();
+
+  if (!titulo || !contenido) { toast('Completa el título y el contenido'); return; }
+
+  const payload = { categoria, titulo, contenido, updated_by: currentUser.id, updated_at: new Date().toISOString() };
+  const { error } = id
+    ? await sb.from('manual_ventas_items').update(payload).eq('id', id)
+    : await sb.from('manual_ventas_items').insert(payload);
+
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  toast('Speech guardado ✓');
+  closeModal('modalNuevoSpeech');
+  cargarManualVentas();
+});
+
+async function eliminarSpeech(id){
+  if (!confirm('¿Eliminar este speech?')) return;
+  const { error } = await sb.from('manual_ventas_items').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Eliminado');
+  cargarManualVentas();
+}
+
+/* ============ DEPARTAMENTOS: reorganiza el drawer según lo configurado por SuperAdmin ============ */
+async function reorganizarDrawerPorDepartamentos(){
+  const { data, error } = await sb.from('modulo_departamentos').select('*').order('orden');
+  if (error || !data) { console.error('Error cargando departamentos de módulos:', error); return; }
+
+  const grupos = {};
+  document.querySelectorAll('.dr-dept-group').forEach(g => { grupos[g.dataset.dept] = g.querySelector('.dr-dept-items'); });
+
+  data.forEach(m => {
+    const btn = document.querySelector(`[data-modkey="${m.modulo_key}"]`);
+    const destino = grupos[m.departamento];
+    if (btn && destino) destino.appendChild(btn);
+  });
+
+  // Ocultar el grupo si quedó sin ningún botón visible
+  document.querySelectorAll('.dr-dept-group').forEach(g => {
+    const items = g.querySelector('.dr-dept-items');
+    const algunoVisible = [...items.children].some(el => !el.classList.contains('hidden'));
+    g.classList.toggle('dr-dept-vacio', !algunoVisible);
+  });
+}
+
+/* Pantalla para que SuperAdmin asigne cada módulo a un departamento */
+async function cargarConfigDepartamentos(){
+  const el = document.getElementById('listaConfigDepartamentos');
+  if (!el) return;
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  const { data, error } = await sb.from('modulo_departamentos').select('*').order('orden');
+  if (error || !data) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar.'); return; }
+
+  const deptos = [
+    { key: 'comercial', label: '💼 Comercial' },
+    { key: 'marketing', label: '📣 Marketing' },
+    { key: 'administracion', label: '🗂️ Administración' },
+    { key: 'legal', label: '⚖️ Legal' },
+  ];
+
+  el.innerHTML = data.map(m => `
+    <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:12px 14px;">
+      <span style="font-size:13px; font-weight:700;">${escapeHtml(m.modulo_label)}</span>
+      <select onchange="cambiarDepartamentoModulo('${m.modulo_key}', this.value)" style="padding:6px 10px; border-radius:8px; border:1.5px solid #E5DFCF; font-size:12px;">
+        ${deptos.map(d => `<option value="${d.key}" ${d.key === m.departamento ? 'selected' : ''}>${d.label}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+}
+
+async function cambiarDepartamentoModulo(moduloKey, nuevoDepto){
+  const { error } = await sb.from('modulo_departamentos').update({ departamento: nuevoDepto }).eq('modulo_key', moduloKey);
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  toast('Actualizado ✓');
+  reorganizarDrawerPorDepartamentos();
+}
+
 async function cargarNotificacionesBadge(){
   let totalAlertas = 0;
   try {
@@ -5041,10 +5545,32 @@ async function cargarNotificacionesBadge(){
   }
 }
 
-async function cargarNotificaciones(){
+async function cargarNotificaciones(asesorIdFiltro){
   const el = document.getElementById('listaNotificaciones');
   if (!el) return;
   el.innerHTML = `<div class="spinner"></div>`;
+
+  const rolActual = currentProfile?.rol;
+  const puedeVerEquipo = rolActual === 'admin' || rolActual === 'superadmin' || rolActual === 'director_comercial' || rolActual === 'gerencia';
+  const idObjetivo = puedeVerEquipo ? (asesorIdFiltro || 'todos') : currentUser.id;
+
+  // Selector de asesor (solo para quien puede ver el equipo)
+  const selector = document.getElementById('notifAsesorSelector');
+  if (selector) {
+    if (puedeVerEquipo) {
+      if (!selector.dataset.cargado) {
+        const { data: asesores } = await sb.from('usuarios').select('id, nombre').eq('rol', 'usuario').eq('activo', true).order('nombre');
+        selector.innerHTML = `<option value="todos">🔔 Todas mis notificaciones + equipo</option>` +
+          (asesores || []).map(a => `<option value="${a.id}">👤 Solo: ${escapeHtml(a.nombre)}</option>`).join('');
+        selector.dataset.cargado = '1';
+        selector.onchange = () => cargarNotificaciones(selector.value === 'todos' ? null : selector.value);
+      }
+      selector.value = idObjetivo;
+      selector.classList.remove('hidden');
+    } else {
+      selector.classList.add('hidden');
+    }
+  }
 
   try {
     const alertas = [];
@@ -5056,12 +5582,9 @@ async function cargarNotificaciones(){
     const mananaStr = `${dManana.getFullYear()}-${String(dManana.getMonth() + 1).padStart(2, '0')}-${String(dManana.getDate()).padStart(2, '0')}`;
 
     // 0. Errores de sincronización con Google Calendar (para poder diagnosticarlos sin perder el mensaje)
-    const { data: errsSync, error: errErrsSync } = await sb.from('notificaciones')
-      .select('*')
-      .eq('usuario_id', currentUser.id)
-      .eq('tipo', 'error_sync_calendar')
-      .order('created_at', { ascending: false })
-      .limit(10);
+    let qErr = sb.from('notificaciones').select('*').eq('tipo', 'error_sync_calendar').order('created_at', { ascending: false }).limit(10);
+    qErr = idObjetivo === 'todos' ? qErr : qErr.eq('usuario_id', idObjetivo);
+    const { data: errsSync, error: errErrsSync } = await qErr;
     if (errErrsSync) console.error('Error cargando notificaciones de sync:', errErrsSync);
 
     (errsSync || []).forEach(n => {
@@ -5099,7 +5622,9 @@ async function cargarNotificaciones(){
       .eq('estado', 'programada')
       .order('fecha_inicio', { ascending: true });
 
-    if (!esSuperAdminODirector) {
+    if (idObjetivo !== 'todos') {
+      qAg = qAg.eq('usuario_id', idObjetivo);
+    } else if (!esSuperAdminODirector) {
       qAg = qAg.eq('usuario_id', currentUser.id);
     }
 
