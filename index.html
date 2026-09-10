@@ -4346,7 +4346,7 @@ let ultimoErrorTokenGoogle = null;
 async function obtenerTokenGoogleFresco(){
   try {
     const { data: { session } } = await sb.auth.getSession();
-    if (!session) { ultimoErrorTokenGoogle = 'No hay sesión activa de Supabase.'; return localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token'); }
+    if (!session) { ultimoErrorTokenGoogle = 'No hay sesión activa de Supabase.'; return null; }
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/refrescar-token-google`, {
       method: 'POST',
       headers: {
@@ -4360,13 +4360,16 @@ async function obtenerTokenGoogleFresco(){
       localStorage.setItem('google_provider_token', result.access_token);
       return result.access_token;
     }
-    ultimoErrorTokenGoogle = result.mensaje || result.error || `Respuesta inesperada del servidor (HTTP ${resp.status})`;
-    console.warn('No se pudo renovar el token de Google, usando el guardado:', ultimoErrorTokenGoogle);
-    return localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+    // Motivo detallado real de Google (no solo el código genérico)
+    const detalleGoogle = result.detalle ? JSON.stringify(result.detalle) : '';
+    ultimoErrorTokenGoogle = `${result.mensaje || result.error || `HTTP ${resp.status}`}${detalleGoogle ? ' — ' + detalleGoogle : ''}`;
+    console.warn('No se pudo renovar el token de Google:', ultimoErrorTokenGoogle);
+    localStorage.removeItem('google_provider_token'); // el token viejo puede estar revocado, no lo reutilizamos
+    return null;
   } catch (e) {
     ultimoErrorTokenGoogle = `Error de red al pedir el token: ${String(e)}`;
     console.error('Error al pedir token fresco de Google', e);
-    return localStorage.getItem('google_provider_token') || sessionStorage.getItem('google_provider_token');
+    return null;
   }
 }
 
@@ -4374,11 +4377,15 @@ async function obtenerTokenGoogleFresco(){
 async function sincronizarEventoCalendar(ev){
   const googleToken = await obtenerTokenGoogleFresco();
   if (!googleToken) {
-    await sb.from('notificaciones').insert({
-      usuario_id: currentUser.id, tipo: 'error_sync_calendar',
-      titulo: '⚠️ No se pudo obtener token de Google',
-      mensaje: `Cita "${ev.titulo}" no se sincronizó. Motivo: ${ultimoErrorTokenGoogle || 'no hay ningún token guardado (vuelve a iniciar sesión con Google).'}`,
-    }).catch(() => {});
+    const intentosActuales = (ev.sync_calendar_intentos || 0) + 1;
+    await sb.from('agenda').update({ sync_calendar_intentos: intentosActuales }).eq('id', ev.id).catch(() => {});
+    if (intentosActuales === 1) {
+      await sb.from('notificaciones').insert({
+        usuario_id: currentUser.id, tipo: 'error_sync_calendar',
+        titulo: '⚠️ No se pudo obtener token de Google',
+        mensaje: `Cita "${ev.titulo}" no se sincronizó. Motivo: ${ultimoErrorTokenGoogle || 'no hay ningún token guardado (vuelve a iniciar sesión con Google).'}`,
+      }).catch(() => {});
+    }
     return;
   }
 
