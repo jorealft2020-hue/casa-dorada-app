@@ -38,18 +38,38 @@
 /* Ocultar barra inferior redundante (se usa el menú lateral) */
   .bottomnav{ display: none !important; }
 
-  /* ===== VISTA COMPUTADORA / LAPTOP: DASHBOARD SaaS DE PANTALLA COMPLETA ===== */
+  /* ===== VISTA COMPUTADORA / LAPTOP: PÁGINA PROFESIONAL, ANCHA, TIPO INMOBILIARIA CORPORATIVA ===== */
   @media (min-width: 900px){
     html, body{
-      background: #F4F1EA !important;
+      background: #EAE6DA !important;
       background-image: none !important;
     }
     #app{
-      max-width: 480px !important;
+      max-width: 1160px !important;
       margin: 0 auto !important;
       background: #F7F5EF !important;
-      box-shadow: 0 0 40px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 50px rgba(20,42,77,0.10);
       min-height: 100vh;
+      border-left: 1px solid #E5DFCF;
+      border-right: 1px solid #E5DFCF;
+    }
+    .topbar{
+      padding: 26px 44px 18px !important;
+    }
+    .topbar .greet{ font-size: 24px !important; }
+    main{
+      padding: 8px 44px 80px !important;
+    }
+    /* Tira de KPIs como cuadrícula ejecutiva, aprovechando el ancho */
+    .kpi-strip{
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+      overflow: visible !important;
+    }
+    .kpi-card{ min-width: 0 !important; }
+    /* El drawer se abre igual que en móvil (deslizante), solo un poco más ancho en pantallas grandes */
+    .drawer-panel{
+      max-width: 300px !important;
     }
     /* Modales centrados en pantalla en escritorio */
     .modal-backdrop{
@@ -58,7 +78,7 @@
     }
     .modal-sheet{
       border-radius: 18px !important;
-      max-width: 440px !important;
+      max-width: 560px !important;
       max-height: 86vh !important;
       box-shadow: 0 24px 60px rgba(26,35,50,0.28) !important;
     }
