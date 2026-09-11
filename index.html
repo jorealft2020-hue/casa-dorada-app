@@ -56,8 +56,11 @@
 /* Ocultar barra inferior redundante (se usa el menú lateral) */
   .bottomnav{ display: none !important; }
 
-  /* ===== VISTA COMPUTADORA / LAPTOP: PÁGINA PROFESIONAL, ANCHA, TIPO INMOBILIARIA CORPORATIVA ===== */
-  @media (min-width: 900px){
+  /* ===== VISTA COMPUTADORA / LAPTOP / TABLET: PÁGINA PROFESIONAL, ANCHA, TIPO INMOBILIARIA CORPORATIVA =====
+     Antes el punto de cambio era 900px, lo que dejaba a la mayoría de tablets
+     (usualmente 768-880px de ancho) atrapadas en la vista móvil angosta con
+     enormes márgenes vacíos a los lados. Se baja a 680px para cubrirlas. */
+  @media (min-width: 680px){
     html, body{
       background: #F7F5EF !important;
       background-image: none !important;
@@ -704,7 +707,7 @@
     background: #fff; border: 1.5px solid #E5DFCF; border-radius: 14px; overflow: hidden;
     box-shadow: 0 6px 20px rgba(0,0,0,0.06);
   }
-  @media (min-width: 900px){
+  @media (min-width: 680px){
     .plano-frame-container{ height: 750px; }
   }
   .plano-iframe{ width: 100%; height: 100%; border: 0; display: block; }
@@ -900,6 +903,22 @@
           <div class="video-wrapper">
             <iframe id="vd_iframe" src="https://www.youtube-nocookie.com/embed/Hq0V_pBDRy8" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
+        </div>
+
+        <!-- RESUMEN DE AYER Y PLAN DE HOY (la lógica ya existía en el código, faltaba esta tarjeta) -->
+        <div class="daily-analysis-card">
+          <div class="da-section-title"><span>📊</span> Tu resumen de ayer</div>
+          <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <div style="flex:1; background:#F7F4EC; border-radius:10px; padding:10px; text-align:center;">
+              <div style="font-size:20px; font-weight:800; color:var(--navy);" id="da_tareas_ayer">0</div>
+              <div style="font-size:10.5px; color:var(--ink-dim);">Actividades</div>
+            </div>
+            <div style="flex:1; background:#F7F4EC; border-radius:10px; padding:10px; text-align:center;">
+              <div style="font-size:20px; font-weight:800; color:var(--navy);" id="da_leads_ayer">0</div>
+              <div style="font-size:10.5px; color:var(--ink-dim);">Contactos</div>
+            </div>
+          </div>
+          <p style="font-size:12.5px; line-height:1.5; margin:0;" id="da_plan_texto"></p>
         </div>
 
         <!-- RANKING DEL EQUIPO (solo Admin/SuperAdmin o quien tenga el permiso) -->
