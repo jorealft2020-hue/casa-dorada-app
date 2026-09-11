@@ -1814,6 +1814,50 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
 let currentProfile = null;
+
+/* =========================================================================
+   LISTA ÚNICA Y CANÓNICA DE PERMISOS DEL SISTEMA
+   -------------------------------------------------------------------------
+   Regla de oro: cuando se agregue un módulo, submódulo o acción nueva que
+   requiera control de acceso, AGREGAR SU CLAVE AQUÍ (con su valor por
+   defecto y una etiqueta legible). Todo lo demás (checkboxes de los
+   formularios de usuario, y el "relleno" automático de usuarios ya
+   existentes que no tenían esa clave) se genera a partir de esta lista,
+   así que nunca más queda un permiso "huérfano" que solo vive hardcodeado
+   en un checkbox suelto.
+   ========================================================================= */
+const PERMISOS_CATALOGO = [
+  { key: 'ver_agenda',          label: 'Ver Agenda',                         default: true  },
+  { key: 'ver_clientes',        label: 'Ver Cartera de Clientes',            default: true  },
+  { key: 'ver_separaciones',    label: 'Ver Separaciones de Lotes',          default: true  },
+  { key: 'ver_cotizador',       label: 'Ver Cotizador Rápido',               default: true  },
+  { key: 'ver_planos',          label: 'Ver Planos Interactivos',            default: true  },
+  { key: 'ver_portafolio',      label: 'Ver Portafolio Comercial',           default: true  },
+  { key: 'ver_actividades',     label: 'Ver Actividades Realizadas',         default: true  },
+  { key: 'ver_control',         label: 'Ver Tablero de Control',             default: true  },
+  { key: 'ver_rendimiento',     label: 'Ver Rendimiento',                    default: true  },
+  { key: 'ver_ranking_equipo',  label: 'Ver Ranking del Equipo',             default: false },
+  { key: 'kpi_monto',           label: 'Ver Montos (KPI)',                   default: false },
+  { key: 'kpi_desglose',        label: 'Ver Desglose de KPI',                default: false },
+  { key: 'reportes_pasados',    label: 'Ver Reportes Pasados',               default: false },
+  { key: 'generar_informes',    label: 'Generar Informes',                   default: false },
+  { key: 'gestionar_equipo',    label: 'Crear y editar usuarios y permisos', default: false },
+  { key: 'eliminar_registros',  label: 'Eliminar Registros',                 default: false },
+];
+
+/** Completa cualquier permiso faltante de un usuario con su valor por
+ *  defecto del catálogo. Úsese SIEMPRE al leer currentProfile.permisos
+ *  o el permisos de cualquier usuario, así como al abrir los formularios
+ *  de edición, para que un permiso agregado después de crear al usuario
+ *  no quede indefinido (undefined) en vez de tener un valor explícito. */
+function fusionarPermisosConCatalogo(permisosGuardados){
+  const p = permisosGuardados || {};
+  const resultado = {};
+  PERMISOS_CATALOGO.forEach(({ key, default: def }) => {
+    resultado[key] = (p[key] !== undefined) ? p[key] : def;
+  });
+  return resultado;
+}
 let currentView = 'inicio';
 let puedeEliminar = false;
 
@@ -2158,7 +2202,7 @@ function actualizarDatosDrawer(){
   const elMail = document.getElementById('drUserEmail');
   if (elMail) elMail.textContent = emailTxt;
 
-  const perm = currentProfile?.permisos || {};
+  const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial';
   const esGerencia = rol === 'gerencia';
@@ -3104,7 +3148,22 @@ function compartirWhatsAppInvitacion(){
 }
 
 /* ============ ADMIN: USUARIOS PRE-AUTORIZADOS (ALTA COMPLETA) ============ */
-document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => openModal('modalPreautorizar'));
+document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => {
+  // Reset completo: si no se hace, un usuario NUEVO puede heredar en silencio
+  // los datos y permisos del último colaborador que se editó en este formulario.
+  ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('pa_area').value = 'Comercial';
+  document.getElementById('pa_rol').value = 'usuario';
+  window._permisosCompletosEnEdicionPA = null;
+  const defPerm = fusionarPermisosConCatalogo(null);
+  Object.keys(defPerm).forEach(key => {
+    const el = document.getElementById('pa_perm_' + key);
+    if (el) el.checked = defPerm[key];
+  });
+  openModal('modalPreautorizar');
+});
 
 async function cargarPreautorizados(){
   const { data } = await sb.from('usuarios_preautorizados').select('*').order('created_at', { ascending: false });
@@ -3143,7 +3202,8 @@ async function abrirEditarPreautorizado(email){
   document.getElementById('pa_cargo').value = p.cargo || '';
   document.getElementById('pa_rol').value = p.rol || 'usuario';
 
-  const perm = p.permisos || {};
+  const perm = fusionarPermisosConCatalogo(p.permisos);
+  window._permisosCompletosEnEdicionPA = perm; // preserva claves del catálogo sin checkbox propio en este formulario
   document.getElementById('pa_perm_ver_actividades').checked = perm.ver_actividades !== false;
   document.getElementById('pa_perm_ver_clientes').checked = perm.ver_clientes !== false;
   document.getElementById('pa_perm_ver_separaciones').checked = perm.ver_separaciones !== false;
@@ -3155,6 +3215,9 @@ async function abrirEditarPreautorizado(email){
   document.getElementById('pa_perm_reportes_pasados').checked = perm.reportes_pasados === true;
   document.getElementById('pa_perm_generar_informes').checked = perm.generar_informes !== false;
   document.getElementById('pa_perm_eliminar_registros').checked = perm.eliminar_registros === true;
+  document.getElementById('pa_perm_ver_planos').checked = perm.ver_planos !== false;
+  document.getElementById('pa_perm_ver_cotizador').checked = perm.ver_cotizador !== false;
+  document.getElementById('pa_perm_ver_portafolio').checked = perm.ver_portafolio !== false;
 
   openModal('modalPreautorizar');
 }
@@ -3191,10 +3254,15 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
     rol,
     creado_por: currentUser.id,
     permisos: {
+      ...fusionarPermisosConCatalogo(window._permisosCompletosEnEdicionPA),
       ver_actividades: document.getElementById('pa_perm_ver_actividades').checked,
       ver_clientes: document.getElementById('pa_perm_ver_clientes').checked,
       ver_separaciones: document.getElementById('pa_perm_ver_separaciones').checked,
       ver_agenda: document.getElementById('pa_perm_ver_agenda').checked,
+      ver_rendimiento: document.getElementById('pa_perm_ver_rendimiento').checked,
+      ver_control: document.getElementById('pa_perm_ver_control').checked,
+      kpi_monto: document.getElementById('pa_perm_kpi_monto').checked,
+      kpi_desglose: document.getElementById('pa_perm_kpi_desglose').checked,
       reportes_pasados: document.getElementById('pa_perm_reportes_pasados').checked,
       generar_informes: document.getElementById('pa_perm_generar_informes').checked,
       eliminar_registros: document.getElementById('pa_perm_eliminar_registros').checked,
@@ -3302,7 +3370,8 @@ async function abrirEditarUsuario(id){
   }
   selSup.value = data.supervisor_id || '';
   
-  const perm = data.permisos || {};
+  const perm = fusionarPermisosConCatalogo(data.permisos);
+  window._permisosCompletosEnEdicion = perm; // preserva claves del catálogo sin checkbox propio en este formulario
   document.getElementById('perm_ver_actividades').checked = perm.ver_actividades !== false;
   document.getElementById('perm_ver_clientes').checked = perm.ver_clientes !== false;
   document.getElementById('perm_ver_separaciones').checked = perm.ver_separaciones !== false;
@@ -3332,6 +3401,11 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
     reporte_email_adicional: document.getElementById('eu_reporte_email_adicional').value.trim() || null,
     reporte_diario_activo: document.getElementById('eu_reporte_diario_activo').checked,
     permisos: {
+      // Partimos de los permisos completos ya cargados (incluye claves del catálogo
+      // que no tienen checkbox en este formulario, como ver_control/ver_rendimiento/
+      // kpi_monto/kpi_desglose) y solo pisamos las que sí se editan aquí. Así nunca
+      // se pierde un permiso por no tener campo visible en este formulario puntual.
+      ...fusionarPermisosConCatalogo(window._permisosCompletosEnEdicion),
       ver_actividades: document.getElementById('perm_ver_actividades').checked,
       ver_clientes: document.getElementById('perm_ver_clientes').checked,
       ver_separaciones: document.getElementById('perm_ver_separaciones').checked,
