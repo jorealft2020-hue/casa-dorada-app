@@ -2566,7 +2566,7 @@ async function mostrarApp(){
   document.getElementById('mainScreen').classList.remove('hidden');
   document.getElementById('mainScreen').style.display = 'flex';
   document.getElementById('greetName').textContent = 'Hola, ' + (currentProfile?.nombre?.split(' ')[0] || 'usuario');
-  document.getElementById('greetRole').textContent = rolLabel(currentProfile?.rol);
+  document.getElementById('greetRole').textContent = currentProfile?.cargo || rolLabel(currentProfile?.rol);
   activarAlarmasPush();
 
   const rol = currentProfile?.rol;
@@ -2718,7 +2718,7 @@ function cerrarDrawer(){
 function actualizarDatosDrawer(){
   const colabNombre = currentProfile?.nombre || 'Jorge Alexander Luque';
   const inicial = colabNombre.trim().charAt(0).toUpperCase() || 'J';
-  const rolTxt = rolLabel(currentProfile?.rol);
+  const rolTxt = currentProfile?.cargo || rolLabel(currentProfile?.rol);
   const emailTxt = currentUser?.email || 'joreal.ft2020@gmail.com';
 
   const elIni = document.getElementById('drUserInitial');
@@ -4046,13 +4046,7 @@ function compartirWhatsAppInvitacion(){
 /* ============ ADMIN: USUARIOS PRE-AUTORIZADOS (ALTA COMPLETA) ============ */
 document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => {
   // Reset completo: si no se hace, un usuario NUEVO puede heredar en silencio
-  // los datos, permisos, título y estado del botón del último colaborador
-  // que se editó en este formulario (por eso a veces parecía que "no guardaba
-  // los cambios" — el botón seguía diciendo "Agregar colaborador" al editar,
-  // y aquí seguía diciendo "Guardar cambios" al querer crear uno nuevo).
-  document.getElementById('pa_modal_titulo').textContent = 'Alta de colaborador en el equipo';
-  document.getElementById('btnGuardarPreautorizado').textContent = '➕ Agregar colaborador';
-  document.getElementById('pa_email').disabled = false;
+  // los datos y permisos del último colaborador que se editó en este formulario.
   ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
@@ -4095,7 +4089,6 @@ async function abrirEditarPreautorizado(email){
   if (!p) { toast('No se encontró el registro'); return; }
 
   document.getElementById('pa_modal_titulo').textContent = 'Editar colaborador pendiente';
-  document.getElementById('btnGuardarPreautorizado').textContent = '💾 Guardar cambios';
   document.getElementById('pa_nombre').value = p.nombre || '';
   document.getElementById('pa_email').value = p.email;
   document.getElementById('pa_email').disabled = true;
@@ -4181,12 +4174,10 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
     }
   };
 
-  const esEdicion = document.getElementById('pa_email').disabled;
   const { error } = await sb.from('usuarios_preautorizados').upsert(payload);
-  if (error) { toast('Error al guardar'); console.error(error); return; }
-  toast(esEdicion ? 'Cambios guardados ✓' : 'Colaborador pre-autorizado ✓ ya puede iniciar sesión con Google');
+  if (error) { toast('Error al agregar colaborador'); console.error(error); return; }
+  toast('Colaborador pre-autorizado ✓ ya puede iniciar sesión con Google');
   closeModal('modalPreautorizar');
-  document.getElementById('pa_email').disabled = false;
   ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => document.getElementById(id).value = '');
   cargarPreautorizados();
 });
@@ -5813,6 +5804,7 @@ async function sincronizarEventoCalendar(ev){
       reminders: {
         useDefault: false,
         overrides: [
+          { method: 'email', minutes: 60 },
           { method: 'popup', minutes: 60 },
           { method: 'popup', minutes: 30 },
           { method: 'popup', minutes: 15 }
@@ -5886,6 +5878,7 @@ async function sincronizarSolicitudCalendar(sol){
       reminders: {
         useDefault: false,
         overrides: [
+          { method: 'email', minutes: 1440 }, // 1 día antes
           { method: 'popup', minutes: 1440 }, // 1 día antes
           { method: 'popup', minutes: 0 }      // el mismo día
         ]
@@ -5948,6 +5941,7 @@ async function sincronizarSeparacionCalendar(sep){
       reminders: {
         useDefault: false,
         overrides: [
+          { method: 'email', minutes: 2880 },
           { method: 'popup', minutes: 4320 },
           { method: 'popup', minutes: 2880 },
           { method: 'popup', minutes: 1440 }
