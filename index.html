@@ -3082,6 +3082,16 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
     doc.setTextColor(...cDim);
     doc.text('Constructora & Inmobiliaria Casa Dorada', vbX + (colW / 2), y + 22, { align: 'center' });
 
+    // Copyright en el pie de TODAS las páginas del documento (no solo la última)
+    const totalPaginasRD = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPaginasRD; p++) {
+      doc.setPage(p);
+      doc.setFontSize(6.5);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...cDim);
+      doc.text(`© ${new Date().getFullYear()} CRM MAJO · Jorge Luque — Todos los derechos reservados`, pageWidth / 2, pageHeight - 14, { align: 'center' });
+    }
+
     const nombreArchivo = `informe-diario-${(currentProfile?.nombre || 'usuario').replace(/\s+/g,'-').toLowerCase()}-${fechaReporte}.pdf`;
     const blob = doc.output('blob');
     const archivoPDF = new File([blob], nombreArchivo, { type: 'application/pdf' });
@@ -3466,6 +3476,16 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
     y += 14;
     doc.setFont(undefined, 'normal');
     doc.text(cargoVendedor, marginX, y);
+
+    // Copyright en el pie de TODAS las páginas del documento
+    const totalPaginasInf = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPaginasInf; p++) {
+      doc.setPage(p);
+      doc.setFontSize(6.5);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(150, 150, 150);
+      doc.text(`© ${new Date().getFullYear()} CRM MAJO · Jorge Luque — Todos los derechos reservados`, pageWidth / 2, pageHeight - 14, { align: 'center' });
+    }
 
     const nombreArchivo = `informe-${tipo}-${nombreVendedor.replace(/\s+/g,'-').toLowerCase()}-${fechaInicio}.pdf`;
     doc.save(nombreArchivo);
