@@ -254,7 +254,14 @@
     0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
     30% { transform: translateY(-5px); opacity: 1; }
   }
-  .bell{ position:relative; width:40px; height:40px; border-radius:10px; background: var(--cream-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; font-size:16px; }
+  .bell{
+    position:relative; width:42px; height:42px; border-radius:13px;
+    background: linear-gradient(155deg, #ffffff 0%, var(--cream-dim) 100%);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; font-size:17px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 2px 6px rgba(26,35,50,0.10), 0 1px 2px rgba(26,35,50,0.06);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .bell:active{ transform: scale(0.92); box-shadow: 0 1px 3px rgba(26,35,50,0.15) inset; }
   .bell .dot{ position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%; background: var(--danger); display:none; }
   .bell.has-unread .dot{ display:block; }
 
@@ -835,10 +842,9 @@
         </div>
       </div>
       <div class="topbar-actions">
+        <button class="bell" id="btnBell"><span class="dot" id="bellDot"></span>🔔</button>
         <button class="bell majo-fab-btn" id="btnMajoRapido" title="Hablar con MAJO ASSISTANT">😊</button>
         <button class="bell" id="btnRefrescarApp" title="Refrescar aplicación">🔄</button>
-        <button class="bell" id="btnBell"><span class="dot" id="bellDot"></span>🔔</button>
-        <button class="bell" id="btnLogout" title="Cerrar sesión">🚪</button>
       </div>
     </div>
 
@@ -896,6 +902,10 @@
       <div id="viewActividades" class="hidden">
         <div class="section-title">Actividades realizadas
           <button class="see-all" onclick="toggleArchivadasUI()">🗄️ Ver archivadas</button>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <button class="plano-tab-btn active" id="tabActHoy" onclick="cambiarFiltroFechaActividades('hoy')">📅 Hoy</button>
+          <button class="plano-tab-btn" id="tabActTodas" onclick="cambiarFiltroFechaActividades('todas')">🗂️ Historial completo</button>
         </div>
         <div id="listaActividadesTodas"></div>
         <div id="bloqueActividadesArchivadas" class="hidden" style="margin-top:18px;">
@@ -2464,14 +2474,15 @@ document.getElementById('btnGoogleLogin').addEventListener('click', async () => 
   });
 });
 
-document.getElementById('btnLogout').addEventListener('click', async () => {
+async function cerrarSesionApp(){
   if (confirm('¿Cerrar sesión?')) {
     localStorage.removeItem('google_provider_token');
     sessionStorage.removeItem('google_provider_token');
     await sb.auth.signOut();
     mostrarLogin();
   }
-});
+}
+document.getElementById('btnLogout')?.addEventListener('click', cerrarSesionApp);
 
 sb.auth.onAuthStateChange(async (event, session) => {
   if (session?.user) {
@@ -2731,7 +2742,7 @@ document.querySelectorAll('.drawer-item[data-nav]').forEach(btn => {
 
 document.getElementById('drBtnLogout')?.addEventListener('click', () => {
   cerrarDrawer();
-  document.getElementById('btnLogout').click();
+  cerrarSesionApp();
 });
 
 /* ============ NAVEGACIÓN ============ */
@@ -2824,17 +2835,36 @@ async function cargarActividadesHoy(){
   renderActividades(data || [], 'listaActividadesHoy', 'Sin actividades registradas hoy.');
 }
 
+let filtroFechaActividadesActual = 'hoy';
+
+function cambiarFiltroFechaActividades(filtro){
+  filtroFechaActividadesActual = filtro;
+  document.getElementById('tabActHoy').classList.toggle('active', filtro === 'hoy');
+  document.getElementById('tabActTodas').classList.toggle('active', filtro === 'todas');
+  cargarActividadesTodas();
+}
+
 async function cargarActividadesTodas(){
-  // Orden descendente: las nuevas arriba. Las archivadas quedan fuera de esta
-  // vista (no se borran, solo se ocultan) — se conservan para reportes/informes.
-  const { data } = await sb.from('actividades')
+  // Por defecto solo se muestra el día de hoy: las de días anteriores se
+  // "ocultan" automáticamente al cambiar de fecha, sin que nadie tenga que
+  // archivarlas a mano. El historial completo sigue disponible con un toque.
+  let query = sb.from('actividades')
     .select('*')
     .eq('usuario_id', currentUser.id)
-    .eq('archivada', false)
+    .eq('archivada', false);
+
+  if (filtroFechaActividadesActual === 'hoy') {
+    query = query.eq('fecha_programada', obtenerHoyLocal());
+  }
+
+  const { data } = await query
     .order('fecha_programada', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false });
 
-  renderActividades(data || [], 'listaActividadesTodas', 'No tienes actividades registradas.');
+  const mensajeVacio = filtroFechaActividadesActual === 'hoy'
+    ? 'No tienes actividades registradas hoy. Usa "Historial completo" para ver días anteriores.'
+    : 'No tienes actividades registradas.';
+  renderActividades(data || [], 'listaActividadesTodas', mensajeVacio);
 }
 
 async function cargarActividadesArchivadas(){
