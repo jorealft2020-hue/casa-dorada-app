@@ -616,6 +616,10 @@
           <span class="dr-icon">🧑‍🤝‍🧑</span>
           <span class="dr-label">Reporte Diario del Equipo</span>
         </button>
+        <button class="drawer-item" data-nav="majo_assistant" id="drNavMajoAssistant" data-modkey="majo_assistant">
+          <span class="dr-icon">🤖</span>
+          <span class="dr-label">MAJO ASSISTANT</span>
+        </button>
           </div>
         </div>
 
@@ -980,6 +984,44 @@
           <button class="btn-primary" id="btnCargarReporteEquipo" style="height:44px;">Ver reporte</button>
         </div>
         <div id="reporteEquipoContenido"></div>
+      </div>
+
+      <div id="viewMajoAssistant" class="hidden">
+        <div class="section-title" style="margin-top:0;">🤖 MAJO ASSISTANT</div>
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <button class="plano-tab-btn active" data-majotab="chat" onclick="cambiarTabMajo('chat')">💬 Chat</button>
+          <button class="plano-tab-btn hidden" id="tabMajoBaseConocimiento" data-majotab="base" onclick="cambiarTabMajo('base')">📚 Base de Conocimiento</button>
+        </div>
+
+        <div id="majoTabChat">
+          <div id="majoChatMensajes" style="display:flex; flex-direction:column; gap:10px; min-height:200px; margin-bottom:10px;"></div>
+          <div style="display:flex; gap:8px; position:sticky; bottom:0; background:var(--cream); padding:8px 0;">
+            <input type="text" id="majoChatInput" placeholder="Pregúntale a MAJO sobre el proyecto…" style="flex:1;">
+            <button class="btn-primary" id="btnEnviarMajoChat" style="width:auto; padding:0 18px;">➤</button>
+          </div>
+        </div>
+
+        <div id="majoTabBase" class="hidden">
+          <div class="card" style="margin-bottom:14px;">
+            <p class="card-title" style="margin-bottom:10px;">Subir documento o video a la base de conocimiento</p>
+            <div class="field"><label>Título</label><input type="text" id="majoDocTitulo" placeholder="Ej: Reglamento de Habilitación Urbana Costa Dorada"></div>
+            <div class="field"><label>Archivo (PDF o video)</label><input type="file" id="majoDocArchivo" accept="application/pdf,video/*"></div>
+            <div class="field"><label>O pega texto directamente (opcional, en vez de archivo)</label><textarea id="majoDocTexto" placeholder="Pega aquí texto plano si no tienes un archivo"></textarea></div>
+            <button class="btn-primary" id="btnSubirDocMajo" style="width:100%;">Subir y procesar</button>
+          </div>
+          <div id="majoListaDocumentos"></div>
+
+          <div class="card" style="margin-top:14px;">
+            <p class="card-title" style="margin-bottom:10px;">Sitios oficiales autorizados para investigar</p>
+            <p class="card-sub" style="margin-bottom:10px;">MAJO solo puede buscar información en estos dominios, nunca en internet libre.</p>
+            <div id="majoListaSitios"></div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <input type="text" id="majoNuevoSitioNombre" placeholder="Nombre (ej: SUNARP)" style="flex:1;">
+              <input type="text" id="majoNuevoSitioDominio" placeholder="dominio.gob.pe" style="flex:1;">
+              <button class="chip-btn gold" id="btnAgregarSitioMajo">➕</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="viewNotificaciones" class="hidden">
@@ -2557,6 +2599,7 @@ function irAVista(vista){
     rendimiento:'viewRendimiento', 
     notificaciones:'viewNotificaciones', solicitudes:'viewSolicitudes', manualventas:'viewManualVentas', 
     reporte_equipo:'viewReporteEquipo',
+    majo_assistant:'viewMajoAssistant',
     admin:'viewAdmin',
     sistema:'viewSistema'
   };
@@ -2581,6 +2624,7 @@ function irAVista(vista){
     cargarReporteEquipo(elF?.value || obtenerHoyLocal());
   }
   if (vista === 'manualventas') cargarManualVentas();
+  if (vista === 'majo_assistant') iniciarMajoAssistant();
   if (vista === 'admin') { cargarUsuariosAdmin(); cargarPreautorizados(); }
   if (vista === 'sistema') cargarConfigDepartamentos();
   if (vista === 'portafolio') cargarPortafolio();
@@ -6342,6 +6386,228 @@ async function cargarReporteEquipo(fecha){
 document.getElementById('btnCargarReporteEquipo')?.addEventListener('click', () => {
   const fecha = document.getElementById('rdFecha').value || obtenerHoyLocal();
   cargarReporteEquipo(fecha);
+});
+
+/* ============ MAJO ASSISTANT (agente IA interno) ============ */
+let majoConversacionActual = null;
+
+async function obtenerTokenSesion(){
+  const { data } = await sb.auth.getSession();
+  return data?.session?.access_token || null;
+}
+
+async function iniciarMajoAssistant(){
+  const rol = currentProfile?.rol;
+  const puedeAdministrar = rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || fusionarPermisosConCatalogo(currentProfile?.permisos).gestionar_equipo;
+  document.getElementById('tabMajoBaseConocimiento')?.classList.toggle('hidden', !puedeAdministrar);
+
+  if (!majoConversacionActual) {
+    const { data: nueva, error } = await sb.from('majo_conversaciones').insert({
+      usuario_id: currentUser.id, titulo: 'Conversación ' + new Date().toLocaleDateString('es-PE'),
+    }).select().single();
+    if (error) { toast('Error al iniciar el chat con MAJO'); console.error(error); return; }
+    majoConversacionActual = nueva.id;
+    document.getElementById('majoChatMensajes').innerHTML = `
+      <div style="background:#F7F4EC; border-radius:12px; padding:12px; align-self:flex-start; max-width:85%;">
+        <p style="font-size:13px; margin:0;">👋 Hola, soy <b>MAJO ASSISTANT</b>. Puedo responder preguntas sobre los documentos del proyecto que suban a mi base de conocimiento, y también investigar en los sitios oficiales autorizados (SUNARP, SUNAT, COFOPRI, etc). ¿En qué te ayudo?</p>
+      </div>`;
+  }
+}
+
+function cambiarTabMajo(tab){
+  document.querySelectorAll('[data-majotab]').forEach(b => b.classList.toggle('active', b.dataset.majotab === tab));
+  document.getElementById('majoTabChat').classList.toggle('hidden', tab !== 'chat');
+  document.getElementById('majoTabBase').classList.toggle('hidden', tab !== 'base');
+  if (tab === 'base') { cargarDocumentosMajo(); cargarSitiosMajo(); }
+}
+
+function renderBurbujaMajo(rol, contenido, fuentes){
+  const cont = document.getElementById('majoChatMensajes');
+  const esUsuario = rol === 'user';
+  const burbuja = document.createElement('div');
+  burbuja.style.cssText = `background:${esUsuario ? 'var(--navy)' : '#F7F4EC'}; color:${esUsuario ? '#fff' : 'var(--ink)'}; border-radius:12px; padding:12px; align-self:${esUsuario ? 'flex-end' : 'flex-start'}; max-width:85%;`;
+  burbuja.innerHTML = `<p style="font-size:13px; margin:0; white-space:pre-wrap;">${escapeHtml(contenido)}</p>`;
+  if (fuentes && fuentes.length > 0) {
+    burbuja.innerHTML += `<div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,0,0,.1);">
+      ${fuentes.map(f => `<a href="${f.url}" target="_blank" rel="noopener" style="display:block; font-size:11px; color:${esUsuario ? '#CBD5E1' : '#7C6BAF'};">🔗 ${escapeHtml(f.titulo || f.url)}</a>`).join('')}
+    </div>`;
+  }
+  cont.appendChild(burbuja);
+  cont.scrollTop = cont.scrollHeight;
+}
+
+async function enviarMensajeMajo(){
+  const input = document.getElementById('majoChatInput');
+  const mensaje = input.value.trim();
+  if (!mensaje || !majoConversacionActual) return;
+  input.value = '';
+  renderBurbujaMajo('user', mensaje);
+
+  const cont = document.getElementById('majoChatMensajes');
+  const indicador = document.createElement('div');
+  indicador.id = 'majoEscribiendo';
+  indicador.style.cssText = 'align-self:flex-start; font-size:12px; color:var(--ink-dim); padding:6px 0;';
+  indicador.textContent = 'MAJO está escribiendo…';
+  cont.appendChild(indicador);
+  cont.scrollTop = cont.scrollHeight;
+
+  try {
+    const token = await obtenerTokenSesion();
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/majo-chat`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversacion_id: majoConversacionActual, mensaje }),
+    });
+    document.getElementById('majoEscribiendo')?.remove();
+    if (!resp.ok) {
+      const errTxt = await resp.text();
+      console.error('Error de majo-chat:', errTxt);
+      renderBurbujaMajo('assistant', '⚠️ Tuve un problema para responder. Puede que falte configurar las claves de API en el servidor — avisa a soporte técnico.');
+      return;
+    }
+    const data = await resp.json();
+    renderBurbujaMajo('assistant', data.respuesta, data.fuentes);
+  } catch (e) {
+    document.getElementById('majoEscribiendo')?.remove();
+    console.error(e);
+    renderBurbujaMajo('assistant', '⚠️ Error de conexión al hablar con MAJO. Intenta de nuevo.');
+  }
+}
+
+document.getElementById('btnEnviarMajoChat')?.addEventListener('click', enviarMensajeMajo);
+document.getElementById('majoChatInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarMensajeMajo(); });
+
+/* ---- Base de conocimiento: documentos ---- */
+async function cargarDocumentosMajo(){
+  const { data, error } = await sb.from('majo_documentos').select('*').order('created_at', { ascending: false });
+  const el = document.getElementById('majoListaDocumentos');
+  if (error) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar la lista de documentos.'); return; }
+  if (!data || data.length === 0) { el.innerHTML = emptyState('📚', 'Aún no has subido documentos a la base de conocimiento.'); return; }
+
+  const estadoInfo = { procesando: ['⏳ Procesando…', '#C9973E'], listo: ['✓ Listo', '#3D8B5F'], error: ['⚠️ Error', '#B4453C'] };
+  el.innerHTML = data.map(d => {
+    const [txt, color] = estadoInfo[d.estado] || ['—', '#999'];
+    return `
+    <div class="card" style="margin-bottom:10px; border-left:4px solid ${color};">
+      <p class="card-title" style="font-size:13.5px;">${escapeHtml(d.titulo)}</p>
+      <p class="card-sub">${d.tipo.toUpperCase()} · <span style="color:${color}; font-weight:700;">${txt}</span></p>
+      ${d.estado === 'error' && d.error_detalle ? `<p class="card-sub" style="color:#B4453C; margin-top:4px;">${escapeHtml(d.error_detalle.slice(0, 200))}</p>` : ''}
+      <div class="card-actions" style="margin-top:8px;">
+        <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarDocumentoMajo('${d.id}')">🗑️ Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function eliminarDocumentoMajo(id){
+  if (!confirm('¿Eliminar este documento de la base de conocimiento de MAJO?')) return;
+  const { error } = await sb.from('majo_documentos').delete().eq('id', id);
+  if (error) { toast('Error al eliminar'); console.error(error); return; }
+  toast('Documento eliminado');
+  cargarDocumentosMajo();
+}
+
+document.getElementById('btnSubirDocMajo')?.addEventListener('click', async () => {
+  const titulo = document.getElementById('majoDocTitulo').value.trim();
+  let archivo = document.getElementById('majoDocArchivo').files[0];
+  const textoDirecto = document.getElementById('majoDocTexto').value.trim();
+  if (!titulo) { toast('Ponle un título al documento'); return; }
+  if (!archivo && !textoDirecto) { toast('Sube un archivo o pega texto'); return; }
+
+  toast('Subiendo a MAJO ASSISTANT…');
+  try {
+    let tipo = 'texto';
+    let urlOriginal = null;
+
+    if (archivo) {
+      if (archivo.type === 'application/pdf') { tipo = 'pdf'; archivo = await comprimirPDFSiEsNecesario(archivo); }
+      else if (archivo.type.startsWith('video/')) { tipo = 'video'; archivo = await comprimirVideoSiEsNecesario(archivo); }
+      else { toast('Solo se aceptan PDF o video'); return; }
+
+      const ext = archivo.name.split('.').pop() || 'dat';
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('majo-documentos').upload(path, archivo);
+      if (upErr) { toast('Error al subir el archivo'); console.error(upErr); return; }
+      const { data: pub } = sb.storage.from('majo-documentos').getPublicUrl(path);
+      urlOriginal = pub.publicUrl;
+    }
+
+    const { data: nuevoDoc, error } = await sb.from('majo_documentos').insert({
+      titulo, tipo, url_original: urlOriginal,
+      texto_extraido: textoDirecto || null,
+      estado: textoDirecto ? 'listo' : 'procesando',
+      created_by: currentUser.id,
+    }).select().single();
+    if (error) { toast('Error al guardar'); console.error(error); return; }
+
+    document.getElementById('majoDocTitulo').value = '';
+    document.getElementById('majoDocArchivo').value = '';
+    document.getElementById('majoDocTexto').value = '';
+    cargarDocumentosMajo();
+
+    if (!textoDirecto) {
+      // Se procesa en segundo plano: extraer texto (PDF/video) + generar sus vectores
+      const token = await obtenerTokenSesion();
+      fetch(`${SUPABASE_URL}/functions/v1/majo-ingest-documento`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documento_id: nuevoDoc.id }),
+      }).then(() => cargarDocumentosMajo()).catch(err => console.error('Error en ingesta:', err));
+      toast('Documento en proceso — MAJO lo estará "leyendo" en unos momentos ✓');
+    } else {
+      // Texto directo: igual necesita generar sus vectores para búsqueda semántica
+      const token = await obtenerTokenSesion();
+      fetch(`${SUPABASE_URL}/functions/v1/majo-ingest-documento`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documento_id: nuevoDoc.id }),
+      }).then(() => cargarDocumentosMajo()).catch(err => console.error('Error en ingesta:', err));
+      toast('Texto agregado a la base de conocimiento ✓');
+    }
+  } catch (e) {
+    toast('Error inesperado al subir');
+    console.error(e);
+  }
+});
+
+/* ---- Sitios oficiales autorizados ---- */
+async function cargarSitiosMajo(){
+  const { data } = await sb.from('majo_sitios_oficiales').select('*').order('nombre');
+  const el = document.getElementById('majoListaSitios');
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🌐', 'No hay sitios oficiales configurados.'); return; }
+  el.innerHTML = data.map(s => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #EFEAE0;">
+      <div>
+        <p style="font-size:13px; font-weight:700; margin:0;">${escapeHtml(s.nombre)}</p>
+        <p style="font-size:11.5px; color:var(--ink-dim); margin:2px 0 0;">${escapeHtml(s.dominio)}</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:4px; font-size:11px;">
+          <input type="checkbox" ${s.activo ? 'checked' : ''} onchange="toggleSitioMajo('${s.id}', this.checked)"> Activo
+        </label>
+        <button onclick="eliminarSitioMajo('${s.id}')" style="background:none; border:none; color:var(--danger); font-size:15px; cursor:pointer;">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+async function toggleSitioMajo(id, activo){
+  await sb.from('majo_sitios_oficiales').update({ activo }).eq('id', id);
+  toast(activo ? 'Sitio activado' : 'Sitio desactivado');
+}
+async function eliminarSitioMajo(id){
+  await sb.from('majo_sitios_oficiales').delete().eq('id', id);
+  cargarSitiosMajo();
+}
+document.getElementById('btnAgregarSitioMajo')?.addEventListener('click', async () => {
+  const nombre = document.getElementById('majoNuevoSitioNombre').value.trim();
+  const dominio = document.getElementById('majoNuevoSitioDominio').value.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+  if (!nombre || !dominio) { toast('Completa nombre y dominio'); return; }
+  const { error } = await sb.from('majo_sitios_oficiales').insert({ nombre, dominio });
+  if (error) { toast('Error al agregar'); console.error(error); return; }
+  document.getElementById('majoNuevoSitioNombre').value = '';
+  document.getElementById('majoNuevoSitioDominio').value = '';
+  toast('Sitio agregado ✓');
+  cargarSitiosMajo();
 });
 
 document.getElementById('btnGuardarSolicitud')?.addEventListener('click', async () => {
