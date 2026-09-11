@@ -2742,7 +2742,7 @@ function actualizarDatosDrawer(){
     if (el) el.classList.toggle('hidden', !cond);
   };
 
-  const puedeVerAjustes = esSuperAdminODirector || perm.gestionar_equipo || rol === 'superadmin';
+  const puedeVerAjustes = rol === 'superadmin' || perm.gestionar_equipo;
   showDr('drNavAdmin', rol === 'superadmin' || perm.gestionar_equipo);
   showDr('drNavSistema', rol === 'superadmin');
   showDr('drDeptAjustes', puedeVerAjustes);
