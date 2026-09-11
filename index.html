@@ -5101,6 +5101,79 @@ async function sincronizarEventoCalendar(ev){
   }
 }
 
+// Alarmas automáticas para Solicitudes y Requerimientos con fecha límite (1 día antes y el mismo día)
+async function sincronizarSolicitudCalendar(sol){
+  const googleToken = await obtenerTokenGoogleFresco();
+  if (!googleToken) {
+    const intentosActuales = (sol.sync_calendar_intentos || 0) + 1;
+    await sb.from('solicitudes').update({ sync_calendar_intentos: intentosActuales }).eq('id', sol.id).catch(() => {});
+    if (intentosActuales === 1) {
+      await sb.from('notificaciones').insert({
+        usuario_id: sol.asignado_a || currentUser.id, tipo: 'error_sync_calendar',
+        titulo: '⚠️ No se pudo obtener token de Google',
+        mensaje: `Solicitud "${sol.titulo}" no se sincronizó con Calendar. Motivo: ${ultimoErrorTokenGoogle || 'no hay ningún token guardado (vuelve a iniciar sesión con Google).'}`,
+      }).catch(() => {});
+    }
+    return;
+  }
+
+  try {
+    const bodyEvento = {
+      summary: `📋 SOLICITUD: ${sol.titulo}`,
+      description: `Solicitud/Requerimiento en Casa Dorada.\nPedida por: ${sol.solicitante_nombre || 'No especificado'}\nDetalle: ${sol.descripcion || 'Sin detalle'}`,
+      start: { date: sol.fecha_limite },
+      end: { date: sol.fecha_limite },
+      reminders: {
+        useDefault: false,
+        overrides: [
+          { method: 'popup', minutes: 1440 }, // 1 día antes
+          { method: 'popup', minutes: 0 }      // el mismo día
+        ]
+      }
+    };
+
+    const resp = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${googleToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyEvento)
+    });
+
+    if (resp.ok) {
+      const gEvent = await resp.json();
+      await sb.from('solicitudes').update({ google_calendar_event_id: gEvent.id }).eq('id', sol.id);
+      // Además de la alarma en Google Calendar, se registra como notificación
+      // interna para que aparezca también en la campanita 🔔 de la app.
+      await sb.from('notificaciones').insert({
+        usuario_id: sol.asignado_a || currentUser.id, tipo: 'solicitud_alarma',
+        titulo: `📋 Recordatorio: "${sol.titulo}" vence el ${fmtFecha(sol.fecha_limite)}`,
+        mensaje: `Solicitud de ${sol.solicitante_nombre || 'un colaborador'}. Se sincronizó con Google Calendar.`,
+      }).catch(() => {});
+    } else {
+      const errBody = await resp.json().catch(() => ({}));
+      const intentosActuales = (sol.sync_calendar_intentos || 0) + 1;
+      await sb.from('solicitudes').update({ sync_calendar_intentos: intentosActuales }).eq('id', sol.id);
+      if (intentosActuales === 1) {
+        const msg = `Google rechazó la solicitud "${sol.titulo}" (código ${resp.status}): ${errBody?.error?.message || 'sin detalle'}`;
+        console.error(msg, errBody);
+        await sb.from('notificaciones').insert({
+          usuario_id: sol.asignado_a || currentUser.id, tipo: 'error_sync_calendar',
+          titulo: '⚠️ Error al sincronizar solicitud con Google Calendar', mensaje: msg,
+        });
+      }
+    }
+  } catch (err) {
+    const intentosActuales = (sol.sync_calendar_intentos || 0) + 1;
+    await sb.from('solicitudes').update({ sync_calendar_intentos: intentosActuales }).eq('id', sol.id).catch(() => {});
+    if (intentosActuales === 1) {
+      console.error(`Error de conexión al sincronizar solicitud "${sol.titulo}" con Google Calendar:`, err);
+      await sb.from('notificaciones').insert({
+        usuario_id: sol.asignado_a || currentUser.id, tipo: 'error_sync_calendar',
+        titulo: '⚠️ Error de conexión con Google Calendar', mensaje: String(err),
+      }).catch(() => {});
+    }
+  }
+}
+
 // Alarmas automáticas para Separaciones (3 días, 2 días, 1 día)
 async function sincronizarSeparacionCalendar(sep){
   const googleToken = await obtenerTokenGoogleFresco();
@@ -5748,14 +5821,14 @@ document.getElementById('btnGuardarSolicitud')?.addEventListener('click', async 
     return;
   }
 
-  const { error } = await sb.from('solicitudes').insert({
+  const { data: nuevaSol, error } = await sb.from('solicitudes').insert({
     solicitante_nombre: solicitante,
     titulo,
     descripcion: descripcion || null,
     asignado_a: asignadoA,
     fecha_limite: fechaLimite || null,
     created_by: currentUser.id,
-  });
+  }).select().single();
   if (error) { toast('Error al guardar'); console.error(error); return; }
 
   toast('Solicitud creada ✓');
@@ -5765,6 +5838,11 @@ document.getElementById('btnGuardarSolicitud')?.addEventListener('click', async 
   document.getElementById('sol_descripcion').value = '';
   document.getElementById('sol_fecha_limite').value = '';
   cargarSolicitudes(solicitudesFiltroActual);
+
+  // Si tiene fecha límite, se crea la alarma en Google Calendar + notificación en la campanita
+  if (fechaLimite && nuevaSol) {
+    sincronizarSolicitudCalendar(nuevaSol);
+  }
 });
 
 /* ============ MANUAL DE VENTAS ============ */
@@ -5923,6 +6001,18 @@ async function cargarNotificacionesBadge(){
     const { count: numAgenda, error: errAg } = await qAg;
     if (errAg) console.error('Error contando agenda pendiente:', errAg);
     totalAlertas += (numAgenda || 0);
+
+    // 3. Solicitudes y Requerimientos con fecha límite en los próximos 3 días (o ya vencidas) y sin resolver
+    const en3Dias = new Date(); en3Dias.setDate(en3Dias.getDate() + 3);
+    const en3DiasStr = `${en3Dias.getFullYear()}-${String(en3Dias.getMonth() + 1).padStart(2, '0')}-${String(en3Dias.getDate()).padStart(2, '0')}`;
+    let qSol = sb.from('solicitudes').select('id', { count: 'exact', head: true })
+      .neq('estado', 'realizado')
+      .not('fecha_limite', 'is', null)
+      .lte('fecha_limite', en3DiasStr);
+    if (!esSuperAdminODirector) qSol = qSol.eq('asignado_a', currentUser.id);
+    const { count: numSol, error: errSol } = await qSol;
+    if (errSol) console.error('Error contando solicitudes por vencer:', errSol);
+    totalAlertas += (numSol || 0);
   } catch (e) {
     console.error('Error general en cargarNotificacionesBadge:', e);
   }
@@ -6058,6 +6148,39 @@ async function cargarNotificaciones(asesorIdFiltro){
         titulo: `${etiqueta}: ${escapeHtml(ag.titulo)}`,
         mensaje: `🗓️ ${fechaLegible} a las ${hStr || '--:--'} hrs · 📍 ${escapeHtml(ag.locacion || 'Oficina / Campo')}${asesorTxt}`,
         accion: "irAVista('agenda')"
+      });
+    });
+
+    // 3. Solicitudes y Requerimientos con fecha límite próxima (o vencida) y sin resolver
+    const en3DiasNotif = new Date(hoy); en3DiasNotif.setDate(en3DiasNotif.getDate() + 3);
+    const en3DiasNotifStr = `${en3DiasNotif.getFullYear()}-${String(en3DiasNotif.getMonth() + 1).padStart(2, '0')}-${String(en3DiasNotif.getDate()).padStart(2, '0')}`;
+
+    let qSolNotif = sb.from('solicitudes')
+      .select('*, usuarios!solicitudes_asignado_a_fkey(nombre)')
+      .neq('estado', 'realizado')
+      .not('fecha_limite', 'is', null)
+      .lte('fecha_limite', en3DiasNotifStr)
+      .order('fecha_limite', { ascending: true });
+    if (idObjetivo !== 'todos') {
+      qSolNotif = qSolNotif.eq('asignado_a', idObjetivo);
+    } else if (!esSuperAdminODirector) {
+      qSolNotif = qSolNotif.eq('asignado_a', currentUser.id);
+    }
+    const { data: sols, error: errSols } = await qSolNotif.limit(50);
+    if (errSols) console.error('Error cargando solicitudes para notificaciones:', errSols);
+
+    (sols || []).forEach(s => {
+      const vencida = s.fecha_limite < hoyStr;
+      const esHoySol = s.fecha_limite === hoyStr;
+      const etiqueta = vencida ? '🔴 SOLICITUD VENCIDA' : (esHoySol ? '🚨 SOLICITUD VENCE HOY' : '🔔 SOLICITUD PRÓXIMA A VENCER');
+      const asesorTxt = s.usuarios?.nombre ? ` · Asignada a: ${escapeHtml(s.usuarios.nombre)}` : '';
+      alertas.push({
+        tipo: 'solicitud',
+        icono: '📋',
+        color: vencida || esHoySol ? '#B4453C' : '#C9973E',
+        titulo: `${etiqueta}: ${escapeHtml(s.titulo)}`,
+        mensaje: `📅 Vence: ${fmtFecha(s.fecha_limite)} · Pedida por: ${escapeHtml(s.solicitante_nombre || 'No especificado')}${asesorTxt}`,
+        accion: "irAVista('solicitudes')"
       });
     });
 
