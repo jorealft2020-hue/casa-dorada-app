@@ -154,6 +154,106 @@
   .topbar .greet{ font-size: 20px; font-weight: 700; letter-spacing:-0.02em; }
   .topbar .role{ font-size: 12.5px; color: var(--ink-dim); margin-top:2px; }
   .topbar-actions{ display:flex; gap:8px; align-items:center; }
+
+  /* Botón flotante de acceso rápido a MAJO ASSISTANT: más grande que los demás
+     íconos de la barra, con un pulso suave continuo (crece y vuelve a su
+     tamaño) para que llame la atención de forma amigable, no intrusiva. */
+  .majo-fab-btn{
+    font-size: 22px !important;
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%) !important;
+    border-radius: 50% !important;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(201,151,62,0.45);
+    animation: majoPulso 2.6s ease-in-out infinite;
+  }
+  @keyframes majoPulso{
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.14); }
+  }
+
+  /* ---- MAJO ASSISTANT: interfaz de chat moderna ---- */
+  .majo-header-card{
+    background: linear-gradient(135deg, var(--navy) 0%, #2A3B5C 60%, #3D2E5C 100%);
+    border-radius: 18px; padding: 16px 18px; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 8px 24px rgba(26,35,50,0.28);
+  }
+  .majo-avatar-grande{
+    width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.12);
+    animation: majoPulso 2.6s ease-in-out infinite;
+  }
+  .majo-chat-fondo{
+    display: flex; flex-direction: column; gap: 12px; min-height: 260px;
+    max-height: 55vh; overflow-y: auto; padding: 14px 4px 8px;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(201,151,62,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(124,107,175,0.07) 0%, transparent 50%);
+    border-radius: 16px;
+  }
+  .majo-burbuja{
+    max-width: 82%; padding: 12px 15px; font-size: 13.3px; line-height: 1.5;
+    animation: majoAparecer 0.28s ease-out;
+    box-shadow: 0 3px 10px rgba(26,35,50,0.08);
+  }
+  @keyframes majoAparecer{
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .majo-burbuja-usuario{
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--navy) 0%, #2A3B5C 100%);
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+  }
+  .majo-burbuja-asistente{
+    align-self: flex-start;
+    background: linear-gradient(160deg, #ffffff 0%, #F7F4EC 100%);
+    color: var(--ink);
+    border: 1px solid #EFE9DA;
+    border-radius: 16px 16px 16px 4px;
+  }
+  .majo-burbuja-fila{ display:flex; gap:8px; align-items:flex-end; }
+  .majo-mini-avatar{
+    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
+    display:flex; align-items:center; justify-content:center; font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .majo-input-bar{
+    display: flex; gap: 8px; align-items: center;
+    position: sticky; bottom: 0; padding: 10px 6px 4px; background: var(--cream);
+  }
+  .majo-input-bar input{
+    flex: 1; border-radius: 999px; border: 1.5px solid #E5DFCF;
+    padding: 12px 18px; font-size: 13.5px; background: #fff;
+  }
+  .majo-input-bar input:focus{ outline: none; border-color: var(--gold); }
+  .majo-btn-enviar{
+    width: 44px; height: 44px; border-radius: 50%; border: none; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
+    color: #fff; font-size: 17px; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(201,151,62,0.4);
+    transition: transform 0.15s ease;
+  }
+  .majo-btn-enviar:active{ transform: scale(0.9); }
+  .majo-escribiendo{
+    align-self: flex-start; display:flex; gap:4px; padding: 12px 16px;
+    background: #F7F4EC; border-radius: 16px 16px 16px 4px; width: fit-content;
+  }
+  .majo-escribiendo span{
+    width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+    animation: majoRebote 1.2s infinite ease-in-out;
+  }
+  .majo-escribiendo span:nth-child(2){ animation-delay: 0.15s; }
+  .majo-escribiendo span:nth-child(3){ animation-delay: 0.3s; }
+  @keyframes majoRebote{
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
   .bell{ position:relative; width:40px; height:40px; border-radius:10px; background: var(--cream-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; font-size:16px; }
   .bell .dot{ position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%; background: var(--danger); display:none; }
   .bell.has-unread .dot{ display:block; }
@@ -691,6 +791,7 @@
         </div>
       </div>
       <div class="topbar-actions">
+        <button class="bell majo-fab-btn" id="btnMajoRapido" title="Hablar con MAJO ASSISTANT">😊</button>
         <button class="bell" id="btnRefrescarApp" title="Refrescar aplicación">🔄</button>
         <button class="bell" id="btnBell"><span class="dot" id="bellDot"></span>🔔</button>
         <button class="bell" id="btnLogout" title="Cerrar sesión">🚪</button>
@@ -987,17 +1088,23 @@
       </div>
 
       <div id="viewMajoAssistant" class="hidden">
-        <div class="section-title" style="margin-top:0;">🤖 MAJO ASSISTANT</div>
+        <div class="majo-header-card">
+          <div class="majo-avatar-grande">😊</div>
+          <div>
+            <p style="font-weight:800; font-size:16px; margin:0; color:#fff;">MAJO ASSISTANT</p>
+            <p style="font-size:11.5px; color:#CBD5E1; margin:2px 0 0;">● En línea · Casa Dorada AI</p>
+          </div>
+        </div>
         <div style="display:flex; gap:8px; margin-bottom:12px;">
           <button class="plano-tab-btn active" data-majotab="chat" onclick="cambiarTabMajo('chat')">💬 Chat</button>
           <button class="plano-tab-btn hidden" id="tabMajoBaseConocimiento" data-majotab="base" onclick="cambiarTabMajo('base')">📚 Base de Conocimiento</button>
         </div>
 
         <div id="majoTabChat">
-          <div id="majoChatMensajes" style="display:flex; flex-direction:column; gap:10px; min-height:200px; margin-bottom:10px;"></div>
-          <div style="display:flex; gap:8px; position:sticky; bottom:0; background:var(--cream); padding:8px 0;">
-            <input type="text" id="majoChatInput" placeholder="Pregúntale a MAJO sobre el proyecto…" style="flex:1;">
-            <button class="btn-primary" id="btnEnviarMajoChat" style="width:auto; padding:0 18px;">➤</button>
+          <div id="majoChatMensajes" class="majo-chat-fondo"></div>
+          <div class="majo-input-bar">
+            <input type="text" id="majoChatInput" placeholder="Pregúntale a MAJO sobre el proyecto…">
+            <button id="btnEnviarMajoChat" class="majo-btn-enviar">➤</button>
           </div>
         </div>
 
@@ -2531,6 +2638,7 @@ function actualizarDatosDrawer(){
 }
 
 document.getElementById('btnMenuDrawer')?.addEventListener('click', abrirDrawer);
+document.getElementById('btnMajoRapido')?.addEventListener('click', () => irAVista('majo_assistant'));
 document.getElementById('drBtnConfigRapida')?.addEventListener('click', () => {
   const esSA = currentProfile?.rol === 'superadmin';
   document.getElementById('btnConfigModoServidor')?.classList.toggle('hidden', !esSA);
@@ -6408,8 +6516,11 @@ async function iniciarMajoAssistant(){
     if (error) { toast('Error al iniciar el chat con MAJO'); console.error(error); return; }
     majoConversacionActual = nueva.id;
     document.getElementById('majoChatMensajes').innerHTML = `
-      <div style="background:#F7F4EC; border-radius:12px; padding:12px; align-self:flex-start; max-width:85%;">
-        <p style="font-size:13px; margin:0;">👋 Hola, soy <b>MAJO ASSISTANT</b>. Puedo responder preguntas sobre los documentos del proyecto que suban a mi base de conocimiento, y también investigar en los sitios oficiales autorizados (SUNARP, SUNAT, COFOPRI, etc). ¿En qué te ayudo?</p>
+      <div class="majo-burbuja-fila">
+        <div class="majo-mini-avatar">😊</div>
+        <div class="majo-burbuja majo-burbuja-asistente">
+          👋 Hola, soy <b>MAJO ASSISTANT</b>. Puedo responder preguntas sobre los documentos del proyecto que suban a mi base de conocimiento, y también investigar en los sitios oficiales autorizados (SUNARP, SUNAT, COFOPRI, etc). ¿En qué te ayudo?
+        </div>
       </div>`;
   }
 }
@@ -6424,15 +6535,22 @@ function cambiarTabMajo(tab){
 function renderBurbujaMajo(rol, contenido, fuentes){
   const cont = document.getElementById('majoChatMensajes');
   const esUsuario = rol === 'user';
-  const burbuja = document.createElement('div');
-  burbuja.style.cssText = `background:${esUsuario ? 'var(--navy)' : '#F7F4EC'}; color:${esUsuario ? '#fff' : 'var(--ink)'}; border-radius:12px; padding:12px; align-self:${esUsuario ? 'flex-end' : 'flex-start'}; max-width:85%;`;
-  burbuja.innerHTML = `<p style="font-size:13px; margin:0; white-space:pre-wrap;">${escapeHtml(contenido)}</p>`;
+  const fila = document.createElement('div');
+  fila.className = 'majo-burbuja-fila';
+  fila.style.justifyContent = esUsuario ? 'flex-end' : 'flex-start';
+
+  let fuentesHtml = '';
   if (fuentes && fuentes.length > 0) {
-    burbuja.innerHTML += `<div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,0,0,.1);">
+    fuentesHtml = `<div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,0,0,.1);">
       ${fuentes.map(f => `<a href="${f.url}" target="_blank" rel="noopener" style="display:block; font-size:11px; color:${esUsuario ? '#CBD5E1' : '#7C6BAF'};">🔗 ${escapeHtml(f.titulo || f.url)}</a>`).join('')}
     </div>`;
   }
-  cont.appendChild(burbuja);
+
+  fila.innerHTML = `
+    ${!esUsuario ? '<div class="majo-mini-avatar">😊</div>' : ''}
+    <div class="majo-burbuja ${esUsuario ? 'majo-burbuja-usuario' : 'majo-burbuja-asistente'}" style="white-space:pre-wrap;">${escapeHtml(contenido)}${fuentesHtml}</div>
+  `;
+  cont.appendChild(fila);
   cont.scrollTop = cont.scrollHeight;
 }
 
@@ -6446,8 +6564,8 @@ async function enviarMensajeMajo(){
   const cont = document.getElementById('majoChatMensajes');
   const indicador = document.createElement('div');
   indicador.id = 'majoEscribiendo';
-  indicador.style.cssText = 'align-self:flex-start; font-size:12px; color:var(--ink-dim); padding:6px 0;';
-  indicador.textContent = 'MAJO está escribiendo…';
+  indicador.className = 'majo-burbuja-fila';
+  indicador.innerHTML = `<div class="majo-mini-avatar">😊</div><div class="majo-escribiendo"><span></span><span></span><span></span></div>`;
   cont.appendChild(indicador);
   cont.scrollTop = cont.scrollHeight;
 
