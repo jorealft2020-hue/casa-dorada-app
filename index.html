@@ -556,7 +556,7 @@
         </button>
         <button class="drawer-item" data-nav="actividades" id="drNavTareas" data-modkey="actividades">
           <span class="dr-icon">✓</span>
-          <span class="dr-label">Mis Tareas Realizadas</span>
+          <span class="dr-label">Actividades Realizadas</span>
         </button>
         <button class="drawer-item" data-nav="agenda" id="drNavAgenda" data-modkey="agenda">
           <span class="dr-icon">📅</span>
@@ -726,8 +726,14 @@
 
       <!-- VISTA: Actividades -->
       <div id="viewActividades" class="hidden">
-        <div class="section-title">Mis tareas y actividades realizadas</div>
+        <div class="section-title">Actividades realizadas
+          <button class="see-all" onclick="toggleArchivadasUI()">🗄️ Ver archivadas</button>
+        </div>
         <div id="listaActividadesTodas"></div>
+        <div id="bloqueActividadesArchivadas" class="hidden" style="margin-top:18px;">
+          <div class="section-title">Archivadas (ocultas, se conservan para reportes)</div>
+          <div id="listaActividadesArchivadas"></div>
+        </div>
       </div>
 
       <!-- VISTA: Clientes -->
@@ -1087,9 +1093,23 @@
   <!-- MODAL: nueva actividad realizada (Tareas) -->
   <div class="modal-backdrop" id="modalActividad">
     <div class="modal-sheet">
-      <h3>Nueva tarea realizada</h3>
+      <h3>Nueva actividad realizada</h3>
       <div class="field"><label>Actividad realizada</label><textarea id="actTitulo" placeholder="Describe la actividad efectuada"></textarea></div>
       <div class="field"><label>Locación / Lugar</label><input type="text" id="actLocacion" placeholder="Ej: Oficina central, Proyecto Costa Dorada, Notaría..."></div>
+
+      <div class="field">
+        <label>Temas y Acuerdos</label>
+        <div id="actTemasLista" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>
+        <button type="button" class="chip-btn gold" id="btnAgregarTema" style="width:100%; justify-content:center;">➕ Agregar tema</button>
+        <div id="actTemaFormNuevo" class="hidden" style="margin-top:8px; padding:10px; border:1.5px dashed #E5DFCF; border-radius:10px;">
+          <div class="field"><label>Tema</label><input type="text" id="actTemaInput" placeholder="Ej: Condiciones de pago del lote 14"></div>
+          <div class="field"><label>Acuerdo</label><textarea id="actAcuerdoInput" placeholder="Describe libremente el acuerdo alcanzado sobre este tema"></textarea></div>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-secondary" id="btnCancelarTema" style="flex:1;">Cancelar</button>
+            <button type="button" class="btn-primary" id="btnConfirmarTema" style="flex:1;">Agregar</button>
+          </div>
+        </div>
+      </div>
       <div class="field"><label>Fecha</label><input type="date" id="actFecha"></div>
       <div class="field"><label>Hora de inicio</label><input type="time" id="actHoraInicio"></div>
       <div class="field"><label>Hora de fin</label><input type="time" id="actHoraFin"></div>
@@ -2375,6 +2395,7 @@ async function cargarActividadesHoy(){
     .select('*')
     .eq('usuario_id', currentUser.id)
     .eq('fecha_programada', hoy)
+    .eq('archivada', false)
     .order('hora_inicio', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false });
     
@@ -2382,14 +2403,57 @@ async function cargarActividadesHoy(){
 }
 
 async function cargarActividadesTodas(){
-  // Orden descendente: las nuevas arriba
+  // Orden descendente: las nuevas arriba. Las archivadas quedan fuera de esta
+  // vista (no se borran, solo se ocultan) — se conservan para reportes/informes.
   const { data } = await sb.from('actividades')
     .select('*')
     .eq('usuario_id', currentUser.id)
+    .eq('archivada', false)
     .order('fecha_programada', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false });
-    
+
   renderActividades(data || [], 'listaActividadesTodas', 'No tienes actividades registradas.');
+}
+
+async function cargarActividadesArchivadas(){
+  const { data } = await sb.from('actividades')
+    .select('*')
+    .eq('usuario_id', currentUser.id)
+    .eq('archivada', true)
+    .order('fecha_programada', { ascending: false, nullsFirst: false });
+
+  const el = document.getElementById('listaActividadesArchivadas');
+  if (!el) return;
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🗄️', 'No hay actividades archivadas.'); return; }
+  el.innerHTML = data.map(a => `
+    <div class="card" data-id="${a.id}" style="opacity:.72;">
+      <div class="card-row">
+        <div>
+          <p class="card-title">${escapeHtml(a.titulo)}</p>
+          <p class="card-sub">${a.fecha_programada ? fmtFecha(a.fecha_programada) : 'Sin fecha'}</p>
+          ${a.locacion ? `<p class="card-sub">📍 ${escapeHtml(a.locacion)}</p>` : ''}
+        </div>
+        <span class="badge">Archivada</span>
+      </div>
+      <div class="card-actions">
+        <button class="chip-btn gold" onclick="desarchivarActividad('${a.id}')">↩️ Restaurar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function desarchivarActividad(id){
+  const { error } = await sb.from('actividades').update({ archivada: false }).eq('id', id);
+  if (error) { toast('Error al restaurar'); console.error(error); return; }
+  toast('Actividad restaurada ✓');
+  cargarActividadesArchivadas(); cargarActividadesTodas(); cargarActividadesHoy();
+}
+
+function toggleArchivadasUI(){
+  const bloque = document.getElementById('bloqueActividadesArchivadas');
+  const abrir = bloque.classList.contains('hidden');
+  bloque.classList.toggle('hidden', !abrir);
+  if (abrir) cargarActividadesArchivadas();
 }
 
 function renderActividades(items, contenedorId, mensajeVacio){
@@ -2406,6 +2470,13 @@ function renderActividades(items, contenedorId, mensajeVacio){
         </div>
         <span class="badge badge-${a.estado || 'completada'}">${estadoLabel(a.estado || 'completada')}</span>
       </div>
+      ${(a.temas_acuerdos && a.temas_acuerdos.length > 0) ? `<div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+        ${a.temas_acuerdos.map(t => `
+          <div style="background:#F7F4EC; border-radius:8px; padding:8px 10px;">
+            <p style="font-size:12px; font-weight:700; margin:0;">🗂️ ${escapeHtml(t.tema)}</p>
+            ${t.acuerdo ? `<p style="font-size:12px; color:var(--ink-dim); margin:2px 0 0; white-space:pre-wrap;">${escapeHtml(t.acuerdo)}</p>` : ''}
+          </div>`).join('')}
+      </div>` : ''}
       ${(a.evidencias && a.evidencias.length > 0) ? `<div class="evidencia-thumbs" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
         ${a.evidencias.map(url => `<img src="${url}" style="width:52px; height:52px; object-fit:cover; border-radius:8px; border:1px solid #E5DFCF;" />`).join('')}
       </div>` : ''}
@@ -2414,17 +2485,19 @@ function renderActividades(items, contenedorId, mensajeVacio){
           📷 Adjuntar foto
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="subirEvidencia('${a.id}', this.files[0])">
         </label>
-        ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarActividad('${a.id}')">🗑️ Eliminar</button>` : ''}
+        ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="archivarActividad('${a.id}')">🗄️ Archivar</button>` : ''}
       </div>
     </div>
   `).join('');
 }
 
-async function eliminarActividad(id){
-  if (!confirm('¿Eliminar esta actividad? Esta acción no se puede deshacer.')) return;
-  const { error } = await sb.from('actividades').delete().eq('id', id);
-  if (error) { toast('Error al eliminar'); console.error(error); return; }
-  toast('Actividad eliminada');
+/* Archivar en vez de eliminar: el registro se conserva siempre en la base de
+   datos para reportes e informes, solo deja de mostrarse en las listas activas. */
+async function archivarActividad(id){
+  if (!confirm('¿Archivar esta actividad? Dejará de verse en tu lista, pero seguirá contando para los reportes e informes.')) return;
+  const { error } = await sb.from('actividades').update({ archivada: true }).eq('id', id);
+  if (error) { toast('Error al archivar'); console.error(error); return; }
+  toast('Actividad archivada (se conserva para reportes)');
   cargarActividadesHoy(); cargarActividadesTodas(); cargarKPIs();
 }
 
@@ -2439,8 +2512,53 @@ document.getElementById('btnFab').addEventListener('click', () => {
   else if (currentView === 'clientes') { prepararModalCliente(); openModal('modalCliente'); }
   else {
     document.getElementById('actFecha').value = obtenerHoyLocal();
+    actTemasAcuerdosTemp = [];
+    renderActTemasLista();
+    document.getElementById('actTemaFormNuevo')?.classList.add('hidden');
+    document.getElementById('btnAgregarTema')?.classList.remove('hidden');
     openModal('modalActividad');
   }
+});
+
+/* ---- Temas y Acuerdos dentro de una actividad ---- */
+let actTemasAcuerdosTemp = [];
+
+function renderActTemasLista(){
+  const cont = document.getElementById('actTemasLista');
+  if (!cont) return;
+  if (actTemasAcuerdosTemp.length === 0) { cont.innerHTML = ''; return; }
+  cont.innerHTML = actTemasAcuerdosTemp.map((t, i) => `
+    <div style="background:#F7F4EC; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; gap:8px; align-items:flex-start;">
+      <div style="min-width:0;">
+        <p style="font-size:12.5px; font-weight:700; margin:0;">${escapeHtml(t.tema)}</p>
+        <p style="font-size:12px; color:var(--ink-dim); margin:2px 0 0; white-space:pre-wrap;">${escapeHtml(t.acuerdo)}</p>
+      </div>
+      <button type="button" onclick="quitarActTema(${i})" style="background:none; border:none; color:var(--danger); font-size:16px; cursor:pointer; flex-shrink:0;">🗑️</button>
+    </div>
+  `).join('');
+}
+function quitarActTema(i){ actTemasAcuerdosTemp.splice(i, 1); renderActTemasLista(); }
+
+document.getElementById('btnAgregarTema')?.addEventListener('click', () => {
+  document.getElementById('actTemaFormNuevo').classList.remove('hidden');
+  document.getElementById('btnAgregarTema').classList.add('hidden');
+});
+document.getElementById('btnCancelarTema')?.addEventListener('click', () => {
+  document.getElementById('actTemaInput').value = '';
+  document.getElementById('actAcuerdoInput').value = '';
+  document.getElementById('actTemaFormNuevo').classList.add('hidden');
+  document.getElementById('btnAgregarTema').classList.remove('hidden');
+});
+document.getElementById('btnConfirmarTema')?.addEventListener('click', () => {
+  const tema = document.getElementById('actTemaInput').value.trim();
+  const acuerdo = document.getElementById('actAcuerdoInput').value.trim();
+  if (!tema) { toast('Escribe el tema'); return; }
+  actTemasAcuerdosTemp.push({ tema, acuerdo });
+  renderActTemasLista();
+  document.getElementById('actTemaInput').value = '';
+  document.getElementById('actAcuerdoInput').value = '';
+  document.getElementById('actTemaFormNuevo').classList.add('hidden');
+  document.getElementById('btnAgregarTema').classList.remove('hidden');
 });
 
 document.getElementById('btnGuardarActividad').addEventListener('click', async () => {
@@ -2464,9 +2582,13 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
     hora_inicio: horaInicio,
     hora_fin: horaFin,
     personas_involucradas: personas || null,
+    temas_acuerdos: actTemasAcuerdosTemp,
     estado: 'completada',
     fecha_completada: new Date().toISOString()
   }).select().single();
+
+  actTemasAcuerdosTemp = [];
+  renderActTemasLista();
 
   if (error) { toast('Error al guardar'); console.error(error); return; }
 
