@@ -3204,6 +3204,26 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
 
     actividades.sort((a, b) => (a.fecha_programada || '').localeCompare(b.fecha_programada || ''));
 
+    // Agenda del periodo que NO se realizó (pendiente/reprogramada) — antes faltaba en este informe
+    const { data: agendaSinResolverPeriodo } = await sb.from('agenda')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .in('estado', ['programada', 'reprogramada'])
+      .gte('fecha_inicio', fechaInicio + 'T00:00:00')
+      .lte('fecha_inicio', fechaFin + 'T23:59:59');
+    const agPendientesPeriodo = (agendaSinResolverPeriodo || []).filter(a => a.estado === 'programada');
+    const agReprogramadasPeriodo = (agendaSinResolverPeriodo || []).filter(a => a.estado === 'reprogramada');
+
+    // Solicitudes y Requerimientos con fecha límite en el periodo — antes faltaban por completo en este informe
+    const { data: solicitudesPeriodo } = await sb.from('solicitudes')
+      .select('*')
+      .eq('asignado_a', currentUser.id)
+      .gte('fecha_limite', fechaInicio)
+      .lte('fecha_limite', fechaFin);
+    const solRealizadasPeriodo = (solicitudesPeriodo || []).filter(s => s.estado === 'realizado');
+    const solPendientesPeriodo = (solicitudesPeriodo || []).filter(s => s.estado === 'pendiente' || s.estado === 'en_proceso');
+    const solReprogramadasPeriodo = (solicitudesPeriodo || []).filter(s => s.estado === 'reprogramada');
+
     const { data: rendimientoPeriodo } = await sb.from('rendimiento_leads')
       .select('*')
       .eq('usuario_id', currentUser.id)
@@ -3370,6 +3390,61 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
       y += 12;
       if (y > pageHeight - 160) { doc.addPage(); dibujarMembrete(); y = 150; }
     }
+
+    // AGENDA DEL PERIODO — PENDIENTES Y REPROGRAMADAS (lo realizado ya está en la tabla de arriba)
+    const dibujarTablaSimple = (titulo, items, vacioTxt, campoFecha) => {
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(titulo, marginX, y);
+      y += 18;
+      doc.setFillColor(26, 35, 50);
+      doc.rect(marginX, y - 12, pageWidth - marginX * 2, 18, 'F');
+      doc.setTextColor(255,255,255);
+      doc.setFontSize(9.5);
+      doc.setFont(undefined, 'bold');
+      doc.text('Fecha', marginX + 5, y);
+      doc.text('Detalle', marginX + 80, y);
+      doc.text('Estado', pageWidth - marginX - 90, y);
+      y += 14;
+      doc.setTextColor(26, 35, 50);
+      doc.setFont(undefined, 'normal');
+
+      if (!items || items.length === 0) {
+        doc.setFontSize(9.5);
+        doc.text(vacioTxt, marginX + 5, y);
+        y += 16;
+        return;
+      }
+      items.forEach(it => {
+        if (y > pageHeight - 100) { doc.addPage(); dibujarMembrete(); y = 150; }
+        doc.setFontSize(9.5);
+        doc.text(it[campoFecha] ? fmtFecha(it[campoFecha]) : '-', marginX + 5, y);
+        const lineas = doc.splitTextToSize(it.titulo, 200);
+        doc.text(lineas, marginX + 80, y);
+        doc.text((it._estadoLabel || ''), pageWidth - marginX - 90, y);
+        y += Math.max(13, lineas.length * 11);
+        doc.setDrawColor(230, 230, 230);
+        doc.line(marginX, y - 4, pageWidth - marginX, y - 4);
+      });
+      y += 15;
+    };
+
+    if (y > pageHeight - 160) { doc.addPage(); dibujarMembrete(); y = 150; }
+    const agendaPeriodoParaTabla = [
+      ...agPendientesPeriodo.map(a => ({ ...a, fecha_programada: fechaLocalDeISO(a.fecha_inicio), _estadoLabel: 'Pendiente' })),
+      ...agReprogramadasPeriodo.map(a => ({ ...a, fecha_programada: fechaLocalDeISO(a.fecha_inicio), _estadoLabel: 'Reprogramada' })),
+    ];
+    dibujarTablaSimple('AGENDA — PENDIENTES Y REPROGRAMADAS DEL PERIODO', agendaPeriodoParaTabla, 'No hay citas pendientes ni reprogramadas en este periodo.', 'fecha_programada');
+
+    if (y > pageHeight - 160) { doc.addPage(); dibujarMembrete(); y = 150; }
+    const solicitudesPeriodoParaTabla = [
+      ...solRealizadasPeriodo.map(s => ({ ...s, _estadoLabel: 'Realizada' })),
+      ...solPendientesPeriodo.map(s => ({ ...s, _estadoLabel: 'Pendiente' })),
+      ...solReprogramadasPeriodo.map(s => ({ ...s, _estadoLabel: 'Reprogramada' })),
+    ];
+    dibujarTablaSimple('SOLICITUDES Y REQUERIMIENTOS DEL PERIODO', solicitudesPeriodoParaTabla, 'No hay solicitudes con fecha límite en este periodo.', 'fecha_limite');
+
+    if (y > pageHeight - 160) { doc.addPage(); dibujarMembrete(); y = 150; }
 
     doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
