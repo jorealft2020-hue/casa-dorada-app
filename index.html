@@ -33,7 +33,19 @@
     color: var(--ink);
     -webkit-tap-highlight-color: transparent;
   }
-  #app{ max-width: 480px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; background: var(--cream); position:relative; }
+  #app{ max-width: 480px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; background: var(--cream); position:relative; z-index:1; }
+
+  /* Marca de agua estética del logo Costa Dorada, presente detrás de todas las
+     pantallas de la app (contenida dentro del marco de la app, muy sutil,
+     no interfiere con los toques ni con la legibilidad de las tarjetas). */
+  #app::before{
+    content:'';
+    position: absolute; inset:0;
+    background-image: url('logo-costa-dorada-marca-agua.png');
+    background-repeat: no-repeat; background-position: center 200px;
+    background-size: min(340px, 78vw);
+    opacity: 0.05; pointer-events:none; z-index:0;
+  }
 
 /* Ocultar barra inferior redundante (se usa el menú lateral) */
   .bottomnav{ display: none !important; }
@@ -1077,6 +1089,11 @@
         </div>
       </div>
     </main>
+
+    <div style="text-align:center; padding:4px 8px 6px; flex-shrink:0;">
+      <p style="font-size:9px; color:#B8B2A0; margin:0;">© <span id="footerCopyrightYear"></span> CRM MAJO · Jorge Luque — Todos los derechos reservados</p>
+    </div>
+    <script>document.getElementById('footerCopyrightYear').textContent = new Date().getFullYear();</script>
 
     <button class="fab hidden" id="btnFab">+</button>
 
@@ -2259,6 +2276,8 @@ function actualizarDatosDrawer(){
   if (elMail) elMail.textContent = emailTxt;
   const elYear = document.getElementById('drCopyrightYear');
   if (elYear) elYear.textContent = new Date().getFullYear();
+  const elYearFooter = document.getElementById('footerCopyrightYear');
+  if (elYearFooter) elYearFooter.textContent = new Date().getFullYear();
 
   const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
   const rol = currentProfile?.rol;
