@@ -432,6 +432,19 @@
     background: radial-gradient(circle, rgba(201,151,62,0.25) 0%, transparent 70%); pointer-events:none;
   }
   .welcome-badge{ display:inline-flex; align-items:center; gap:6px; background: rgba(201,151,62,0.2); border:1px solid rgba(201,151,62,0.4); color: var(--gold-soft); padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+
+  .welcome-logos-3d{ display:flex; align-items:center; justify-content:center; gap:22px; perspective: 600px; }
+  .logo-3d-flotante{
+    width: 84px; height: 84px; object-fit: contain;
+    filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
+    animation: logoFlotar3D 4.5s ease-in-out infinite;
+  }
+  @keyframes logoFlotar3D{
+    0%, 100% { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
+    25% { transform: translateY(-6px) rotateY(8deg) rotateX(3deg); }
+    50% { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
+    75% { transform: translateY(6px) rotateY(-8deg) rotateX(-3deg); }
+  }
   .welcome-title{ font-size: 22px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.02em; }
   .welcome-sub{ font-size: 13px; color: #CBD5E1; margin: 0 0 14px; line-height: 1.45; }
   .btn-ir-control{ background: linear-gradient(135deg, var(--gold) 0%, #D4A74F 100%); color: #fff; border:none; border-radius: 10px; padding: 12px 16px; font-size: 13.5px; font-weight: 700; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 14px rgba(201,151,62,0.4); }
@@ -617,7 +630,17 @@
   }
   .drawer-item:active{ background: #F3EFE6; }
   .drawer-item.active{ background: var(--cream-dim); color: var(--gold); font-weight: 700; }
-  .drawer-item .dr-icon{ font-size: 18px; width: 24px; text-align: center; }
+  .drawer-item .dr-icon{
+    font-size: 15px; width: 30px; height: 30px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    background: linear-gradient(155deg, #ffffff 0%, #F2EEE3 100%);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 2px 5px rgba(26,35,50,0.10);
+  }
+  .drawer-item.active .dr-icon{
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
+    box-shadow: 0 2px 8px rgba(201,151,62,0.4);
+  }
   .drawer-footer{ border-top: 1px solid #EDE8DC; padding: 10px; }
   .drawer-item.logout{ color: var(--danger); }
 
@@ -852,9 +875,11 @@
       <!-- VISTA: Inicio (PORTADA DE BIENVENIDA, FRASE, VIDEO Y PLAN DEL DÍA) -->
       <div id="viewInicio">
         <div class="welcome-card">
-          <img src="logo-casa-dorada.png" alt="Casa Dorada" style="width:64px; height:64px; object-fit:contain; margin-bottom:12px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.3));">
-          <div class="welcome-badge">⭐ Casa Dorada · Costa Dorada</div>
-          <h2 class="welcome-title" id="wb_saludo" style="margin-top:6px;">¡Buenos días!</h2>
+          <div class="welcome-logos-3d">
+            <img src="logo-casa-dorada.png" alt="Casa Dorada" class="logo-3d-flotante" style="animation-delay:0s;">
+            <img src="logo-costa-dorada.png" alt="Costa Dorada" class="logo-3d-flotante" style="animation-delay:0.4s;">
+          </div>
+          <h2 class="welcome-title" id="wb_saludo" style="margin-top:14px;">¡Buenos días!</h2>
           <p class="welcome-sub" id="wb_subtitulo" style="margin-bottom:0;">Bienvenido a tu jornada comercial y de gestión. Enfoque total en metas y cierres.</p>
         </div>
 
@@ -1370,6 +1395,8 @@
       <div class="field"><label>Locación</label><input type="text" id="agLocacion" placeholder="Ej: Oficina central"></div>
       <div class="field"><label>Fecha</label><input type="date" id="agFecha"></div>
       <div class="field"><label>Hora</label><input type="time" id="agHora"></div>
+      <div class="field"><label>Persona a contactar (opcional)</label><input type="text" id="agContactoNombre" placeholder="Ej: Sr. Ramírez"></div>
+      <div class="field"><label>WhatsApp / celular de contacto (opcional)</label><input type="tel" id="agContactoWhatsapp" placeholder="Ej: 952123456"></div>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalAgenda">Cancelar</button>
         <button class="btn-primary" id="btnGuardarAgenda">Guardar</button>
@@ -2327,10 +2354,10 @@ const FRASES_MOTIVACIONALES = [
 
 const VIDEOS_MOTIVACIONALES = [
   { id: "Hq0V_pBDRy8", t: "5 Estrategias para organizar tu día y vender más · Brian Tracy" },
-  { id: "osK3rxLTfu0", t: "Técnicas de mentalidad y cierre comercial · Margarita Pasos" },
-  { id: "7RUmzfEaGco", t: "Poderoso discurso de enfoque y hambre de éxito · Dan Peña" },
-  { id: "BV8zIuGCJ3w", t: "Consejos clave de mentalidad empresarial y constancia · Jack Ma" },
-  { id: "-AhceVRNPJk", t: "Motivación y actitud para superar cualquier límite comercial" }
+  { id: "nweBVbCPaLU", t: "Close the Deal — Motivación de ventas y bienes raíces · Grant Cardone" },
+  { id: "CWqW35lVGrQ", t: "¿El vendedor nace o se hace? Mentalidad y ambición en ventas · Sandro Meléndez" },
+  { id: "ahi1QO0s_YE", t: "Los 12 cierres de ventas más poderosos · Alex Dey" },
+  { id: "osK3rxLTfu0", t: "Técnicas de mentalidad y cierre comercial · Margarita Pasos" }
 ];
 
 function cargarPortadaInicio(){
@@ -5614,6 +5641,8 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
   const locacion = document.getElementById('agLocacion').value.trim();
   const fecha = document.getElementById('agFecha').value;
   const hora = document.getElementById('agHora').value;
+  const contactoNombre = document.getElementById('agContactoNombre').value.trim();
+  const contactoWhatsapp = document.getElementById('agContactoWhatsapp').value.trim();
   if (!actividad || !fecha || !hora) { toast('Completa actividad, fecha y hora'); return; }
 
   const fechaInicio = new Date(`${fecha}T${hora}:00`).toISOString();
@@ -5623,6 +5652,8 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
     titulo: actividad,
     locacion: locacion || null,
     fecha_inicio: fechaInicio,
+    contacto_nombre: contactoNombre || null,
+    contacto_whatsapp: contactoWhatsapp || null,
     estado: 'programada'
   }).select().single();
 
@@ -5634,6 +5665,8 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
   document.getElementById('agLocacion').value = '';
   document.getElementById('agFecha').value = '';
   document.getElementById('agHora').value = '';
+  document.getElementById('agContactoNombre').value = '';
+  document.getElementById('agContactoWhatsapp').value = '';
   cargarAgenda();
 
   // Sincronización automática de Google Calendar (Alarmas: 1h, 30m, 15m)
@@ -6139,6 +6172,7 @@ function renderizarTarjetaAgenda(ev){
   const esPropio = ev.usuario_id === currentUser.id;
   const sem = semaforoAgenda(ev.fecha_inicio);
   const nombreAsesor = ev.usuarios?.nombre ? `👤 ${escapeHtml(ev.usuarios.nombre)} · ` : '';
+  const telLimpio = ev.contacto_whatsapp ? ev.contacto_whatsapp.replace(/\D/g, '') : '';
 
   return `
     <div class="card" style="border-left: 4px solid ${sem.color};">
@@ -6147,6 +6181,7 @@ function renderizarTarjetaAgenda(ev){
           <p class="card-title">${sem.label} ${escapeHtml(ev.titulo)}</p>
           <p class="card-sub">${nombreAsesor}${new Date(ev.fecha_inicio).toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
           ${ev.locacion ? `<p class="card-sub">📍 ${escapeHtml(ev.locacion)}</p>` : ''}
+          ${ev.contacto_nombre ? `<p class="card-sub">🙋 Contacto: ${escapeHtml(ev.contacto_nombre)}</p>` : ''}
           ${ev.resultado ? `<p class="card-sub" style="color:var(--ok); font-weight:600; margin-top:3px;">✓ Resultado: ${escapeHtml(ev.resultado)}</p>` : ''}
         </div>
         ${esPropio 
@@ -6154,7 +6189,11 @@ function renderizarTarjetaAgenda(ev){
           : '<span class="badge" style="background:#EDE8DC; color:#1A2332; font-size:10px;">Equipo</span>'
         }
       </div>
-      ${puedeEliminar ? `<div class="card-actions" style="margin-top:8px;"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️ Eliminar</button></div>` : ''}
+      <div class="card-actions" style="margin-top:8px; flex-wrap:wrap;">
+        ${telLimpio ? `<a href="tel:${telLimpio}" class="chip-btn" style="text-decoration:none; color:#2C5691; border-color:#2C5691;">📞 Llamar</a>` : ''}
+        ${telLimpio ? `<a href="https://wa.me/51${telLimpio.slice(-9)}" target="_blank" rel="noopener" class="chip-btn" style="text-decoration:none; color:#25D366; border-color:#25D366;">💬 WhatsApp</a>` : ''}
+        ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarEventoAgenda('${ev.id}')">🗑️ Eliminar</button>` : ''}
+      </div>
     </div>
   `;
 }
