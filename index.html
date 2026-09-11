@@ -1884,6 +1884,185 @@ let currentUser = null;
 let currentProfile = null;
 
 /* =========================================================================
+   COMPRESIÓN AUTOMÁTICA DE ARCHIVOS ANTES DE SUBIR
+   -------------------------------------------------------------------------
+   Si un archivo (imagen, PDF o video) supera el límite razonable, en vez de
+   fallar la subida en silencio o con un error críptico, se intenta comprimir
+   automáticamente y se avisa al usuario. Usa las librerías que la app YA
+   carga (pdf.js y jsPDF) para no sumar peso extra a la aplicación.
+   ========================================================================= */
+const LIMITES_ARCHIVO = {
+  imagen: 1.5 * 1024 * 1024,   // 1.5 MB
+  pdf: 8 * 1024 * 1024,        // 8 MB (por encima de esto, pdf.js sufre en móviles)
+  video: 25 * 1024 * 1024,     // 25 MB
+};
+
+function formatoMB(bytes){ return (bytes / (1024 * 1024)).toFixed(1) + ' MB'; }
+
+/** Comprime una imagen redibujándola en un canvas a menor resolución/calidad.
+ *  Reintenta bajando la calidad hasta cumplir el límite o llegar a un piso razonable. */
+async function comprimirImagenSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.imagen){
+  if (!file.type.startsWith('image/') || file.size <= maxBytes) return file;
+  toast(`Comprimiendo imagen (${formatoMB(file.size)})…`);
+  try {
+    const bitmap = await createImageBitmap(file);
+    const maxDim = 1600;
+    let { width, height } = bitmap;
+    if (width > maxDim || height > maxDim) {
+      const escala = maxDim / Math.max(width, height);
+      width = Math.round(width * escala);
+      height = Math.round(height * escala);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+
+    let calidad = 0.82;
+    let blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', calidad));
+    while (blob && blob.size > maxBytes && calidad > 0.35) {
+      calidad -= 0.12;
+      blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', calidad));
+    }
+    if (!blob) return file; // si algo falla, se sube el original en vez de bloquear al usuario
+
+    const nombreFinal = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+    const archivoComprimido = new File([blob], nombreFinal, { type: 'image/jpeg' });
+    toast(`Imagen comprimida: ${formatoMB(file.size)} → ${formatoMB(archivoComprimido.size)} ✓`);
+    return archivoComprimido;
+  } catch (e) {
+    console.error('Error al comprimir imagen, se sube el original:', e);
+    return file;
+  }
+}
+
+/** Comprime un PDF re-renderizando cada página como imagen (vía pdf.js) y
+ *  reconstruyendo un PDF nuevo (vía jsPDF) con esas imágenes en menor calidad.
+ *  Es especialmente efectivo en PDFs escaneados o con fotos pesadas (el caso
+ *  típico que hacía fallar la previsualización en el Portafolio Comercial). */
+async function comprimirPDFSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.pdf){
+  if (file.type !== 'application/pdf' || file.size <= maxBytes) return file;
+  toast(`Comprimiendo PDF (${formatoMB(file.size)}), esto puede tardar un momento…`);
+  try {
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    }
+    const buffer = await file.arrayBuffer();
+    const pdfDoc = await pdfjsLib.getDocument({ data: buffer }).promise;
+    const { jsPDF } = window.jspdf;
+    let docNuevo = null;
+
+    for (let n = 1; n <= pdfDoc.numPages; n++) {
+      const page = await pdfDoc.getPage(n);
+      const viewport = page.getViewport({ scale: 1.15 }); // resolución reducida a propósito
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width; canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      const imgData = canvas.toDataURL('image/jpeg', 0.62);
+
+      const orientacion = viewport.width > viewport.height ? 'l' : 'p';
+      if (!docNuevo) {
+        docNuevo = new jsPDF({ unit: 'pt', format: [viewport.width, viewport.height], orientation: orientacion });
+      } else {
+        docNuevo.addPage([viewport.width, viewport.height], orientacion);
+      }
+      docNuevo.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height);
+    }
+
+    const blobFinal = docNuevo.output('blob');
+    if (blobFinal.size >= file.size) {
+      toast('El PDF ya estaba en un tamaño óptimo, se sube el original.');
+      return file;
+    }
+    const archivoComprimido = new File([blobFinal], file.name, { type: 'application/pdf' });
+    toast(`PDF comprimido: ${formatoMB(file.size)} → ${formatoMB(archivoComprimido.size)} ✓`);
+    return archivoComprimido;
+  } catch (e) {
+    console.error('Error al comprimir PDF, se intenta subir el original:', e);
+    toast('No se pudo comprimir el PDF automáticamente, se intentará subir tal cual.');
+    return file;
+  }
+}
+
+/** Comprime un video usando únicamente APIs nativas del navegador (sin librerías
+ *  externas): reproduce el video en memoria, redibuja cada cuadro a menor
+ *  resolución en un canvas, y regraba con MediaRecorder a menor bitrate.
+ *  Es "mejor esfuerzo": funciona bien en Chrome/Android; si el navegador no
+ *  soporta la técnica (ej. algunas versiones de Safari/iOS), se avisa con
+ *  claridad en vez de fallar en silencio. */
+async function comprimirVideoSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.video){
+  if (!file.type.startsWith('video/') || file.size <= maxBytes) return file;
+
+  if (typeof MediaRecorder === 'undefined' || !HTMLCanvasElement.prototype.captureStream) {
+    toast(`El video pesa ${formatoMB(file.size)} y tu navegador no permite comprimirlo automáticamente. Reduce su tamaño con una app como CapCut o VLC antes de subirlo.`);
+    return file;
+  }
+
+  toast(`Comprimiendo video (${formatoMB(file.size)}), no cierres esta pantalla…`);
+  try {
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(file);
+    video.muted = true;
+    await new Promise((res, rej) => {
+      video.onloadedmetadata = res;
+      video.onerror = () => rej(new Error('No se pudo leer el video'));
+    });
+
+    const maxAncho = 640;
+    const escala = video.videoWidth > maxAncho ? maxAncho / video.videoWidth : 1;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(video.videoWidth * escala);
+    canvas.height = Math.round(video.videoHeight * escala);
+    const ctx = canvas.getContext('2d');
+
+    const stream = canvas.captureStream(24);
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 1_200_000 });
+    const chunks = [];
+    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+
+    const grabacionLista = new Promise(res => { recorder.onstop = res; });
+    recorder.start();
+    video.play();
+
+    await new Promise((res) => {
+      const dibujar = () => {
+        if (video.ended || video.paused) { res(); return; }
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        requestAnimationFrame(dibujar);
+      };
+      dibujar();
+    });
+    recorder.stop();
+    await grabacionLista;
+    URL.revokeObjectURL(video.src);
+
+    const blobFinal = new Blob(chunks, { type: 'video/webm' });
+    if (blobFinal.size >= file.size) {
+      toast('El video ya estaba en un tamaño óptimo, se sube el original.');
+      return file;
+    }
+    const nombreFinal = file.name.replace(/\.[^.]+$/, '') + '.webm';
+    const archivoComprimido = new File([blobFinal], nombreFinal, { type: 'video/webm' });
+    toast(`Video comprimido: ${formatoMB(file.size)} → ${formatoMB(archivoComprimido.size)} ✓`);
+    return archivoComprimido;
+  } catch (e) {
+    console.error('Error al comprimir video, se intenta subir el original:', e);
+    toast(`No se pudo comprimir el video automáticamente (pesa ${formatoMB(file.size)}). Prueba con una app externa (CapCut, VLC) si la subida falla.`);
+    return file;
+  }
+}
+
+/** Punto único de entrada: recibe cualquier archivo antes de subirlo a
+ *  Supabase Storage y aplica la compresión que corresponda según su tipo. */
+async function prepararArchivoParaSubida(file){
+  if (!file) return file;
+  if (file.type.startsWith('image/')) return comprimirImagenSiEsNecesario(file);
+  if (file.type === 'application/pdf') return comprimirPDFSiEsNecesario(file);
+  if (file.type.startsWith('video/')) return comprimirVideoSiEsNecesario(file);
+  return file;
+}
+
+/* =========================================================================
    LISTA ÚNICA Y CANÓNICA DE PERMISOS DEL SISTEMA
    -------------------------------------------------------------------------
    Regla de oro: cuando se agregue un módulo, submódulo o acción nueva que
@@ -2319,8 +2498,9 @@ document.getElementById('drBtnConfigRapida')?.addEventListener('click', () => {
 
 /* ---- Foto de perfil del colaborador ---- */
 document.getElementById('drFotoPerfilInput')?.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
+  let file = e.target.files[0];
   if (!file || !currentUser) return;
+  file = await comprimirImagenSiEsNecesario(file);
   toast('Subiendo foto…');
   try {
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
@@ -2614,8 +2794,10 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
   const horaInicio = document.getElementById('actHoraInicio').value || null;
   const horaFin = document.getElementById('actHoraFin').value || null;
   const personas = document.getElementById('actPersonas').value.trim();
-  const archivo = document.getElementById('actArchivo').files[0];
+  let archivo = document.getElementById('actArchivo').files[0];
   if (!titulo) { toast('La actividad realizada es obligatoria'); return; }
+
+  if (archivo) archivo = await prepararArchivoParaSubida(archivo);
 
   toast('Guardando actividad realizada…');
 
@@ -3120,6 +3302,7 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
 /* ============ EVIDENCIAS FOTOGRÁFICAS ============ */
 async function subirEvidencia(actividadId, file){
   if (!file) return;
+  file = await comprimirImagenSiEsNecesario(file);
   toast('Subiendo foto…');
   try {
     const ext = file.name.split('.').pop() || 'jpg';
@@ -4749,8 +4932,9 @@ function urlYoutubeAEmbed(url){
 
 /* ---- Brochure: subir PDF ---- */
 document.getElementById('pfBrochureInput')?.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
+  let file = e.target.files[0];
   if (!file) return;
+  file = await comprimirPDFSiEsNecesario(file);
   toast('Subiendo Brochure…');
   try {
     const path = `brochure/${Date.now()}.pdf`;
@@ -4867,11 +5051,12 @@ async function agregarTestimonio(){
 
 async function agregarTestimonioArchivo(){
   const titulo = document.getElementById('pfTestimonioTitulo').value.trim();
-  const file = document.getElementById('pfTestimonioArchivo').files[0];
+  let file = document.getElementById('pfTestimonioArchivo').files[0];
   if (!file) { toast('Selecciona un video primero'); return; }
   const cargando = document.getElementById('pfTestimonioSubiendo');
   cargando.classList.remove('hidden');
   try {
+    file = await comprimirVideoSiEsNecesario(file);
     const ext = file.name.split('.').pop() || 'mp4';
     const path = `testimonios/${Date.now()}.${ext}`;
     const { error: upErr } = await sb.storage.from('portafolio-comercial').upload(path, file);
@@ -4891,11 +5076,12 @@ async function agregarTestimonioArchivo(){
 }
 
 document.getElementById('pfVideoCDArchivo')?.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
+  let file = e.target.files[0];
   if (!file) return;
   const cargando = document.getElementById('pfVideoCDSubiendo');
   cargando.classList.remove('hidden');
   try {
+    file = await comprimirVideoSiEsNecesario(file);
     const ext = file.name.split('.').pop() || 'mp4';
     const path = `video-costa-dorada/${Date.now()}.${ext}`;
     const { error: upErr } = await sb.storage.from('portafolio-comercial').upload(path, file);
@@ -4916,6 +5102,7 @@ document.getElementById('pfVideoCDArchivo')?.addEventListener('change', async (e
 /* ---- Documentación (9 subcategorías) ---- */
 async function subirDocumentoPortafolio(subcategoria, file){
   if (!file) return;
+  file = await prepararArchivoParaSubida(file);
   toast('Subiendo documento…');
   try {
     const ext = file.name.split('.').pop() || 'pdf';
@@ -5068,8 +5255,9 @@ document.getElementById('btnGuardarSeparacion').addEventListener('click', async 
     if (errProp) { toast('Error al registrar el lote'); console.error(errProp); return; }
 
     let voucherUrl = null;
-    const voucherFile = document.getElementById('sp_voucher').files[0];
+    let voucherFile = document.getElementById('sp_voucher').files[0];
     if (voucherFile) {
+      voucherFile = await comprimirImagenSiEsNecesario(voucherFile);
       const ext = voucherFile.name.split('.').pop() || 'jpg';
       const path = `${currentUser.id}/${nuevoCliente.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await sb.storage.from('documentos-separaciones').upload(path, voucherFile);
@@ -5875,7 +6063,7 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   const nuevaHora = document.getElementById('mra_nueva_hora').value;
   const horaInicioReal = document.getElementById('mra_hora_inicio').value;
   const horaFinReal = document.getElementById('mra_hora_fin').value;
-  const archivoEvidencia = document.getElementById('mra_evidencia_input').files[0];
+  let archivoEvidencia = document.getElementById('mra_evidencia_input').files[0];
 
   if (estado === 'realizada' && !resultado) {
     toast('Por favor, indica el resultado de la actividad');
@@ -5901,6 +6089,7 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
 
   if (estado === 'realizada' && archivoEvidencia) {
     try {
+      archivoEvidencia = await comprimirImagenSiEsNecesario(archivoEvidencia);
       const ext = archivoEvidencia.name.split('.').pop() || 'jpg';
       const path = `${currentUser.id}/${id}-${Date.now()}.${ext}`;
       const { error: upErr } = await sb.storage.from('evidencias-agenda').upload(path, archivoEvidencia);
