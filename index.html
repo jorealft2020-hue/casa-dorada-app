@@ -2544,6 +2544,12 @@ async function mostrarApp(){
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
   const esGerencia = rol === 'gerencia';
+  // BUG CRÍTICO CORREGIDO: "perm" se usaba en esta función sin estar definida
+  // en ningún lado (ni local ni global), lo que lanzaba un ReferenceError y
+  // detenía por completo la carga de la app para CUALQUIER usuario que no
+  // fuera exactamente rol "admin" o "superadmin" (el corto-circuito del ||
+  // ocultaba el error solo para esos dos roles).
+  const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
 
   const elNavAdmin = document.getElementById('navAdmin');
   if (elNavAdmin) elNavAdmin.classList.toggle('hidden', !(rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || perm.gestionar_equipo));
@@ -2637,7 +2643,23 @@ function rolLabel(rol){
 }
 
 async function cargarPerfil(){
-  const { data } = await sb.from('usuarios').select('*').eq('id', currentUser.id).single();
+  let { data } = await sb.from('usuarios').select('*').eq('id', currentUser.id).single();
+
+  // BUG CRÍTICO CORREGIDO: hasta ahora, si un colaborador pre-autorizado
+  // iniciaba sesión por primera vez, nunca se creaba su fila en "usuarios"
+  // (solo existía en "usuarios_preautorizados"), dejándolo sin perfil ni
+  // permisos. Ahora se activa automáticamente vía una función de base de
+  // datos (necesaria porque las políticas de seguridad normales exigen ser
+  // "admin" para crear un usuario, y uno nuevo aún no lo es).
+  if (!data) {
+    const { data: activado, error: errActivar } = await sb.rpc('activar_usuario_preautorizado');
+    if (errActivar) {
+      console.error('No se pudo activar la cuenta pre-autorizada:', errActivar);
+    } else {
+      data = activado;
+    }
+  }
+
   currentProfile = data || {};
   
   // Regla SuperAdmin: joreal.ft2020@gmail.com siempre es SuperAdmin por defecto
