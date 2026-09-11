@@ -1889,6 +1889,7 @@
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🎯 Manual de Ventas</span></div><input type="checkbox" id="perm_ver_manualventas"></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🤖 MAJO ASSISTANT</span></div><input type="checkbox" id="perm_ver_majo_assistant"></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧑‍🤝‍🧑 Reporte Diario del Equipo</span></div><input type="checkbox" id="perm_ver_reporte_equipo"></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">⚙️ Módulo Ajustes</span></div><input type="checkbox" id="perm_ver_ajustes"></label>
       <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; gap:10px; width:100%;">
           <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
@@ -2106,6 +2107,7 @@
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🎯 Manual de Ventas</span></div><input type="checkbox" id="pa_perm_ver_manualventas" checked></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🤖 MAJO ASSISTANT</span></div><input type="checkbox" id="pa_perm_ver_majo_assistant" checked></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧑‍🤝‍🧑 Reporte Diario del Equipo</span></div><input type="checkbox" id="pa_perm_ver_reporte_equipo"></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">⚙️ Módulo Ajustes</span></div><input type="checkbox" id="pa_perm_ver_ajustes"></label>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalPreautorizar">Cancelar</button>
         <button class="btn-primary" id="btnGuardarPreautorizado">Agregar colaborador</button>
@@ -2336,6 +2338,7 @@ const PERMISOS_CATALOGO = [
   { key: 'ver_manualventas',    label: 'Ver Manual de Ventas',               default: true  },
   { key: 'ver_majo_assistant',  label: 'Ver MAJO ASSISTANT',                 default: true  },
   { key: 'ver_reporte_equipo',  label: 'Ver Reporte Diario del Equipo',      default: false },
+  { key: 'ver_ajustes',         label: 'Ver módulo Ajustes',                 default: false },
 ];
 
 /** Completa cualquier permiso faltante de un usuario con su valor por
@@ -2742,7 +2745,7 @@ function actualizarDatosDrawer(){
     if (el) el.classList.toggle('hidden', !cond);
   };
 
-  const puedeVerAjustes = rol === 'superadmin' || perm.gestionar_equipo;
+  const puedeVerAjustes = rol === 'superadmin' || perm.ver_ajustes === true;
   showDr('drNavAdmin', rol === 'superadmin' || perm.gestionar_equipo);
   showDr('drNavSistema', rol === 'superadmin');
   showDr('drDeptAjustes', puedeVerAjustes);
@@ -4108,6 +4111,7 @@ async function abrirEditarPreautorizado(email){
   document.getElementById('pa_perm_ver_manualventas').checked = perm.ver_manualventas !== false;
   document.getElementById('pa_perm_ver_majo_assistant').checked = perm.ver_majo_assistant !== false;
   document.getElementById('pa_perm_ver_reporte_equipo').checked = perm.ver_reporte_equipo === true;
+  document.getElementById('pa_perm_ver_ajustes').checked = perm.ver_ajustes === true;
 
   openModal('modalPreautorizar');
 }
@@ -4162,7 +4166,8 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
       ver_solicitudes: document.getElementById('pa_perm_ver_solicitudes').checked,
       ver_manualventas: document.getElementById('pa_perm_ver_manualventas').checked,
       ver_majo_assistant: document.getElementById('pa_perm_ver_majo_assistant').checked,
-      ver_reporte_equipo: document.getElementById('pa_perm_ver_reporte_equipo').checked
+      ver_reporte_equipo: document.getElementById('pa_perm_ver_reporte_equipo').checked,
+      ver_ajustes: document.getElementById('pa_perm_ver_ajustes').checked
     }
   };
 
@@ -4282,6 +4287,7 @@ async function abrirEditarUsuario(id){
   document.getElementById('perm_ver_manualventas').checked = perm.ver_manualventas !== false;
   document.getElementById('perm_ver_majo_assistant').checked = perm.ver_majo_assistant !== false;
   document.getElementById('perm_ver_reporte_equipo').checked = perm.ver_reporte_equipo === true;
+  document.getElementById('perm_ver_ajustes').checked = perm.ver_ajustes === true;
   openModal('modalEditarUsuario');
 }
 
@@ -4320,6 +4326,7 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
       ver_manualventas: document.getElementById('perm_ver_manualventas').checked,
       ver_majo_assistant: document.getElementById('perm_ver_majo_assistant').checked,
       ver_reporte_equipo: document.getElementById('perm_ver_reporte_equipo').checked,
+      ver_ajustes: document.getElementById('perm_ver_ajustes').checked,
     }
   };
   const { error } = await sb.from('usuarios').update(payload).eq('id', id);
