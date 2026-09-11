@@ -905,21 +905,6 @@
           </div>
         </div>
 
-        <!-- RESUMEN DE AYER Y PLAN DE HOY (la lógica ya existía en el código, faltaba esta tarjeta) -->
-        <div class="daily-analysis-card">
-          <div class="da-section-title"><span>📊</span> Tu resumen de ayer</div>
-          <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <div style="flex:1; background:#F7F4EC; border-radius:10px; padding:10px; text-align:center;">
-              <div style="font-size:20px; font-weight:800; color:var(--navy);" id="da_tareas_ayer">0</div>
-              <div style="font-size:10.5px; color:var(--ink-dim);">Actividades</div>
-            </div>
-            <div style="flex:1; background:#F7F4EC; border-radius:10px; padding:10px; text-align:center;">
-              <div style="font-size:20px; font-weight:800; color:var(--navy);" id="da_leads_ayer">0</div>
-              <div style="font-size:10.5px; color:var(--ink-dim);">Contactos</div>
-            </div>
-          </div>
-          <p style="font-size:12.5px; line-height:1.5; margin:0;" id="da_plan_texto"></p>
-        </div>
 
         <!-- RANKING DEL EQUIPO (solo Admin/SuperAdmin o quien tenga el permiso) -->
         <div class="daily-analysis-card hidden" id="cardRankingEquipo">
@@ -1903,6 +1888,7 @@
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📋 Solicitudes y Requerimientos</span></div><input type="checkbox" id="perm_ver_solicitudes"></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🎯 Manual de Ventas</span></div><input type="checkbox" id="perm_ver_manualventas"></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🤖 MAJO ASSISTANT</span></div><input type="checkbox" id="perm_ver_majo_assistant"></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧑‍🤝‍🧑 Reporte Diario del Equipo</span></div><input type="checkbox" id="perm_ver_reporte_equipo"></label>
       <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; gap:10px; width:100%;">
           <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
@@ -2119,6 +2105,7 @@
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📋 Solicitudes y Requerimientos</span></div><input type="checkbox" id="pa_perm_ver_solicitudes" checked></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🎯 Manual de Ventas</span></div><input type="checkbox" id="pa_perm_ver_manualventas" checked></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🤖 MAJO ASSISTANT</span></div><input type="checkbox" id="pa_perm_ver_majo_assistant" checked></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧑‍🤝‍🧑 Reporte Diario del Equipo</span></div><input type="checkbox" id="pa_perm_ver_reporte_equipo"></label>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalPreautorizar">Cancelar</button>
         <button class="btn-primary" id="btnGuardarPreautorizado">Agregar colaborador</button>
@@ -2348,6 +2335,7 @@ const PERMISOS_CATALOGO = [
   { key: 'ver_solicitudes',     label: 'Ver Solicitudes y Requerimientos',   default: true  },
   { key: 'ver_manualventas',    label: 'Ver Manual de Ventas',               default: true  },
   { key: 'ver_majo_assistant',  label: 'Ver MAJO ASSISTANT',                 default: true  },
+  { key: 'ver_reporte_equipo',  label: 'Ver Reporte Diario del Equipo',      default: false },
 ];
 
 /** Completa cualquier permiso faltante de un usuario con su valor por
@@ -2420,7 +2408,9 @@ function cargarPortadaInicio(){
   const elIframe = document.getElementById('vd_iframe');
   if (elIframe) elIframe.src = `https://www.youtube-nocookie.com/embed/${videoObj.id}`;
 
-  cargarAnalisisAyerYHoy();
+  // Nota: la tarjeta "resumen de ayer" se retiró a pedido explícito (ya se había
+  // quitado antes); se deja de llamar esta función para no hacer consultas
+  // a la base de datos que ya no se muestran en ningún lado.
 }
 
 async function cargarAnalisisAyerYHoy(){
@@ -2586,7 +2576,7 @@ async function mostrarApp(){
   const cardEnlaces = document.getElementById('cardEnlacesTecnicos');
   if (cardEnlaces) cardEnlaces.classList.toggle('hidden', rol !== 'superadmin');
 
-  const puedeVerRanking = rol === 'admin' || rol === 'superadmin' || perm.ver_ranking_equipo === true;
+  const puedeVerRanking = rol === 'superadmin' || perm.ver_ranking_equipo === true;
   if (puedeVerRanking) {
     document.getElementById('cardRankingEquipo').classList.remove('hidden');
     cargarRankingEquipo();
@@ -2597,14 +2587,14 @@ async function mostrarApp(){
     if (el) el.classList.toggle('hidden', !cond);
   };
 
-  showMod('navControl', esSuperAdminODirector || esGerencia || perm.ver_control !== false);
-  showMod('navTareas', esSuperAdminODirector || esGerencia || perm.ver_actividades !== false);
-  showMod('navAgenda', esSuperAdminODirector || esGerencia || perm.ver_agenda !== false);
-  showMod('navClientes', esSuperAdminODirector || esGerencia || perm.ver_clientes !== false);
-  showMod('navSeparaciones', esSuperAdminODirector || esGerencia || perm.ver_separaciones !== false);
-  showMod('navRendimiento', esSuperAdminODirector || esGerencia || perm.ver_rendimiento !== false);
+  showMod('navControl', rol === 'superadmin' || perm.ver_control !== false);
+  showMod('navTareas', rol === 'superadmin' || perm.ver_actividades !== false);
+  showMod('navAgenda', rol === 'superadmin' || perm.ver_agenda !== false);
+  showMod('navClientes', rol === 'superadmin' || perm.ver_clientes !== false);
+  showMod('navSeparaciones', rol === 'superadmin' || perm.ver_separaciones !== false);
+  showMod('navRendimiento', rol === 'superadmin' || perm.ver_rendimiento !== false);
 
-  puedeEliminar = esSuperAdminODirector || (perm.eliminar_registros === true);
+  puedeEliminar = rol === 'superadmin' || (perm.eliminar_registros === true);
 
   cargarPortadaInicio();
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
@@ -2753,22 +2743,22 @@ function actualizarDatosDrawer(){
   };
 
   const puedeVerAjustes = esSuperAdminODirector || perm.gestionar_equipo || rol === 'superadmin';
-  showDr('drNavAdmin', esSuperAdminODirector || perm.gestionar_equipo);
+  showDr('drNavAdmin', rol === 'superadmin' || perm.gestionar_equipo);
   showDr('drNavSistema', rol === 'superadmin');
   showDr('drDeptAjustes', puedeVerAjustes);
-  showDr('drNavControl', esSuperAdminODirector || esGerencia || perm.ver_control !== false);
-  showDr('drNavTareas', esSuperAdminODirector || esGerencia || perm.ver_actividades !== false);
-  showDr('drNavAgenda', esSuperAdminODirector || esGerencia || perm.ver_agenda !== false);
-  showDr('drNavClientes', esSuperAdminODirector || esGerencia || perm.ver_clientes !== false);
-  showDr('drNavSeparaciones', esSuperAdminODirector || esGerencia || perm.ver_separaciones !== false);
-  showDr('drNavRendimiento', esSuperAdminODirector || esGerencia || perm.ver_rendimiento !== false);
-  showDr('drNavPlanos', esSuperAdminODirector || esGerencia || perm.ver_planos !== false);
-  showDr('drNavCotizador', esSuperAdminODirector || esGerencia || perm.ver_cotizador !== false);
-  showDr('drNavPortafolio', esSuperAdminODirector || esGerencia || perm.ver_portafolio !== false);
-  showDr('drNavSolicitudes', esSuperAdminODirector || esGerencia || perm.ver_solicitudes !== false);
-  showDr('drNavManualVentas', esSuperAdminODirector || esGerencia || perm.ver_manualventas !== false);
-  showDr('drNavMajoAssistant', esSuperAdminODirector || esGerencia || perm.ver_majo_assistant !== false);
-  showDr('drNavReporteEquipo', esSuperAdminODirector || esGerencia || rol === 'supervisor' || perm.gestionar_equipo);
+  showDr('drNavControl', rol === 'superadmin' || perm.ver_control !== false);
+  showDr('drNavTareas', rol === 'superadmin' || perm.ver_actividades !== false);
+  showDr('drNavAgenda', rol === 'superadmin' || perm.ver_agenda !== false);
+  showDr('drNavClientes', rol === 'superadmin' || perm.ver_clientes !== false);
+  showDr('drNavSeparaciones', rol === 'superadmin' || perm.ver_separaciones !== false);
+  showDr('drNavRendimiento', rol === 'superadmin' || perm.ver_rendimiento !== false);
+  showDr('drNavPlanos', rol === 'superadmin' || perm.ver_planos !== false);
+  showDr('drNavCotizador', rol === 'superadmin' || perm.ver_cotizador !== false);
+  showDr('drNavPortafolio', rol === 'superadmin' || perm.ver_portafolio !== false);
+  showDr('drNavSolicitudes', rol === 'superadmin' || perm.ver_solicitudes !== false);
+  showDr('drNavManualVentas', rol === 'superadmin' || perm.ver_manualventas !== false);
+  showDr('drNavMajoAssistant', rol === 'superadmin' || perm.ver_majo_assistant !== false);
+  showDr('drNavReporteEquipo', rol === 'superadmin' || perm.ver_reporte_equipo === true);
   reorganizarDrawerPorDepartamentos();
 }
 
@@ -4117,6 +4107,7 @@ async function abrirEditarPreautorizado(email){
   document.getElementById('pa_perm_ver_solicitudes').checked = perm.ver_solicitudes !== false;
   document.getElementById('pa_perm_ver_manualventas').checked = perm.ver_manualventas !== false;
   document.getElementById('pa_perm_ver_majo_assistant').checked = perm.ver_majo_assistant !== false;
+  document.getElementById('pa_perm_ver_reporte_equipo').checked = perm.ver_reporte_equipo === true;
 
   openModal('modalPreautorizar');
 }
@@ -4170,7 +4161,8 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
       ver_portafolio: document.getElementById('pa_perm_ver_portafolio').checked,
       ver_solicitudes: document.getElementById('pa_perm_ver_solicitudes').checked,
       ver_manualventas: document.getElementById('pa_perm_ver_manualventas').checked,
-      ver_majo_assistant: document.getElementById('pa_perm_ver_majo_assistant').checked
+      ver_majo_assistant: document.getElementById('pa_perm_ver_majo_assistant').checked,
+      ver_reporte_equipo: document.getElementById('pa_perm_ver_reporte_equipo').checked
     }
   };
 
@@ -4289,6 +4281,7 @@ async function abrirEditarUsuario(id){
   document.getElementById('perm_ver_solicitudes').checked = perm.ver_solicitudes !== false;
   document.getElementById('perm_ver_manualventas').checked = perm.ver_manualventas !== false;
   document.getElementById('perm_ver_majo_assistant').checked = perm.ver_majo_assistant !== false;
+  document.getElementById('perm_ver_reporte_equipo').checked = perm.ver_reporte_equipo === true;
   openModal('modalEditarUsuario');
 }
 
@@ -4326,6 +4319,7 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
       ver_solicitudes: document.getElementById('perm_ver_solicitudes').checked,
       ver_manualventas: document.getElementById('perm_ver_manualventas').checked,
       ver_majo_assistant: document.getElementById('perm_ver_majo_assistant').checked,
+      ver_reporte_equipo: document.getElementById('perm_ver_reporte_equipo').checked,
     }
   };
   const { error } = await sb.from('usuarios').update(payload).eq('id', id);
