@@ -4108,7 +4108,16 @@ async function cargarPortafolio(){
   document.getElementById('pfTestimoniosSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
 
   const { data, error } = await sb.from('portafolio_items').select('*').order('orden').order('created_at', { ascending: false });
-  if (error) { console.error('Error cargando portafolio:', error); return; }
+  if (error) {
+    console.error('Error cargando portafolio:', error);
+    const msjError = emptyState('⚠️', 'No se pudo cargar esta sección (revisa tu conexión y vuelve a intentar).');
+    ['pfBrochureViewer', 'pfVideoCDViewer', 'pfTestimoniosViewer', 'pfDocumentosLista'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = msjError;
+    });
+    toast('Error al cargar el Portafolio Comercial');
+    return;
+  }
 
   const brochure = (data || []).find(i => i.categoria === 'brochure');
   const videoCD = (data || []).find(i => i.categoria === 'video_costa_dorada');
@@ -4177,16 +4186,57 @@ async function cargarPortafolio(){
   }).join('');
 }
 
-function abrirVisorDocumento({ url, titulo }){
+async function abrirVisorDocumento({ url, titulo }){
   document.getElementById('visdoc_titulo').textContent = titulo;
   document.getElementById('visdoc_btn_descargar').href = url;
   document.getElementById('visdoc_btn_whatsapp').href = `https://wa.me/?text=${encodeURIComponent(titulo + ': ' + url)}`;
 
   const cont = document.getElementById('visdoc_contenedor');
   const esPDF = /\.pdf(\?|$)/i.test(url);
+  const esImagen = /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url);
+
   if (esPDF) {
-    cont.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:0;"></iframe>`;
-  } else {
+    // Usamos pdf.js (renderizado en canvas) en vez de <iframe>: los navegadores móviles
+    // a menudo no muestran PDFs grandes dentro de un iframe y en su lugar disparan una
+    // descarga nativa sin avisar. Renderizar en canvas evita ese problema de raíz.
+    cont.innerHTML = `<div class="spinner"></div>`;
+    try {
+      if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+      }
+      const doc = await pdfjsLib.getDocument(url).promise;
+      let paginaActual = 1;
+      const render = async (n) => {
+        const page = await doc.getPage(n);
+        const canvas = document.getElementById('visdoc_pdf_canvas');
+        const viewport = page.getViewport({ scale: 1.3 });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        document.getElementById('visdoc_pdf_indicador').textContent = `${n} / ${doc.numPages}`;
+      };
+      cont.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; height:100%; overflow:auto;">
+          <canvas id="visdoc_pdf_canvas" style="max-width:100%; box-shadow:0 2px 10px rgba(0,0,0,.15);"></canvas>
+          <div style="display:flex; align-items:center; gap:12px; padding:10px; position:sticky; bottom:0; background:#fff; width:100%; justify-content:center;">
+            <button class="chip-btn gold" id="visdoc_pdf_prev">⬅️</button>
+            <span id="visdoc_pdf_indicador" style="font-size:13px;"></span>
+            <button class="chip-btn gold" id="visdoc_pdf_next">➡️</button>
+          </div>
+        </div>`;
+      document.getElementById('visdoc_pdf_prev').onclick = () => { if (paginaActual > 1) render(--paginaActual); };
+      document.getElementById('visdoc_pdf_next').onclick = () => { if (paginaActual < doc.numPages) render(++paginaActual); };
+      await render(paginaActual);
+    } catch (e) {
+      console.error('Error al renderizar PDF en visor de documentos:', e);
+      cont.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; text-align:center; padding:20px;">
+          <div style="font-size:40px;">⚠️</div>
+          <p>No se pudo previsualizar este PDF (puede ser muy pesado para tu conexión actual).</p>
+          <a href="${url}" target="_blank" rel="noopener" class="chip-btn gold" style="text-decoration:none;">📥 Abrir / Descargar directamente</a>
+        </div>`;
+    }
+  } else if (esImagen) {
     cont.innerHTML = `<img src="${url}" style="max-width:none; touch-action:pinch-zoom; cursor:zoom-in;" id="visdoc_img">`;
     let escala = 1;
     const img = document.getElementById('visdoc_img');
@@ -4196,6 +4246,16 @@ function abrirVisorDocumento({ url, titulo }){
       img.style.width = escala === 1 ? '100%' : `${escala * 100}%`;
       img.style.cursor = escala === 1 ? 'zoom-in' : 'zoom-out';
     });
+  } else {
+    // Cualquier otro tipo de archivo (docx, xlsx, etc.): no intentamos "adivinar" cómo mostrarlo,
+    // mostramos un mensaje claro y el botón de descarga, en vez de dejar un espacio en blanco.
+    const ext = (url.split('?')[0].split('.').pop() || '').toUpperCase();
+    cont.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; text-align:center; padding:20px;">
+        <div style="font-size:40px;">📄</div>
+        <p>Este archivo (${escapeHtml(ext)}) no se puede previsualizar aquí, pero puedes abrirlo o descargarlo.</p>
+        <a href="${url}" target="_blank" rel="noopener" class="chip-btn gold" style="text-decoration:none;">📥 Abrir / Descargar</a>
+      </div>`;
   }
   openModal('modalVisorDocumento');
 }
