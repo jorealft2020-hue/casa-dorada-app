@@ -7,6 +7,12 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1A2332">
 <link rel="apple-touch-icon" href="icono-apple-touch.png">
+<!-- Soporte iOS: sin estos meta tags, Safari abre la app instalada CON la barra de
+     direcciones visible aunque el manifest.json diga "standalone" (eso solo lo
+     respeta Android/Chrome). Con esto, en iPhone también queda a pantalla completa. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Casa Dorada">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
@@ -2723,6 +2729,25 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
 
     actividades.sort((a, b) => (a.hora_inicio || '99:99').localeCompare(b.hora_inicio || '99:99'));
 
+    // 4. Agenda del día que NO se realizó (pendiente/reprogramada) — antes faltaba en el PDF
+    const { data: agendaSinResolver } = await sb.from('agenda')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .in('estado', ['programada', 'reprogramada'])
+      .gte('fecha_inicio', fechaReporte + 'T00:00:00')
+      .lte('fecha_inicio', fechaReporte + 'T23:59:59');
+    const agendaPendientes = (agendaSinResolver || []).filter(a => a.estado === 'programada');
+    const agendaReprogramadas = (agendaSinResolver || []).filter(a => a.estado === 'reprogramada');
+
+    // 5. Solicitudes y Requerimientos con fecha límite ese día — antes faltaban por completo en el PDF
+    const { data: solicitudesDia } = await sb.from('solicitudes')
+      .select('*')
+      .eq('asignado_a', currentUser.id)
+      .eq('fecha_limite', fechaReporte);
+    const solRealizadas = (solicitudesDia || []).filter(s => s.estado === 'realizado');
+    const solPendientes = (solicitudesDia || []).filter(s => s.estado === 'pendiente' || s.estado === 'en_proceso');
+    const solReprogramadas = (solicitudesDia || []).filter(s => s.estado === 'reprogramada');
+
     const { data: rendimientoDia } = await sb.from('rendimiento_leads')
       .select('*')
       .eq('usuario_id', currentUser.id)
@@ -2793,13 +2818,14 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
     }
 
     dibujarEncabezadoPrincipal();
+    let seccionNum = 1;
 
     // SECCIÓN 1: RENDIMIENTO COMERCIAL
     if (rendimientoDia) {
       doc.setTextColor(...cNavy);
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text('1. MÉTRICAS DE RENDIMIENTO COMERCIAL DEL DÍA', marginX, y);
+      doc.text(`${seccionNum++}. MÉTRICAS DE RENDIMIENTO COMERCIAL DEL DÍA`, marginX, y);
       y += 10;
 
       const totalLeads = (rendimientoDia.leads_facebook || 0) + (rendimientoDia.leads_tiktok || 0) + (rendimientoDia.leads_instagram || 0) + (rendimientoDia.leads_prospeccion || 0) + (rendimientoDia.leads_referidos || 0);
@@ -2838,7 +2864,7 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
     doc.setTextColor(...cNavy);
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    doc.text(rendimientoDia ? '2. ACTIVIDADES Y GESTIONES EJECUTADAS' : '1. ACTIVIDADES Y GESTIONES EJECUTADAS', marginX, y);
+    doc.text(`${seccionNum++}. ACTIVIDADES Y GESTIONES EJECUTADAS`, marginX, y);
     y += 12;
 
     if (!actividades || actividades.length === 0) {
@@ -2904,14 +2930,14 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
         y += cardHeight + 8;
       }
 
-      // SECCIÓN 3: EVIDENCIAS
+      // SECCIÓN: EVIDENCIAS
       if (fotosParaAdjuntar.length > 0) {
         if (y > pageHeight - 180) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
 
         doc.setTextColor(...cNavy);
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text('3. SUSTENTO FOTOGRÁFICO DE CAMPO', marginX, y);
+        doc.text(`${seccionNum++}. SUSTENTO FOTOGRÁFICO DE CAMPO`, marginX, y);
         y += 14;
 
         for (const item of fotosParaAdjuntar) {
@@ -2950,6 +2976,82 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
           y += fotoH + 16;
         }
       }
+    }
+
+    // SECCIÓN: AGENDA DEL DÍA — PENDIENTES Y REPROGRAMADAS (lo realizado ya se listó arriba junto a Actividades)
+    // NOTA: esta sección va FUERA del if/else de actividades a propósito — antes vivía adentro
+    // y por eso desaparecía del PDF cuando no había actividades manuales ese día, aunque sí
+    // hubiera agenda o solicitudes pendientes. Debe mostrarse siempre.
+    if (y > pageHeight - 140) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
+    doc.setTextColor(...cNavy);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${seccionNum++}. AGENDA — PENDIENTES Y REPROGRAMADAS DEL DÍA`, marginX, y);
+    y += 12;
+
+    if (agendaPendientes.length === 0 && agendaReprogramadas.length === 0) {
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(...cBorder);
+      doc.roundedRect(marginX, y, anchoUtil, 24, 4, 4, 'FD');
+      doc.setFontSize(9);
+      doc.setTextColor(...cDim);
+      doc.setFont(undefined, 'normal');
+      doc.text('No hay citas pendientes ni reprogramadas para este día.', marginX + 14, y + 16);
+      y += 36;
+    } else {
+      const dibujarLineaAgenda = (ag, etiqueta, colorRGB) => {
+        if (y > pageHeight - 100) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...cBorder);
+        doc.roundedRect(marginX, y, anchoUtil, 22, 3, 3, 'FD');
+        doc.setFillColor(...colorRGB);
+        doc.rect(marginX, y, 4, 22, 'F');
+        doc.setFontSize(8.5);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...cNavy);
+        doc.text(doc.splitTextToSize(`[${etiqueta}] ${ag.titulo}`, anchoUtil - 24), marginX + 12, y + 14);
+        y += 26;
+      };
+      agendaPendientes.forEach(ag => dibujarLineaAgenda(ag, 'PENDIENTE', cGold));
+      agendaReprogramadas.forEach(ag => dibujarLineaAgenda(ag, 'REPROGRAMADA', [124, 107, 175]));
+      y += 8;
+    }
+
+    // SECCIÓN: SOLICITUDES Y REQUERIMIENTOS DEL DÍA (realizadas / pendientes / reprogramadas)
+    if (y > pageHeight - 140) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
+    doc.setTextColor(...cNavy);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${seccionNum++}. SOLICITUDES Y REQUERIMIENTOS`, marginX, y);
+    y += 12;
+
+    if (solRealizadas.length === 0 && solPendientes.length === 0 && solReprogramadas.length === 0) {
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(...cBorder);
+      doc.roundedRect(marginX, y, anchoUtil, 24, 4, 4, 'FD');
+      doc.setFontSize(9);
+      doc.setTextColor(...cDim);
+      doc.setFont(undefined, 'normal');
+      doc.text('No hay solicitudes con fecha límite este día.', marginX + 14, y + 16);
+      y += 36;
+    } else {
+      const dibujarLineaSolicitud = (s, etiqueta, colorRGB) => {
+        if (y > pageHeight - 100) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...cBorder);
+        doc.roundedRect(marginX, y, anchoUtil, 22, 3, 3, 'FD');
+        doc.setFillColor(...colorRGB);
+        doc.rect(marginX, y, 4, 22, 'F');
+        doc.setFontSize(8.5);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...cNavy);
+        doc.text(doc.splitTextToSize(`[${etiqueta}] ${s.titulo} (pide: ${s.solicitante_nombre || '—'})`, anchoUtil - 24), marginX + 12, y + 14);
+        y += 26;
+      };
+      solRealizadas.forEach(s => dibujarLineaSolicitud(s, 'REALIZADA', [76, 122, 94]));
+      solPendientes.forEach(s => dibujarLineaSolicitud(s, 'PENDIENTE', cGold));
+      solReprogramadas.forEach(s => dibujarLineaSolicitud(s, 'REPROGRAMADA', [124, 107, 175]));
+      y += 8;
     }
 
     // SECCIÓN 4: FIRMAS
@@ -5958,7 +6060,7 @@ document.getElementById('btnCargarReporteEquipo')?.addEventListener('click', () 
   cargarReporteEquipo(fecha);
 });
 
-
+document.getElementById('btnGuardarSolicitud')?.addEventListener('click', async () => {
   const solicitante = document.getElementById('sol_solicitante').value.trim();
   const titulo = document.getElementById('sol_titulo').value.trim();
   const descripcion = document.getElementById('sol_descripcion').value.trim();
