@@ -1881,6 +1881,9 @@
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🗺️ Planos Interactivos</span></div><input type="checkbox" id="perm_ver_planos"></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧮 Cotizador</span></div><input type="checkbox" id="perm_ver_cotizador"></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📁 Portafolio Comercial</span></div><input type="checkbox" id="perm_ver_portafolio"></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📋 Solicitudes y Requerimientos</span></div><input type="checkbox" id="perm_ver_solicitudes"></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🎯 Manual de Ventas</span></div><input type="checkbox" id="perm_ver_manualventas"></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🤖 MAJO ASSISTANT</span></div><input type="checkbox" id="perm_ver_majo_assistant"></label>
       <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; gap:10px; width:100%;">
           <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
@@ -2094,6 +2097,9 @@
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🗺️ Planos Interactivos</span></div><input type="checkbox" id="pa_perm_ver_planos" checked></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧮 Cotizador</span></div><input type="checkbox" id="pa_perm_ver_cotizador" checked></label>
       <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📁 Portafolio Comercial</span></div><input type="checkbox" id="pa_perm_ver_portafolio" checked></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📋 Solicitudes y Requerimientos</span></div><input type="checkbox" id="pa_perm_ver_solicitudes" checked></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🎯 Manual de Ventas</span></div><input type="checkbox" id="pa_perm_ver_manualventas" checked></label>
+      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🤖 MAJO ASSISTANT</span></div><input type="checkbox" id="pa_perm_ver_majo_assistant" checked></label>
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalPreautorizar">Cancelar</button>
         <button class="btn-primary" id="btnGuardarPreautorizado">Agregar colaborador</button>
@@ -2320,6 +2326,9 @@ const PERMISOS_CATALOGO = [
   { key: 'generar_informes',    label: 'Generar Informes',                   default: false },
   { key: 'gestionar_equipo',    label: 'Crear y editar usuarios y permisos', default: false },
   { key: 'eliminar_registros',  label: 'Eliminar Registros',                 default: false },
+  { key: 'ver_solicitudes',     label: 'Ver Solicitudes y Requerimientos',   default: true  },
+  { key: 'ver_manualventas',    label: 'Ver Manual de Ventas',               default: true  },
+  { key: 'ver_majo_assistant',  label: 'Ver MAJO ASSISTANT',                 default: true  },
 ];
 
 /** Completa cualquier permiso faltante de un usuario con su valor por
@@ -2737,6 +2746,9 @@ function actualizarDatosDrawer(){
   showDr('drNavPlanos', esSuperAdminODirector || esGerencia || perm.ver_planos !== false);
   showDr('drNavCotizador', esSuperAdminODirector || esGerencia || perm.ver_cotizador !== false);
   showDr('drNavPortafolio', esSuperAdminODirector || esGerencia || perm.ver_portafolio !== false);
+  showDr('drNavSolicitudes', esSuperAdminODirector || esGerencia || perm.ver_solicitudes !== false);
+  showDr('drNavManualVentas', esSuperAdminODirector || esGerencia || perm.ver_manualventas !== false);
+  showDr('drNavMajoAssistant', esSuperAdminODirector || esGerencia || perm.ver_majo_assistant !== false);
   showDr('drNavReporteEquipo', esSuperAdminODirector || esGerencia || rol === 'supervisor' || perm.gestionar_equipo);
   reorganizarDrawerPorDepartamentos();
 }
@@ -4083,6 +4095,9 @@ async function abrirEditarPreautorizado(email){
   document.getElementById('pa_perm_ver_planos').checked = perm.ver_planos !== false;
   document.getElementById('pa_perm_ver_cotizador').checked = perm.ver_cotizador !== false;
   document.getElementById('pa_perm_ver_portafolio').checked = perm.ver_portafolio !== false;
+  document.getElementById('pa_perm_ver_solicitudes').checked = perm.ver_solicitudes !== false;
+  document.getElementById('pa_perm_ver_manualventas').checked = perm.ver_manualventas !== false;
+  document.getElementById('pa_perm_ver_majo_assistant').checked = perm.ver_majo_assistant !== false;
 
   openModal('modalPreautorizar');
 }
@@ -4133,7 +4148,10 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
       eliminar_registros: document.getElementById('pa_perm_eliminar_registros').checked,
       ver_planos: document.getElementById('pa_perm_ver_planos').checked,
       ver_cotizador: document.getElementById('pa_perm_ver_cotizador').checked,
-      ver_portafolio: document.getElementById('pa_perm_ver_portafolio').checked
+      ver_portafolio: document.getElementById('pa_perm_ver_portafolio').checked,
+      ver_solicitudes: document.getElementById('pa_perm_ver_solicitudes').checked,
+      ver_manualventas: document.getElementById('pa_perm_ver_manualventas').checked,
+      ver_majo_assistant: document.getElementById('pa_perm_ver_majo_assistant').checked
     }
   };
 
@@ -4249,6 +4267,9 @@ async function abrirEditarUsuario(id){
   document.getElementById('perm_ver_planos').checked = perm.ver_planos !== false;
   document.getElementById('perm_ver_cotizador').checked = perm.ver_cotizador !== false;
   document.getElementById('perm_ver_portafolio').checked = perm.ver_portafolio !== false;
+  document.getElementById('perm_ver_solicitudes').checked = perm.ver_solicitudes !== false;
+  document.getElementById('perm_ver_manualventas').checked = perm.ver_manualventas !== false;
+  document.getElementById('perm_ver_majo_assistant').checked = perm.ver_majo_assistant !== false;
   openModal('modalEditarUsuario');
 }
 
@@ -4283,6 +4304,9 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
       ver_planos: document.getElementById('perm_ver_planos').checked,
       ver_cotizador: document.getElementById('perm_ver_cotizador').checked,
       ver_portafolio: document.getElementById('perm_ver_portafolio').checked,
+      ver_solicitudes: document.getElementById('perm_ver_solicitudes').checked,
+      ver_manualventas: document.getElementById('perm_ver_manualventas').checked,
+      ver_majo_assistant: document.getElementById('perm_ver_majo_assistant').checked,
     }
   };
   const { error } = await sb.from('usuarios').update(payload).eq('id', id);
@@ -4504,6 +4528,8 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
   const nombre = document.getElementById('cl_nombre').value.trim();
   const celular = document.getElementById('cl_celular').value.trim();
   const proximaAccion = document.getElementById('cl_proxima_accion').value.trim();
+  const proximaFecha = document.getElementById('cl_proxima_fecha').value;
+  const proximaHora = document.getElementById('cl_proxima_hora').value;
   const dni = document.getElementById('cl_dni').value.trim() || null;
   const correo = document.getElementById('cl_correo').value.trim() || null;
   const origen = document.getElementById('cl_origen').value;
