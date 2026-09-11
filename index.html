@@ -404,14 +404,23 @@
   .drawer-backdrop.open .drawer-panel{ transform: translateX(0); }
   .drawer-header{
     background: linear-gradient(145deg, var(--navy) 0%, #223048 100%);
-    padding: 24px 18px 18px; color: #fff; position: relative;
+    padding: 20px 16px 16px; color: #fff; position: relative;
+    display: flex; align-items: flex-start; gap: 12px;
   }
   .drawer-user-circle{
-    width: 48px; height: 48px; border-radius: 50%;
+    width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
     background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
     display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 10px;
+    font-size: 20px; font-weight: 800; color: var(--navy);
+    position: relative; overflow: visible;
   }
+  .drawer-user-circle::after{
+    content: '📷'; position: absolute; bottom: -3px; right: -3px;
+    background: #fff; border-radius: 50%; width: 18px; height: 18px;
+    font-size: 10px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+  .drawer-user-info{ flex: 1; min-width: 0; padding-top: 2px; }
   .drawer-user-name{ font-size: 15.5px; font-weight: 700; margin-bottom: 2px; }
   .drawer-user-role{ font-size: 12px; color: var(--gold-soft); font-weight: 600; margin-bottom: 2px; }
   .drawer-user-email{ font-size: 11px; color: #CBD5E1; word-break: break-all; }
@@ -521,14 +530,14 @@
   <div class="drawer-backdrop" id="drawerBackdrop">
     <div class="drawer-panel" id="drawerPanel">
       <div class="drawer-header">
-        <div class="drawer-user-circle" id="drUserInitial">J</div>
+        <label for="drFotoPerfilInput" class="drawer-user-circle" id="drUserInitial" title="Cambiar foto de perfil" style="cursor:pointer; background-size:cover; background-position:center;">J</label>
+        <input type="file" id="drFotoPerfilInput" accept="image/*" style="display:none;">
         <div class="drawer-user-info">
           <div class="drawer-user-name" id="drUserName">Jorge Alexander Luque</div>
           <div class="drawer-user-role" id="drUserRole">SuperAdmin</div>
           <div class="drawer-user-email" id="drUserEmail">joreal.ft2020@gmail.com</div>
         </div>
-        <button class="drawer-close-btn" id="btnConfigRapida" style="right:52px;" title="Configuración rápida">⚙️</button>
-        <button class="drawer-close-btn" id="btnCerrarDrawer">✕</button>
+        <img src="logo-crm-majo-icono.png" alt="CRM MAJO" style="width:38px; height:38px; object-fit:contain; border-radius:8px; background:#fff; padding:2px;">
       </div>
       <div class="drawer-menu-list">
         <button class="drawer-item active" data-nav="inicio">
@@ -601,22 +610,22 @@
           <div class="dr-dept-items"></div>
         </div>
 
-        <button class="drawer-item" data-nav="notificaciones" id="drNavNotificaciones">
-          <span class="dr-icon">🔔</span>
-          <span class="dr-label">Alertas y Alarmas</span>
-        </button>
+        <div class="dr-dept-group hidden" data-dept="ajustes" id="drDeptAjustes">
+          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>⚙️ AJUSTES</span><span class="dr-dept-arrow">▾</span></button>
+          <div class="dr-dept-items">
         <button class="drawer-item hidden" data-nav="admin" id="drNavAdmin">
-          <span class="dr-icon">⚙️</span>
+          <span class="dr-icon">🧑‍💼</span>
           <span class="dr-label">Gestión de Equipo</span>
         </button>
         <button class="drawer-item hidden" data-nav="sistema" id="drNavSistema">
           <span class="dr-icon">🛠️</span>
           <span class="dr-label">Configuración del Sistema</span>
         </button>
-        <div class="hidden" id="drMarcaMajo" style="text-align:center; padding:16px 8px 4px; border-top:1px solid #EAE5D8; margin-top:8px;">
-          <img src="logo-crm-majo-icono.png" alt="CRM Majo" style="width:56px; height:56px; margin-bottom:6px; object-fit:contain;">
-          <p style="font-size:10.5px; font-weight:800; letter-spacing:0.06em; color:var(--ink-dim); margin:0;">CRM MAJO</p>
-          <p style="font-size:8.5px; color:#B8B2A0; margin:2px 0 0;">Plataforma · Panel del Desarrollador</p>
+        <button class="drawer-item" id="drBtnConfigRapida">
+          <span class="dr-icon">🔄</span>
+          <span class="dr-label">Configuración Rápida / Sincronización</span>
+        </button>
+          </div>
         </div>
       </div>
       <div class="drawer-footer">
@@ -624,9 +633,11 @@
           <span class="dr-icon">🚪</span>
           <span class="dr-label">Cerrar Sesión</span>
         </button>
+        <p style="text-align:center; font-size:9.5px; color:#B8B2A0; margin:10px 0 0;">© <span id="drCopyrightYear"></span> Casa Dorada · CRM MAJO — Todos los derechos reservados</p>
       </div>
     </div>
   </div>
+
 
   <!-- LOGIN -->
   <div class="login-screen" id="loginScreen">
@@ -2194,13 +2205,23 @@ function actualizarDatosDrawer(){
   const emailTxt = currentUser?.email || 'joreal.ft2020@gmail.com';
 
   const elIni = document.getElementById('drUserInitial');
-  if (elIni) elIni.textContent = inicial;
+  if (elIni) {
+    if (currentProfile?.foto_url) {
+      elIni.style.backgroundImage = `url('${currentProfile.foto_url}')`;
+      elIni.textContent = '';
+    } else {
+      elIni.style.backgroundImage = '';
+      elIni.textContent = inicial;
+    }
+  }
   const elNom = document.getElementById('drUserName');
   if (elNom) elNom.textContent = colabNombre;
   const elRol = document.getElementById('drUserRole');
   if (elRol) elRol.textContent = rolTxt;
   const elMail = document.getElementById('drUserEmail');
   if (elMail) elMail.textContent = emailTxt;
+  const elYear = document.getElementById('drCopyrightYear');
+  if (elYear) elYear.textContent = new Date().getFullYear();
 
   const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
   const rol = currentProfile?.rol;
@@ -2212,9 +2233,10 @@ function actualizarDatosDrawer(){
     if (el) el.classList.toggle('hidden', !cond);
   };
 
+  const puedeVerAjustes = esSuperAdminODirector || perm.gestionar_equipo || rol === 'superadmin';
   showDr('drNavAdmin', esSuperAdminODirector || perm.gestionar_equipo);
   showDr('drNavSistema', rol === 'superadmin');
-  document.getElementById('drMarcaMajo')?.classList.toggle('hidden', rol !== 'superadmin');
+  showDr('drDeptAjustes', puedeVerAjustes);
   showDr('drNavControl', esSuperAdminODirector || esGerencia || perm.ver_control !== false);
   showDr('drNavTareas', esSuperAdminODirector || esGerencia || perm.ver_actividades !== false);
   showDr('drNavAgenda', esSuperAdminODirector || esGerencia || perm.ver_agenda !== false);
@@ -2228,12 +2250,38 @@ function actualizarDatosDrawer(){
 }
 
 document.getElementById('btnMenuDrawer')?.addEventListener('click', abrirDrawer);
-document.getElementById('btnCerrarDrawer')?.addEventListener('click', cerrarDrawer);
-document.getElementById('btnConfigRapida')?.addEventListener('click', () => {
+document.getElementById('drBtnConfigRapida')?.addEventListener('click', () => {
   const esSA = currentProfile?.rol === 'superadmin';
   document.getElementById('btnConfigModoServidor')?.classList.toggle('hidden', !esSA);
   openModal('modalConfigRapida');
+  cerrarDrawer();
 });
+
+/* ---- Foto de perfil del colaborador ---- */
+document.getElementById('drFotoPerfilInput')?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file || !currentUser) return;
+  toast('Subiendo foto…');
+  try {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${currentUser.id}/perfil.${ext}`;
+    const { error: upErr } = await sb.storage.from('fotos-perfil').upload(path, file, { upsert: true });
+    if (upErr) { toast('Error al subir la foto'); console.error(upErr); return; }
+    const { data: pub } = sb.storage.from('fotos-perfil').getPublicUrl(path);
+    // Cache-busting: sin esto, el navegador podría seguir mostrando la foto vieja
+    // con la misma URL (mismo path) aunque el archivo ya se haya reemplazado.
+    const urlConVersion = `${pub.publicUrl}?v=${Date.now()}`;
+    const { error: updErr } = await sb.from('usuarios').update({ foto_url: urlConVersion }).eq('id', currentUser.id);
+    if (updErr) { toast('Error al guardar la foto'); console.error(updErr); return; }
+    currentProfile.foto_url = urlConVersion;
+    actualizarDatosDrawer();
+    toast('Foto de perfil actualizada ✓');
+  } catch (err) {
+    toast('Error inesperado al subir la foto');
+    console.error(err);
+  }
+});
+
 document.getElementById('drawerBackdrop')?.addEventListener('click', (e) => {
   if (e.target.id === 'drawerBackdrop') cerrarDrawer();
 });
