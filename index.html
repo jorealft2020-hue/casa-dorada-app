@@ -594,6 +594,10 @@
           <span class="dr-icon">📋</span>
           <span class="dr-label">Solicitudes y Requerimientos</span>
         </button>
+        <button class="drawer-item hidden" data-nav="reporte_equipo" id="drNavReporteEquipo" data-modkey="reporte_equipo">
+          <span class="dr-icon">🧑‍🤝‍🧑</span>
+          <span class="dr-label">Reporte Diario del Equipo</span>
+        </button>
           </div>
         </div>
 
@@ -946,8 +950,21 @@
           <button class="plano-tab-btn active" data-sol="pendiente" onclick="cambiarFiltroSolicitudes('pendiente')">⚪ Pendientes</button>
           <button class="plano-tab-btn" data-sol="en_proceso" onclick="cambiarFiltroSolicitudes('en_proceso')">🟡 En Proceso</button>
           <button class="plano-tab-btn" data-sol="realizado" onclick="cambiarFiltroSolicitudes('realizado')">🟢 Realizadas</button>
+          <button class="plano-tab-btn" data-sol="reprogramada" onclick="cambiarFiltroSolicitudes('reprogramada')">🔁 Reprogramadas</button>
         </div>
         <div id="listaSolicitudes"></div>
+      </div>
+
+      <div id="viewReporteEquipo" class="hidden">
+        <div class="section-title" style="margin-top:0;">Reporte Diario del Equipo</div>
+        <div class="card" style="margin-bottom:14px; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+          <div class="field" style="flex:1; min-width:150px; margin-bottom:0;">
+            <label>Fecha</label>
+            <input type="date" id="rdFecha">
+          </div>
+          <button class="btn-primary" id="btnCargarReporteEquipo" style="height:44px;">Ver reporte</button>
+        </div>
+        <div id="reporteEquipoContenido"></div>
       </div>
 
       <div id="viewNotificaciones" class="hidden">
@@ -2266,6 +2283,7 @@ function actualizarDatosDrawer(){
   showDr('drNavPlanos', esSuperAdminODirector || esGerencia || perm.ver_planos !== false);
   showDr('drNavCotizador', esSuperAdminODirector || esGerencia || perm.ver_cotizador !== false);
   showDr('drNavPortafolio', esSuperAdminODirector || esGerencia || perm.ver_portafolio !== false);
+  showDr('drNavReporteEquipo', esSuperAdminODirector || esGerencia || rol === 'supervisor' || perm.gestionar_equipo);
   reorganizarDrawerPorDepartamentos();
 }
 
@@ -2336,6 +2354,7 @@ function irAVista(vista){
     agenda:'viewAgenda', 
     rendimiento:'viewRendimiento', 
     notificaciones:'viewNotificaciones', solicitudes:'viewSolicitudes', manualventas:'viewManualVentas', 
+    reporte_equipo:'viewReporteEquipo',
     admin:'viewAdmin',
     sistema:'viewSistema'
   };
@@ -2354,6 +2373,11 @@ function irAVista(vista){
   if (vista === 'rendimiento') cargarRendimiento();
   if (vista === 'notificaciones') cargarNotificaciones();
   if (vista === 'solicitudes') cargarSolicitudes('pendiente');
+  if (vista === 'reporte_equipo') {
+    const elF = document.getElementById('rdFecha');
+    if (elF && !elF.value) elF.value = obtenerHoyLocal();
+    cargarReporteEquipo(elF?.value || obtenerHoyLocal());
+  }
   if (vista === 'manualventas') cargarManualVentas();
   if (vista === 'admin') { cargarUsuariosAdmin(); cargarPreautorizados(); }
   if (vista === 'sistema') cargarConfigDepartamentos();
@@ -5762,9 +5786,9 @@ async function cargarSolicitudes(estado){
     return;
   }
 
-  const colorEstado = { pendiente: '#B4453C', en_proceso: '#C9973E', realizado: '#3D8B5F' };
-  const siguienteEstado = { pendiente: 'en_proceso', en_proceso: 'realizado', realizado: null };
-  const labelSiguiente = { pendiente: '▶️ Marcar En Proceso', en_proceso: '✅ Marcar Realizado', realizado: null };
+  const colorEstado = { pendiente: '#B4453C', en_proceso: '#C9973E', realizado: '#3D8B5F', reprogramada: '#7C6BAF' };
+  const siguienteEstado = { pendiente: 'en_proceso', en_proceso: 'realizado', realizado: null, reprogramada: 'en_proceso' };
+  const labelSiguiente = { pendiente: '▶️ Marcar En Proceso', en_proceso: '✅ Marcar Realizado', realizado: null, reprogramada: '▶️ Reanudar' };
 
   el.innerHTML = data.map(s => {
     const limite = s.fecha_limite ? `📅 Vence: ${fmtFecha(s.fecha_limite)}` : '';
@@ -5777,10 +5801,21 @@ async function cargarSolicitudes(estado){
       ${limite ? `<p class="card-sub" style="margin-top:4px; font-weight:700;">${limite}</p>` : ''}
       <div class="card-actions" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
         ${sig ? `<button class="chip-btn gold" onclick="cambiarEstadoSolicitud('${s.id}','${sig}')">${labelSiguiente[s.estado]}</button>` : ''}
+        ${s.estado !== 'realizado' ? `<button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="reprogramarSolicitud('${s.id}')">🔁 Reprogramar</button>` : ''}
         <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarSolicitud('${s.id}')">🗑️ Eliminar</button>
       </div>
     </div>`;
   }).join('');
+}
+
+async function reprogramarSolicitud(id){
+  const nuevaFecha = prompt('Nueva fecha límite (AAAA-MM-DD):');
+  if (!nuevaFecha) return;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(nuevaFecha)) { toast('Formato de fecha inválido, usa AAAA-MM-DD'); return; }
+  const { error } = await sb.from('solicitudes').update({ estado: 'reprogramada', fecha_limite: nuevaFecha }).eq('id', id);
+  if (error) { toast('Error al reprogramar'); console.error(error); return; }
+  toast('Solicitud reprogramada ✓');
+  cargarSolicitudes(solicitudesFiltroActual);
 }
 
 async function cambiarEstadoSolicitud(id, nuevoEstado){
@@ -5809,7 +5844,105 @@ async function abrirModalNuevaSolicitud(){
   }
 }
 
-document.getElementById('btnGuardarSolicitud')?.addEventListener('click', async () => {
+/* ============ REPORTE DIARIO DEL EQUIPO (vista para supervisores) ============ */
+async function obtenerIdsEquipo(){
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
+  if (esSuperAdminODirector) {
+    const { data } = await sb.from('usuarios').select('id, nombre').eq('activo', true).order('nombre');
+    return data || [];
+  }
+  // Supervisor: su equipo son los usuarios con supervisor_id = él, más él mismo
+  const { data } = await sb.from('usuarios').select('id, nombre').or(`supervisor_id.eq.${currentUser.id},id.eq.${currentUser.id}`).eq('activo', true).order('nombre');
+  return data || [];
+}
+
+async function cargarReporteEquipo(fecha){
+  const cont = document.getElementById('reporteEquipoContenido');
+  if (!cont) return;
+  cont.innerHTML = `<div class="spinner"></div>`;
+
+  const equipo = await obtenerIdsEquipo();
+  if (equipo.length === 0) {
+    cont.innerHTML = emptyState('🧑‍🤝‍🧑', 'No tienes colaboradores asignados como equipo todavía.');
+    return;
+  }
+  const idsEquipo = equipo.map(u => u.id);
+  const nombrePorId = Object.fromEntries(equipo.map(u => [u.id, u.nombre]));
+
+  const [{ data: actividades }, { data: agenda }, { data: solicitudes }] = await Promise.all([
+    sb.from('actividades').select('*').in('usuario_id', idsEquipo).eq('fecha_programada', fecha).eq('archivada', false),
+    sb.from('agenda').select('*').in('usuario_id', idsEquipo).gte('fecha_inicio', fecha + 'T00:00:00').lt('fecha_inicio', fecha + 'T23:59:59'),
+    sb.from('solicitudes').select('*').in('asignado_a', idsEquipo).eq('fecha_limite', fecha),
+  ]);
+
+  const agRealizadas = (agenda || []).filter(a => a.estado === 'realizada');
+  const agPendientes = (agenda || []).filter(a => a.estado === 'programada');
+  const agReprogramadas = (agenda || []).filter(a => a.estado === 'reprogramada');
+
+  const solRealizadas = (solicitudes || []).filter(s => s.estado === 'realizado');
+  const solPendientes = (solicitudes || []).filter(s => s.estado === 'pendiente' || s.estado === 'en_proceso');
+  const solReprogramadas = (solicitudes || []).filter(s => s.estado === 'reprogramada');
+
+  const tarjetaResumen = (num, lbl, color) => `
+    <div style="flex:1; min-width:90px; background:#F7F4EC; border-radius:10px; padding:10px; text-align:center; border-bottom:3px solid ${color};">
+      <div style="font-size:20px; font-weight:800; color:${color};">${num}</div>
+      <div style="font-size:10.5px; color:var(--ink-dim);">${lbl}</div>
+    </div>`;
+
+  const listaItems = (items, campoNombre, extra) => {
+    if (items.length === 0) return `<p class="card-sub" style="padding:8px 0;">— Ninguna —</p>`;
+    return items.map(it => `
+      <div style="padding:8px 0; border-bottom:1px solid #EFEAE0;">
+        <p style="font-size:12.5px; font-weight:700; margin:0;">${escapeHtml(it[campoNombre])}</p>
+        <p style="font-size:11.5px; color:var(--ink-dim); margin:2px 0 0;">👤 ${escapeHtml(nombrePorId[it.usuario_id || it.asignado_a] || '—')}${extra ? ' · ' + extra(it) : ''}</p>
+      </div>`).join('');
+  };
+
+  cont.innerHTML = `
+    <div class="card" style="margin-bottom:14px;">
+      <p class="card-title" style="margin-bottom:10px;">✓ Actividades Realizadas (${(actividades || []).length})</p>
+      ${listaItems(actividades || [], 'titulo', a => a.locacion ? `📍 ${escapeHtml(a.locacion)}` : '')}
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="card-title" style="margin-bottom:10px;">📅 Agenda</p>
+      <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+        ${tarjetaResumen(agRealizadas.length, 'Realizadas', '#3D8B5F')}
+        ${tarjetaResumen(agPendientes.length, 'Pendientes', '#C9973E')}
+        ${tarjetaResumen(agReprogramadas.length, 'Reprogramadas', '#7C6BAF')}
+      </div>
+      <p class="card-sub" style="font-weight:700; margin-bottom:4px;">Realizadas</p>
+      ${listaItems(agRealizadas, 'titulo')}
+      <p class="card-sub" style="font-weight:700; margin:10px 0 4px;">Pendientes</p>
+      ${listaItems(agPendientes, 'titulo')}
+      <p class="card-sub" style="font-weight:700; margin:10px 0 4px;">Reprogramadas</p>
+      ${listaItems(agReprogramadas, 'titulo')}
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="card-title" style="margin-bottom:10px;">📋 Solicitudes y Requerimientos</p>
+      <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+        ${tarjetaResumen(solRealizadas.length, 'Realizadas', '#3D8B5F')}
+        ${tarjetaResumen(solPendientes.length, 'Pendientes', '#C9973E')}
+        ${tarjetaResumen(solReprogramadas.length, 'Reprogramadas', '#7C6BAF')}
+      </div>
+      <p class="card-sub" style="font-weight:700; margin-bottom:4px;">Realizadas</p>
+      ${listaItems(solRealizadas, 'titulo')}
+      <p class="card-sub" style="font-weight:700; margin:10px 0 4px;">Pendientes</p>
+      ${listaItems(solPendientes, 'titulo')}
+      <p class="card-sub" style="font-weight:700; margin:10px 0 4px;">Reprogramadas</p>
+      ${listaItems(solReprogramadas, 'titulo')}
+    </div>
+  `;
+}
+
+document.getElementById('btnCargarReporteEquipo')?.addEventListener('click', () => {
+  const fecha = document.getElementById('rdFecha').value || obtenerHoyLocal();
+  cargarReporteEquipo(fecha);
+});
+
+
   const solicitante = document.getElementById('sol_solicitante').value.trim();
   const titulo = document.getElementById('sol_titulo').value.trim();
   const descripcion = document.getElementById('sol_descripcion').value.trim();
