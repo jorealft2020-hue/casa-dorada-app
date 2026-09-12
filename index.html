@@ -2423,13 +2423,8 @@ main.app-content {
       <!-- BLOQUE FINANCIADO -->
       <div id="cot_bloque_financiado">
         <div class="field">
-          <label>Inicial Pactada (S/)</label>
-          <input type="number" step="0.01" id="cot_inicial" oninput="calcularCotizadorMatematica()">
-          <div style="display:flex; gap:6px; margin-top:6px;">
-            <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.10)">10%</button>
-            <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.20)">20%</button>
-            <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.30)">30%</button>
-          </div>
+          <label>Inicial Pactada (S/) *</label>
+          <input type="number" step="0.01" id="cot_inicial" placeholder="Ingresa el monto pactado de inicial en soles..." oninput="calcularCotizadorMatematica()" style="font-weight:700; color:var(--navy); font-size:15px;">
         </div>
 
         <!-- SALDO (VALOR TOTAL MENOS INICIAL) -->
@@ -6326,11 +6321,10 @@ function calcularCotizadorMatematica(){
     return;
   }
 
-  let inicial = parseFloat(document.getElementById('cot_inicial')?.value);
+  const elIni = document.getElementById('cot_inicial');
+  let inicial = parseFloat(elIni?.value);
   if (isNaN(inicial) || inicial < 0) {
-    inicial = valorTotal * 0.10;
-    const elIni = document.getElementById('cot_inicial');
-    if (elIni) elIni.value = inicial.toFixed(2);
+    inicial = 0;
   }
 
   const saldo = Math.max(0, valorTotal - inicial);
