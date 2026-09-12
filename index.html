@@ -1370,6 +1370,7 @@
       <h3>Nueva actividad realizada</h3>
       <div class="field"><label>Actividad realizada</label><textarea id="actTitulo" placeholder="Describe la actividad efectuada"></textarea></div>
       <div class="field"><label>Locación / Lugar</label><input type="text" id="actLocacion" placeholder="Ej: Oficina central, Proyecto Costa Dorada, Notaría..."></div>
+      <div class="field"><label>Cliente relacionado (opcional)</label><select id="actClienteId"><option value="">— Ninguno —</option></select></div>
 
       <div class="field">
         <label>Temas y Acuerdos</label>
@@ -1402,6 +1403,7 @@
       <h3>Nuevo evento de agenda</h3>
       <div class="field"><label>Actividad</label><input type="text" id="agActividad" placeholder="Ej: Reunión con cliente"></div>
       <div class="field"><label>Locación</label><input type="text" id="agLocacion" placeholder="Ej: Oficina central"></div>
+      <div class="field"><label>Cliente relacionado (opcional)</label><select id="agClienteId"><option value="">— Ninguno —</option></select></div>
       <div class="field"><label>Fecha</label><input type="date" id="agFecha"></div>
       <div class="field"><label>Hora</label><input type="time" id="agHora"></div>
       <div class="field"><label>Persona a contactar (opcional)</label><input type="text" id="agContactoNombre" placeholder="Ej: Sr. Ramírez"></div>
@@ -1566,6 +1568,14 @@
   </div>
 
   <!-- MODAL: nuevo cliente / prospecto -->
+  <div class="modal-backdrop" id="modalHistorialCliente">
+    <div class="modal-sheet">
+      <button class="modal-x-close" data-close="modalHistorialCliente">✕</button>
+      <h3 id="hc_titulo">Historial del cliente</h3>
+      <div id="hc_contenido"></div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="modalCliente">
     <div class="modal-sheet">
       <h3>Registrar nuevo cliente / prospecto</h3>
@@ -3035,9 +3045,22 @@ function estadoLabel(e){
   return { pendiente:'Pendiente', en_proceso:'En proceso', completada:'Realizada', cancelada:'Cancelada', activa:'Activa', vencida:'Vencida', convertida_venta:'Vendido' }[e] || e;
 }
 
+/** Llena un <select> con los clientes del vendedor (o de todo el equipo si es
+ *  admin/superadmin), usado para vincular actividades y citas a un cliente. */
+async function poblarSelectClientes(selectId){
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  let query = sb.from('clientes').select('id, nombre').order('nombre');
+  if (!esSuperAdminODirector) query = query.eq('vendedor_id', currentUser.id);
+  const { data } = await query;
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Ninguno —</option>' + (data || []).map(c => `<option value="${c.id}">${escapeHtml(c.nombre)}</option>`).join('');
+}
+
 /* ============ NUEVA ACTIVIDAD (modal) ============ */
 document.getElementById('btnFab').addEventListener('click', () => {
-  if (currentView === 'agenda') openModal('modalAgenda');
+  if (currentView === 'agenda') { poblarSelectClientes('agClienteId'); openModal('modalAgenda'); }
   else if (currentView === 'separaciones') { prepararModalSeparacion(); openModal('modalSeparacion'); }
   else if (currentView === 'clientes') { prepararModalCliente(); openModal('modalCliente'); }
   else {
@@ -3046,6 +3069,7 @@ document.getElementById('btnFab').addEventListener('click', () => {
     renderActTemasLista();
     document.getElementById('actTemaFormNuevo')?.classList.add('hidden');
     document.getElementById('btnAgregarTema')?.classList.remove('hidden');
+    poblarSelectClientes('actClienteId');
     openModal('modalActividad');
   }
 });
@@ -3098,6 +3122,7 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
   const horaInicio = document.getElementById('actHoraInicio').value || null;
   const horaFin = document.getElementById('actHoraFin').value || null;
   const personas = document.getElementById('actPersonas').value.trim();
+  const clienteId = document.getElementById('actClienteId').value || null;
   let archivo = document.getElementById('actArchivo').files[0];
   if (!titulo) { toast('La actividad realizada es obligatoria'); return; }
 
@@ -3114,6 +3139,7 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
     hora_inicio: horaInicio,
     hora_fin: horaFin,
     personas_involucradas: personas || null,
+    cliente_id: clienteId,
     temas_acuerdos: actTemasAcuerdosTemp,
     estado: 'completada',
     fecha_completada: new Date().toISOString()
@@ -3147,6 +3173,7 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
   document.getElementById('actHoraFin').value = '';
   document.getElementById('actPersonas').value = '';
   document.getElementById('actArchivo').value = '';
+  document.getElementById('actClienteId').value = '';
   cargarActividadesHoy(); cargarActividadesTodas(); cargarKPIs();
 });
 
@@ -4668,6 +4695,7 @@ async function cargarClientes(){
           ${c.estado_prospecto ? `<span class="badge badge-pendiente">${escapeHtml(c.estado_prospecto)}</span>` : ''}
         </div>
         <div class="card-actions" style="margin-top:8px;">
+          <button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">🕒 Historial</button>
           ${wspUrl ? `<a class="chip-btn gold" href="${wspUrl}" target="_blank" style="text-decoration:none;">💬 WhatsApp</a>` : ''}
           ${c.celular ? `<a class="chip-btn" href="tel:${c.celular}" style="text-decoration:none;">📞 Llamar</a>` : ''}
           ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarCliente('${c.id}')">🗑️</button>` : ''}
@@ -4727,9 +4755,10 @@ function renderPipelineClientes(){
                 <p style="font-size:12.5px; font-weight:700; margin:0;">${escapeHtml(c.nombre)}</p>
                 <p style="font-size:11px; color:var(--ink-dim); margin:2px 0 6px;">${c.celular || c.telefono || 'Sin celular'}</p>
                 ${enRiesgo ? `<p style="font-size:10.5px; color:var(--danger); font-weight:700; margin:0 0 6px;">⚠️ Sin contacto +7 días</p>` : ''}
-                <select onchange="moverClientePipeline('${c.id}', this.value)" style="width:100%; font-size:11px; padding:5px; border-radius:6px; border:1px solid #E5DFCF;">
+                <select onchange="moverClientePipeline('${c.id}', this.value)" style="width:100%; font-size:11px; padding:5px; border-radius:6px; border:1px solid #E5DFCF; margin-bottom:6px;">
                   ${ETAPAS_PIPELINE.map(e2 => `<option value="${e2}" ${e2 === etapa ? 'selected' : ''}>➜ ${e2}</option>`).join('')}
                 </select>
+                <button onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')" style="width:100%; font-size:10.5px; padding:4px; border-radius:6px; border:1px solid #7C6BAF; background:none; color:#7C6BAF; cursor:pointer;">🕒 Historial</button>
               </div>`;
             }).join('')}
           </div>
@@ -4746,6 +4775,47 @@ async function moverClientePipeline(id, nuevaEtapa){
   if (c) c.estado_prospecto = nuevaEtapa;
   toast(`Movido a "${nuevaEtapa}" ✓`);
   renderPipelineClientes();
+}
+
+/** Línea de tiempo de interacciones: mezcla actividades y citas de agenda
+ *  vinculadas a un cliente, ordenadas de la más reciente a la más antigua. */
+async function abrirHistorialCliente(clienteId, nombreCliente){
+  document.getElementById('hc_titulo').textContent = `Historial · ${nombreCliente}`;
+  const cont = document.getElementById('hc_contenido');
+  cont.innerHTML = `<div class="spinner"></div>`;
+  openModal('modalHistorialCliente');
+
+  const [{ data: acts }, { data: citas }] = await Promise.all([
+    sb.from('actividades').select('*').eq('cliente_id', clienteId).order('created_at', { ascending: false }),
+    sb.from('agenda').select('*').eq('cliente_id', clienteId).order('fecha_inicio', { ascending: false }),
+  ]);
+
+  const eventos = [
+    ...(acts || []).map(a => ({ tipo: 'actividad', fecha: a.created_at, titulo: a.titulo, detalle: a.locacion, icono: '✓', color: 'var(--ok)' })),
+    ...(citas || []).map(c => ({ tipo: 'agenda', fecha: c.fecha_inicio, titulo: c.titulo, detalle: `${c.locacion || ''} · ${estadoLabel(c.estado)}`, icono: '📅', color: c.estado === 'realizada' ? 'var(--ok)' : (c.estado === 'reprogramada' ? '#7C6BAF' : 'var(--gold)') })),
+  ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+  if (eventos.length === 0) {
+    cont.innerHTML = emptyState('🕒', 'Este cliente aún no tiene actividades ni citas vinculadas.');
+    return;
+  }
+
+  cont.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:0;">
+      ${eventos.map((e, i) => `
+        <div style="display:flex; gap:12px; padding-bottom:${i === eventos.length - 1 ? '0' : '16px'};">
+          <div style="display:flex; flex-direction:column; align-items:center;">
+            <div style="width:28px; height:28px; border-radius:50%; background:${e.color}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;">${e.icono}</div>
+            ${i < eventos.length - 1 ? '<div style="flex:1; width:2px; background:#E5DFCF; margin-top:2px;"></div>' : ''}
+          </div>
+          <div style="padding-bottom:4px;">
+            <p style="font-size:12.5px; font-weight:700; margin:0;">${escapeHtml(e.titulo)}</p>
+            <p style="font-size:11px; color:var(--ink-dim); margin:2px 0 0;">${new Date(e.fecha).toLocaleString('es-PE', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}${e.detalle ? ' · ' + escapeHtml(e.detalle) : ''}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }
 
 async function eliminarCliente(id){
@@ -5790,6 +5860,7 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
   const hora = document.getElementById('agHora').value;
   const contactoNombre = document.getElementById('agContactoNombre').value.trim();
   const contactoWhatsapp = document.getElementById('agContactoWhatsapp').value.trim();
+  const clienteId = document.getElementById('agClienteId').value || null;
   if (!actividad || !fecha || !hora) { toast('Completa actividad, fecha y hora'); return; }
 
   const fechaInicio = new Date(`${fecha}T${hora}:00`).toISOString();
@@ -5801,6 +5872,7 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
     fecha_inicio: fechaInicio,
     contacto_nombre: contactoNombre || null,
     contacto_whatsapp: contactoWhatsapp || null,
+    cliente_id: clienteId,
     estado: 'programada'
   }).select().single();
 
@@ -5814,13 +5886,14 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
   document.getElementById('agHora').value = '';
   document.getElementById('agContactoNombre').value = '';
   document.getElementById('agContactoWhatsapp').value = '';
+  document.getElementById('agClienteId').value = '';
   cargarAgenda();
 
   // Sincronización automática de Google Calendar (Alarmas: 1h, 30m, 15m)
   sincronizarEventoCalendar(nuevoEv);
 });
 
-document.getElementById('btnAbrirNuevaAgenda')?.addEventListener('click', () => openModal('modalAgenda'));
+document.getElementById('btnAbrirNuevaAgenda')?.addEventListener('click', () => { poblarSelectClientes('agClienteId'); openModal('modalAgenda'); });
 
 /* Pide un access_token fresco mediante el refresh_token guardado en el servidor.
    Sin esto, el token dejaba de funcionar pasada 1 hora y la sincronización fallaba en silencio. */
