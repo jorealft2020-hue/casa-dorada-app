@@ -920,6 +920,7 @@
 
         <div class="section-title">📈 Proyección de Ventas — este mes</div>
         <div id="cardProyeccionVentas" class="card"></div>
+        <div id="avisoClientesRiesgo"></div>
 
         <div class="section-title">Actividades realizadas hoy <button class="see-all" data-nav="actividades">Ver todo</button></div>
         <button class="chip-btn gold" id="btnDescargarReporte" style="margin-bottom:12px; width:100%; padding:11px; font-size:13px; font-weight:700;">📄 Descargar reporte diario</button>
@@ -2864,7 +2865,7 @@ function irAVista(vista){
   document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones' && vista !== 'clientes'));
 
   if (vista === 'inicio') cargarPortadaInicio();
-  if (vista === 'control') { cargarKPIs(); cargarActividadesHoy(); cargarSeparacionesPorVencer(); cargarProyeccionVentas(); }
+  if (vista === 'control') { cargarKPIs(); cargarActividadesHoy(); cargarSeparacionesPorVencer(); cargarProyeccionVentas(); cargarAvisoClientesRiesgo(); }
   if (vista === 'actividades') cargarActividadesTodas();
   if (vista === 'clientes') cargarClientes();
   if (vista === 'separaciones') cargarSeparacionesTodas();
@@ -2924,6 +2925,27 @@ const PROBABILIDAD_POR_ETAPA = {
   'Visita realizada': 0.30,
   'Evaluación crediticia': 0.55,
 };
+
+async function cargarAvisoClientesRiesgo(){
+  const cont = document.getElementById('avisoClientesRiesgo');
+  if (!cont) return;
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+
+  let query = sb.from('clientes').select('*').not('estado_prospecto', 'in', '("Separado","No interesado")');
+  if (!esSuperAdminODirector) query = query.eq('vendedor_id', currentUser.id);
+  const { data } = await query;
+  const enRiesgo = (data || []).filter(clienteEnRiesgo);
+
+  if (enRiesgo.length === 0) { cont.innerHTML = ''; return; }
+  cont.innerHTML = `
+    <div class="card" style="border-left:4px solid var(--danger); margin-top:14px; cursor:pointer;" onclick="irAVista('clientes')">
+      <p class="card-title" style="color:var(--danger);">⚠️ ${enRiesgo.length} cliente${enRiesgo.length > 1 ? 's' : ''} en riesgo</p>
+      <p class="card-sub">Sin contacto ni próxima acción hace más de 7 días. Toca para revisar.</p>
+    </div>
+  `;
+}
+
 
 async function cargarProyeccionVentas(){
   const cont = document.getElementById('cardProyeccionVentas');
@@ -7357,6 +7379,14 @@ async function cargarNotificacionesBadge(){
     const { count: numSol, error: errSol } = await qSol;
     if (errSol) console.error('Error contando solicitudes por vencer:', errSol);
     totalAlertas += (numSol || 0);
+
+    // 4. Clientes en riesgo: sin contacto/próxima acción hace más de 7 días
+    let qCli = sb.from('clientes').select('proxima_fecha, fecha_contacto, created_at, estado_prospecto')
+      .not('estado_prospecto', 'in', '("Separado","No interesado")');
+    if (!esSuperAdminODirector) qCli = qCli.eq('vendedor_id', currentUser.id);
+    const { data: clientesRiesgo, error: errCli } = await qCli;
+    if (errCli) console.error('Error contando clientes en riesgo:', errCli);
+    totalAlertas += (clientesRiesgo || []).filter(clienteEnRiesgo).length;
   } catch (e) {
     console.error('Error general en cargarNotificacionesBadge:', e);
   }
@@ -7525,6 +7555,28 @@ async function cargarNotificaciones(asesorIdFiltro){
         titulo: `${etiqueta}: ${escapeHtml(s.titulo)}`,
         mensaje: `📅 Vence: ${fmtFecha(s.fecha_limite)} · Pedida por: ${escapeHtml(s.solicitante_nombre || 'No especificado')}${asesorTxt}`,
         accion: "irAVista('solicitudes')"
+      });
+    });
+
+    // 4. Clientes en riesgo: sin contacto/próxima acción hace más de 7 días
+    let qCliNotif = sb.from('clientes').select('*')
+      .not('estado_prospecto', 'in', '("Separado","No interesado")');
+    if (idObjetivo !== 'todos') {
+      qCliNotif = qCliNotif.eq('vendedor_id', idObjetivo);
+    } else if (!esSuperAdminODirector) {
+      qCliNotif = qCliNotif.eq('vendedor_id', currentUser.id);
+    }
+    const { data: clientesNotif, error: errCliNotif } = await qCliNotif.limit(100);
+    if (errCliNotif) console.error('Error cargando clientes en riesgo para notificaciones:', errCliNotif);
+
+    (clientesNotif || []).filter(clienteEnRiesgo).forEach(c => {
+      alertas.push({
+        tipo: 'cliente_riesgo',
+        icono: '⚠️',
+        color: '#B4453C',
+        titulo: `CLIENTE EN RIESGO: ${escapeHtml(c.nombre)}`,
+        mensaje: `Sin contacto ni próxima acción hace más de 7 días · ${c.celular || c.telefono || 'Sin celular'}`,
+        accion: "irAVista('clientes')"
       });
     });
 
