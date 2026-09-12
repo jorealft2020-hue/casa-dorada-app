@@ -887,6 +887,10 @@
               <span class="dr-icon">📅</span>
               <span class="dr-label">Agenda & Google Calendar</span>
             </button>
+            <button class="drawer-item" data-nav="visitas" id="drNavVisitas" data-modkey="control_visitas">
+              <span class="dr-icon">🚐</span>
+              <span class="dr-label">Presentaciones & Movilidad (14 Asientos)</span>
+            </button>
             <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones" data-modkey="separaciones">
               <span class="dr-icon">🏷️</span>
               <span class="dr-label">Separaciones de Lotes</span>
@@ -1081,9 +1085,10 @@
 
           <!-- Botones de acción rápida -->
           <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;">
-            <button class="chip-btn gold" onclick="abrirModalActividad()" style="font-size:11.5px; padding:6px 12px;">+ Registrar Tarea</button>
-            <button class="chip-btn" onclick="abrirModalAgenda()" style="font-size:11.5px; padding:6px 12px; border-color:var(--gold); color:var(--navy); background:#fff;">📅 Agendar Cita</button>
-            <button class="chip-btn" onclick="irAVista('agenda')" style="font-size:11.5px; padding:6px 12px; color:var(--navy); background:#fff; margin-left:auto;">Ver Agenda Completa →</button>
+            <button class="chip-btn gold" onclick="abrirModalActividad()" style="font-size:11.5px; padding:7px 12px; font-weight:700;">+ Registrar Actividad</button>
+            <button class="chip-btn" onclick="abrirModalAgenda()" style="font-size:11.5px; padding:7px 12px; border-color:var(--gold); color:var(--navy); background:#fff; font-weight:700;">📅 Agendar Cita</button>
+            <button class="chip-btn" onclick="abrirModalNuevaSolicitud()" style="font-size:11.5px; padding:7px 12px; border-color:#CBD5E1; color:var(--navy); background:#fff; font-weight:700;">📝 Registrar Solicitud</button>
+            <button class="chip-btn" onclick="irAVista('agenda')" style="font-size:11.5px; padding:7px 10px; color:var(--ink-dim); background:#fff; margin-left:auto;">Agenda →</button>
           </div>
         </div>
 
@@ -1284,6 +1289,13 @@
           <div id="pfTestimoniosViewer"></div>
         </div>
         <div id="pfPanelDocumentos" class="pf-panel hidden">
+          <!-- FORMULARIO DE SUBIDA PARA SUPERADMIN / DIRECCIÓN -->
+          <div id="pfDocumentoSuperAdmin" class="card" style="margin-bottom:14px; background:#F8FAFC; border:1px solid #CBD5E1;">
+            <p class="card-title" style="font-size:13px; color:var(--navy); font-weight:700;">📤 Subir nuevo documento o archivo legal</p>
+            <div class="field" style="margin-top:6px;"><label>Título del documento</label><input type="text" id="pfNuevoDocTitulo" placeholder="Ej: Memoria Descriptiva, Partida Registral, etc."></div>
+            <div class="field"><label>Archivo (PDF o Imagen con auto-compresión)</label><input type="file" id="pfNuevoDocArchivo" accept="application/pdf,image/*"></div>
+            <button class="btn-primary" style="width:100%; margin-top:8px;" onclick="subirDocumentoPersonalizadoPortafolio()">Subir y guardar documento</button>
+          </div>
           <div id="pfDocumentosLista"></div>
         </div>
       </div>
@@ -1307,6 +1319,73 @@
         <div id="secTabCobranzas" class="hidden">
           <p style="font-size:12.5px; color:var(--ink-dim); margin: 0 0 10px;">Seguimiento de letras y cobranzas de clientes con financiamiento directo activo:</p>
           <div id="listaCobranzasCuotas"></div>
+        </div>
+      </div>
+
+      
+      <!-- VISTA: Control de Presentaciones, Visitas y Movilidad (Van 14 asientos) -->
+      <div id="viewVisitas" class="hidden">
+        <div class="section-title" style="margin-top:0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span>🚐 Presentaciones y Visitas a Proyecto</span>
+          <button class="chip-btn gold" onclick="abrirModalNuevaVisita()">+ Agendar Visita / Presentación</button>
+        </div>
+        <p style="font-size:12px; color:var(--ink-dim); margin:-6px 0 14px;">
+          Control de cupos en Van corporativa (14 asientos máx.) para traslados a Costa Dorada en La Yarada Los Palos y registro de presentaciones.
+        </p>
+
+        <!-- SELECTOR DE FECHA Y BARRA DE DISPONIBILIDAD DE MOVILIDAD -->
+        <div class="card" style="background:linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%); border:1.5px solid #BFDBFE; margin-bottom:14px; padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+            <label style="font-size:12.5px; font-weight:700; color:var(--navy);">
+              📅 Fecha a inspeccionar:
+              <input type="date" id="vis_filtro_fecha" style="padding:4px 8px; border-radius:6px; border:1px solid #CBD5E1; font-weight:600; margin-left:6px;" onchange="cargarVisitasPresentaciones()">
+            </label>
+            <span id="vis_badge_estado_van" class="badge badge-completada" style="font-size:11px;">🟢 Van Disponible</span>
+          </div>
+
+          <!-- METRICAS DE OCUPACIÓN -->
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:12px;">
+            <div style="background:#fff; border:1px solid #DBEAFE; border-radius:10px; padding:8px; text-align:center;">
+              <span style="font-size:11px; color:#5B738E; display:block;">Capacidad Total</span>
+              <span style="font-size:18px; font-weight:800; color:#142A4D;">14 Asientos</span>
+            </div>
+            <div style="background:#fff; border:1px solid #DBEAFE; border-radius:10px; padding:8px; text-align:center;">
+              <span style="font-size:11px; color:#5B738E; display:block;">Asientos Ocupados</span>
+              <span id="vis_num_ocupados" style="font-size:18px; font-weight:800; color:#C89B3C;">0</span>
+            </div>
+            <div style="background:#fff; border:1px solid #DBEAFE; border-radius:10px; padding:8px; text-align:center;">
+              <span style="font-size:11px; color:#5B738E; display:block;">Asientos Libres</span>
+              <span id="vis_num_libres" style="font-size:18px; font-weight:800; color:#2E7D32;">14</span>
+            </div>
+          </div>
+
+          <!-- BARRA VISUAL DE LOS 14 ASIENTOS -->
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; color:#334155; margin-bottom:4px;">
+              <span>Ocupación de la Van Costa Dorada:</span>
+              <span id="vis_porcentaje_ocupacion">0%</span>
+            </div>
+            <div style="width:100%; height:14px; background:#E2E8F0; border-radius:8px; overflow:hidden; display:flex;">
+              <div id="vis_barra_progreso" style="width:0%; background:linear-gradient(90deg, #3B82F6 0%, #10B981 100%); transition:width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <!-- ALERTA DE CRUCE DE HORARIO / EXCESO DE CAPACIDAD -->
+          <div id="vis_alerta_cruce" class="hidden" style="margin-top:12px; background:#FEE2E2; border:1.5px solid #F87171; border-radius:10px; padding:10px; color:#991B1B; font-size:12px; line-height:1.4;">
+            ⚠️ <b>¡CRUCE DE HORARIOS / CAPACIDAD EXCEDIDA!</b> Se requieren más de 14 asientos en este turno. Se debe gestionar movilidad de apoyo o vehículo de accionista.
+          </div>
+        </div>
+
+        <!-- LISTA DE PRESENTACIONES Y VISITAS DEL DÍA -->
+        <div style="display:flex; gap:8px; margin-bottom:12px; overflow-x:auto;">
+          <button class="plano-tab-btn active" id="tabVisitasTodas" onclick="cambiarFiltroTipoVisitas('todas')">Todas</button>
+          <button class="plano-tab-btn" id="tabVisitasProyecto" onclick="cambiarFiltroTipoVisitas('proyecto')">🚗 Terreno (Van)</button>
+          <button class="plano-tab-btn" id="tabVisitasOficina" onclick="cambiarFiltroTipoVisitas('oficina')">🏢 Oficina</button>
+          <button class="plano-tab-btn" id="tabVisitasVirtual" onclick="cambiarFiltroTipoVisitas('virtual')">💻 Virtual</button>
+        </div>
+
+        <div id="listaVisitasPresentaciones">
+          <div class="spinner"></div>
         </div>
       </div>
 
@@ -1659,6 +1738,89 @@
     </div>
   </div>
 
+  
+  <!-- MODAL: Agendar Presentación / Visita a Proyecto -->
+  <div class="modal-backdrop" id="modalNuevaVisita">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalNuevaVisita">✕</button>
+      <h3 style="margin-top:0;">🚐 Agendar Presentación o Visita</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:14px;">Registro de presentaciones y cupos de movilidad a Costa Dorada</p>
+      
+      <div class="field">
+        <label>Tipo de Presentación *</label>
+        <select id="nv_tipo" onchange="alCambiarTipoVisitaModal()">
+          <option value="visita_proyecto" selected>🚗 Visita Directa a Proyecto (Usa Van)</option>
+          <option value="oficina_visita">🏢🚗 Presentación en Oficina + Visita a Proyecto (Usa Van)</option>
+          <option value="oficina">🏢 Presentación en Oficina (Sala Tacna - No usa Van)</option>
+          <option value="virtual">💻 Presentación Virtual (Zoom / Meet / WhatsApp)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Cliente *</label>
+        <select id="nv_cliente_sel"></select>
+      </div>
+
+      <div class="field">
+        <label>Asesor Responsable *</label>
+        <input type="text" id="nv_asesor_nombre" readonly style="background:#F8FAFC; font-weight:600;">
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="field">
+          <label>Fecha de la Cita *</label>
+          <input type="date" id="nv_fecha" onchange="verificarCruceMovilidadModal()">
+        </div>
+        <div class="field">
+          <label>Hora de Partida / Inicio *</label>
+          <input type="time" id="nv_hora" value="09:00" onchange="verificarCruceMovilidadModal()">
+        </div>
+      </div>
+
+      <!-- BLOQUE ESPECÍFICO DE MOVILIDAD (VAN 14 ASIENTOS) -->
+      <div id="nv_bloque_movilidad" style="background:#F0F7FF; border:1.5px solid #BFDBFE; border-radius:12px; padding:12px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:12px; font-weight:800; color:#142A4D;">🚐 Control de Cupos en Van</span>
+          <span style="font-size:11px; color:#1D4ED8; font-weight:700;">Capacidad: 14 personas</span>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="field" style="margin-bottom:0;">
+            <label style="font-size:11.5px;">Clientes / Acompañantes</label>
+            <input type="number" min="1" max="13" id="nv_num_clientes" value="2" oninput="alCambiarAsientosModal()">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label style="font-size:11.5px;">Total Asientos en Van</label>
+            <input type="number" min="1" max="14" id="nv_num_asientos" value="3" readonly style="background:#fff; font-weight:800; color:#142A4D;">
+            <span style="font-size:10px; color:#5B738E;">(Clientes + Asesor)</span>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #DBEAFE; border-radius:8px; padding:8px 10px; margin-top:8px;">
+          <p style="font-size:11px; color:#1E40AF; margin:0; line-height:1.4;">
+            ⏱️ <b>Itinerario estimado (2h 15m):</b> 15m espera + 30m viaje ida + 60m recorrido en La Yarada + 30m retorno.<br>
+            <b>Hora estimada de retorno:</b> <span id="nv_hora_retorno_display" style="font-weight:700;">11:15</span>
+          </p>
+        </div>
+
+        <!-- ALERTA DINÁMICA DE CRUCE EN MODAL -->
+        <div id="nv_alerta_cruce_modal" class="hidden" style="margin-top:8px; background:#FEE2E2; border:1px solid #F87171; border-radius:8px; padding:8px; color:#991B1B; font-size:11.5px;">
+          ⚠️ <b>Atención:</b> La Van ya tiene asientos ocupados en este turno. Si excedes los 14 cupos, deberás coordinar movilidad de apoyo o vehículo de accionista.
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Notas de Logística / Observaciones</label>
+        <textarea id="nv_observaciones" placeholder="Punto de encuentro, requerimientos especiales del cliente..." style="width:100%; min-height:60px;"></textarea>
+      </div>
+
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn-secondary" data-close="modalNuevaVisita">Cancelar</button>
+        <button class="btn-primary" id="btnGuardarNuevaVisita" onclick="guardarNuevaVisita()">Agendar Presentación</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: nuevo evento de agenda -->
   <div class="modal-backdrop" id="modalAgenda">
     <div class="modal-sheet">
@@ -1903,68 +2065,135 @@
 
   <!-- MODAL: Cotizador rápido -->
   <div class="modal-backdrop" id="modalCotizador">
-    <div class="modal-sheet">
-      <h3>Cotizador rápido</h3>
-      <div class="field"><label>Cliente</label><input type="text" id="cot_cliente" placeholder="Nombre del cliente"></div>
-      <div class="field"><label>Celular / WhatsApp</label><input type="text" id="cot_celular" placeholder="9XXXXXXXX"></div>
-      <div class="field"><label>Manzana</label><select id="cot_manzana"></select></div>
-      <div class="field"><label>Lote</label><input type="text" id="cot_lote"></div>
-      <div class="field"><label>Área (m²)</label><input type="number" step="0.01" id="cot_area" value="160"></div>
-      <div class="field"><label>Precio por m² (S/)</label><input type="number" step="0.01" id="cot_precio_m2"></div>
-      <div class="field"><label>Valor total (S/)</label><input type="number" step="0.01" id="cot_valor_total"></div>
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalCotizador">✕</button>
+      <h3 style="margin-top:0;">🧮 Cotizador Rápido de Lotes</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:14px;">Simulación oficial de inversión y financiamiento directo · Costa Dorada</p>
+      
+      <!-- DATOS DEL CLIENTE -->
+      <div class="field"><label>Nombre del Cliente *</label><input type="text" id="cot_cliente" placeholder="Nombres y apellidos"></div>
+      <div class="field"><label>DNI / RUC *</label><input type="text" id="cot_dni" placeholder="Número de documento"></div>
+      <div class="field"><label>Celular / WhatsApp *</label><input type="tel" id="cot_celular" placeholder="9XXXXXXXX"></div>
+      <div class="field"><label>Dirección</label><input type="text" id="cot_direccion" placeholder="Dirección de residencia"></div>
+      <div class="field"><label>Ocupación / Actividad económica</label><input type="text" id="cot_ocupacion" placeholder="Ej: Comerciante, Profesional, Independiente..."></div>
+      
+      <!-- DATOS DEL LOTE -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="field"><label>Manzana</label><select id="cot_manzana"></select></div>
+        <div class="field"><label>Lote</label><input type="text" id="cot_lote" placeholder="Número de lote"></div>
+      </div>
+
+      <!-- VALOR TOTAL ANTES QUE VALOR M2 (SOLICITUD EXPRESA) -->
       <div class="field">
-        <label>Condición</label>
-        <select id="cot_condicion">
-          <option value="contado">Al contado</option>
-          <option value="financiado" selected>Financiado</option>
+        <label style="color:var(--navy); font-weight:700;">Valor Total del Lote (S/) *</label>
+        <input type="number" step="0.01" id="cot_valor_total" placeholder="Ej: 55400" oninput="alCambiarValorTotalCotizador()">
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="field">
+          <label>Metraje / Área (m²) *</label>
+          <input type="number" step="0.01" id="cot_area" value="160" oninput="alCambiarMetrajeCotizador()">
+        </div>
+        <div class="field">
+          <label>Valor de m² (S/)</label>
+          <input type="number" step="0.01" id="cot_precio_m2" oninput="alCambiarPrecioM2Cotizador()">
+        </div>
+      </div>
+
+      <!-- CONDICIÓN DE PAGO -->
+      <div class="field">
+        <label>Condición de Pago</label>
+        <select id="cot_condicion" onchange="calcularCotizadorMatematica()">
+          <option value="financiado" selected>Financiamiento Directo (Sin bancos)</option>
+          <option value="contado">Pago al Contado</option>
         </select>
       </div>
+
+      <!-- BLOQUE FINANCIADO -->
       <div id="cot_bloque_financiado">
         <div class="field">
-          <label>Inicial (S/)</label>
-          <input type="number" step="0.01" id="cot_inicial">
+          <label>Inicial Pactada (S/)</label>
+          <input type="number" step="0.01" id="cot_inicial" oninput="calcularCotizadorMatematica()">
           <div style="display:flex; gap:6px; margin-top:6px;">
             <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.10)">10%</button>
             <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.20)">20%</button>
             <button type="button" class="chip-btn" onclick="aplicarPorcentajeInicial(0.30)">30%</button>
           </div>
         </div>
+
+        <!-- SALDO (VALOR TOTAL MENOS INICIAL) -->
         <div class="field">
-          <label>Meses a financiar</label>
-          <select id="cot_meses">
-            <option value="12">12</option>
-            <option value="24">24</option>
-            <option value="36" selected>36</option>
-            <option value="48">48</option>
-            <option value="60">60</option>
+          <label>Saldo a Financiar (Valor Total - Inicial)</label>
+          <input type="text" id="cot_saldo_display" readonly style="background:#F4EFE6; font-weight:700; color:var(--navy);">
+        </div>
+
+        <div class="field">
+          <label>Financiamiento en # de Meses</label>
+          <select id="cot_meses" onchange="alCambiarMesesCotizador()">
+            <option value="12">12 meses (1 año)</option>
+            <option value="24">24 meses (2 años)</option>
+            <option value="36" selected>36 meses (3 años)</option>
+            <option value="48">48 meses (4 años)</option>
+            <option value="60">60 meses (5 años)</option>
+            <option value="__OTRO__">Otro número de meses...</option>
           </select>
+          <input type="number" id="cot_meses_otro" placeholder="Ingresa cantidad de meses" class="hidden" style="margin-top:6px;" oninput="calcularCotizadorMatematica()">
         </div>
       </div>
 
-      <div class="card" style="background:#FBF6EC; border-color:#E8D9B5;">
-        <p class="card-title" id="cot_cuota_display" style="font-size:18px;">—</p>
-        <p class="card-sub" id="cot_resumen_display">—</p>
+      <!-- TARJETA RESUMEN DE INVERSIÓN MENSUAL -->
+      <div class="card" style="background:#FBF6EC; border:1.5px solid #E8D9B5; margin-top:12px; padding:14px;">
+        <span style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">Valor de Inversión Mensual</span>
+        <p class="card-title" id="cot_cuota_display" style="font-size:22px; color:var(--navy); margin:4px 0 2px;">S/ 0.00 / mes</p>
+        <p class="card-sub" id="cot_resumen_display" style="font-size:12px; color:var(--ink-dim); margin:0;">—</p>
       </div>
-      <div class="card" style="background:#EBF3FC; border-color:#B8D5F5; margin-top:10px;">
+
+      <!-- ESCALA DE COMISIONES DEL ASESOR (CONFIDENCIAL) -->
+      <div class="card" style="background:#EBF3FC; border:1.5px solid #B8D5F5; margin-top:12px; padding:14px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:12px; font-weight:700; color:var(--navy);">💼 Comisión Estimada del Asesor:</span>
-          <select id="cot_pct_comision" style="padding:2px 6px; font-size:11px; border-radius:6px; border:1px solid #B8D5F5;" onchange="calcularCotizadorMatematica()">
-            <option value="0.03" selected>3% Estándar</option>
-            <option value="0.04">4% Bono Meta</option>
-            <option value="0.05">5% Senior/Cierre</option>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:16px;">💼</span>
+            <span style="font-size:12px; font-weight:800; color:#142A4D;">Comisión del Asesor (Meta: 6 lotes/mes)</span>
+          </div>
+          <span style="font-size:10px; background:#D0E2FF; color:#0F4C81; padding:2px 6px; border-radius:6px; font-weight:700;">Uso Interno</span>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label style="font-size:11.5px; color:#3A5372; font-weight:600;">¿Qué número de venta del mes representa este lote?</label>
+          <select id="cot_escala_lote" style="width:100%; padding:6px; font-size:12px; border-radius:6px; border:1px solid #B8D5F5; margin-top:4px;" onchange="calcularComisionAsesorEscala()">
+            <option value="1">Lote 1 (Cubre sueldo básico · S/ 0)</option>
+            <option value="2">Lote 2 (Comisión: S/ 1,000)</option>
+            <option value="3">Lote 3 (Comisión: S/ 1,500)</option>
+            <option value="4">Lote 4 (Comisión: S/ 2,000)</option>
+            <option value="5">Lote 5 (Comisión: S/ 2,500)</option>
+            <option value="6" selected>Lote 6 🏆 (¡META CUMPLIDA! = S/ 12,500 total)</option>
+            <option value="7">Lote 7 (+S/ 2,500 adicional)</option>
+            <option value="8">Lote 8 (+S/ 2,500 adicional)</option>
           </select>
         </div>
-        <p class="card-title" id="cot_comision_display" style="font-size:16px; color:#1E4B82; margin-top:4px;">S/ 0.00</p>
-        <p class="card-sub" style="font-size:11px; color:#5A7B9D;">Ganancia estimada por cierre directo de este lote</p>
+
+        <div style="background:#fff; border:1px solid #C2DCFA; border-radius:8px; padding:10px; margin-top:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:#5A7B9D;">Comisión por este lote:</span>
+            <span id="cot_comision_este_lote" style="font-size:14px; font-weight:800; color:#1E4B82;">S/ 5,500.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span style="font-size:12px; color:#5A7B9D;">Acumulado del mes:</span>
+            <span id="cot_comision_acumulada" style="font-size:16px; font-weight:800; color:#2E7D32;">S/ 12,500.00</span>
+          </div>
+          <p id="cot_escala_detalle" style="font-size:11px; color:#0F4C81; margin:6px 0 0; line-height:1.35; border-top:1px dashed #D0E2FF; padding-top:5px;"></p>
+        </div>
+        <p style="font-size:10px; color:#7A8B9E; margin:6px 0 0;">🔒 Nota: Este cálculo no se incluye en el PDF ni en el WhatsApp enviado al cliente.</p>
       </div>
 
-      <div class="modal-actions" style="flex-wrap:wrap;">
-        <button class="btn-secondary" data-close="modalCotizador">Cerrar</button>
-        <button class="btn-primary" onclick="enviarCotizacionWhatsApp()">📲 WhatsApp</button>
+      <!-- ACCIONES DE COTIZACIÓN -->
+      <div class="modal-actions" style="margin-top:14px; flex-wrap:wrap; gap:8px;">
+        <button class="btn-secondary" data-close="modalCotizador" style="flex:1;">Cerrar</button>
+        <button class="btn-primary" onclick="enviarCotizacionWhatsApp()" style="flex:1;">📲 WhatsApp</button>
       </div>
-      <div class="modal-actions" style="flex-wrap:wrap;">
-        <button class="btn-secondary" onclick="descargarCotizacionPDF()">📄 Descargar PDF</button>
-        <button class="btn-primary" onclick="pasarCotizacionASeparacion()">🏷️ Pasar a Separación</button>
+      <div class="modal-actions" style="margin-top:8px; flex-wrap:wrap; gap:8px;">
+        <button class="btn-secondary" onclick="descargarCotizacionPDF()" style="flex:1;">📄 Descargar PDF</button>
+        <button class="btn-primary" onclick="pasarCotizacionASeparacion()" style="flex:1;">🏷️ Pasar a Separación</button>
       </div>
     </div>
   </div>
@@ -2545,6 +2774,7 @@ const PERMISOS_CATALOGO = [
   { key: 'asignar_archivar_masivo',  label: 'Acciones Masivas en Clientes',           dept: 'Comercial', default: false },
   { key: 'ver_actividades',          label: 'Ver Actividades y Tareas del Día',       dept: 'Comercial', default: true },
   { key: 'ver_agenda',               label: 'Ver Agenda y Sincronización Google',     dept: 'Comercial', default: true },
+  { key: 'ver_control_visitas',      label: 'Ver Control de Presentaciones y Movilidad (14 Asientos)', dept: 'Comercial', default: true },
   { key: 'ver_separaciones',         label: 'Ver Separaciones de Lotes',              dept: 'Comercial', default: true },
 
   // MARKETING & PROSPECCIÓN
@@ -2582,7 +2812,11 @@ const PERMISOS_CATALOGO = [
 
 function esUsuarioSuperAdmin(){
   const email = (currentUser?.email || '').toLowerCase().trim();
-  return email === 'joreal.ft2020@gmail.com' || email === 'jorea.ft2020@gmail.com' || currentProfile?.rol === 'superadmin';
+  const rol = (currentProfile?.rol || '').toLowerCase().trim();
+  const cargo = (currentProfile?.cargo || '').toLowerCase().trim();
+  return email === 'joreal.ft2020@gmail.com' || email === 'jorea.ft2020@gmail.com' || 
+         rol === 'superadmin' || rol === 'director_comercial' || rol === 'admin' ||
+         cargo.includes('director') || cargo.includes('gerente') || cargo.includes('desarrollador');
 }
 
 
@@ -3192,6 +3426,7 @@ function irAVista(vista){
     control:'viewControl',
     actividades:'viewActividades', 
     clientes:'viewClientes', 
+    visitas:'viewVisitas', 
     planos:'viewPlanos', portafolio:'viewPortafolio', separaciones:'viewSeparaciones', 
     agenda:'viewAgenda', 
     rendimiento:'viewRendimiento', 
@@ -5506,7 +5741,7 @@ async function eliminarCliente(id){
   cargarClientes(); cargarKPIs();
 }
 /* ============ COTIZADOR RÁPIDO DE LOTES ============ */
-function abrirModalCotizador(clienteNombre, celular, manzana, lote, area, precioM2){
+function abrirModalCotizador(clienteNombre, celular, manzana, lote, area, precioM2, dni = '', direccion = '', ocupacion = '', valorTotal = 0){
   const selMz = document.getElementById('cot_manzana');
   if (selMz && selMz.options.length === 0) {
     const opciones = [];
@@ -5516,24 +5751,91 @@ function abrirModalCotizador(clienteNombre, celular, manzana, lote, area, precio
   }
 
   if (clienteNombre) document.getElementById('cot_cliente').value = clienteNombre;
+  if (dni) document.getElementById('cot_dni').value = dni;
   if (celular) document.getElementById('cot_celular').value = celular;
+  if (direccion) document.getElementById('cot_direccion').value = direccion;
+  if (ocupacion) document.getElementById('cot_ocupacion').value = ocupacion;
   if (manzana) document.getElementById('cot_manzana').value = manzana;
   if (lote) document.getElementById('cot_lote').value = lote;
-  if (area) document.getElementById('cot_area').value = area;
-  if (precioM2) document.getElementById('cot_precio_m2').value = precioM2;
+  
+  const elArea = document.getElementById('cot_area');
+  if (elArea) elArea.value = area || 160;
+
+  if (valorTotal > 0) {
+    document.getElementById('cot_valor_total').value = valorTotal;
+    alCambiarValorTotalCotizador();
+  } else if (precioM2 > 0) {
+    document.getElementById('cot_precio_m2').value = precioM2;
+    alCambiarPrecioM2Cotizador();
+  } else {
+    // Valor por defecto estándar en Costa Dorada si viene vacío
+    document.getElementById('cot_valor_total').value = '55400';
+    alCambiarValorTotalCotizador();
+  }
 
   calcularCotizadorMatematica();
   openModal('modalCotizador');
 }
 
-function calcularCotizadorMatematica(){
-  const area = parseFloat(document.getElementById('cot_area')?.value) || 0;
-  const precioM2 = parseFloat(document.getElementById('cot_precio_m2')?.value) || 0;
-  const valorTotal = area * precioM2;
-  
-  const elTotal = document.getElementById('cot_valor_total');
-  if (elTotal) elTotal.value = valorTotal.toFixed(2);
 
+/* ============ COTIZADOR RÁPIDO Y REGLA DE COMISIONES ============ */
+function alCambiarValorTotalCotizador(){
+  const total = parseFloat(document.getElementById('cot_valor_total')?.value) || 0;
+  const area = parseFloat(document.getElementById('cot_area')?.value) || 160;
+  if (area > 0) {
+    const pM2 = total / area;
+    const elPM2 = document.getElementById('cot_precio_m2');
+    if (elPM2) elPM2.value = pM2.toFixed(2);
+  }
+  calcularCotizadorMatematica();
+}
+
+function alCambiarMetrajeCotizador(){
+  const area = parseFloat(document.getElementById('cot_area')?.value) || 0;
+  const total = parseFloat(document.getElementById('cot_valor_total')?.value) || 0;
+  if (area > 0 && total > 0) {
+    const pM2 = total / area;
+    const elPM2 = document.getElementById('cot_precio_m2');
+    if (elPM2) elPM2.value = pM2.toFixed(2);
+  }
+  calcularCotizadorMatematica();
+}
+
+function alCambiarPrecioM2Cotizador(){
+  const pM2 = parseFloat(document.getElementById('cot_precio_m2')?.value) || 0;
+  const area = parseFloat(document.getElementById('cot_area')?.value) || 160;
+  const total = area * pM2;
+  const elTotal = document.getElementById('cot_valor_total');
+  if (elTotal) elTotal.value = total.toFixed(2);
+  calcularCotizadorMatematica();
+}
+
+function alCambiarMesesCotizador(){
+  const sel = document.getElementById('cot_meses');
+  const inputOtro = document.getElementById('cot_meses_otro');
+  if (!sel || !inputOtro) return;
+  if (sel.value === '__OTRO__') {
+    inputOtro.classList.remove('hidden');
+    inputOtro.focus();
+  } else {
+    inputOtro.classList.add('hidden');
+    inputOtro.value = '';
+  }
+  calcularCotizadorMatematica();
+}
+
+function obtenerMesesFinanciamiento(){
+  const sel = document.getElementById('cot_meses');
+  const inputOtro = document.getElementById('cot_meses_otro');
+  if (!sel) return 36;
+  if (sel.value === '__OTRO__') {
+    return parseInt(inputOtro?.value) || 36;
+  }
+  return parseInt(sel.value) || 36;
+}
+
+function calcularCotizadorMatematica(){
+  const valorTotal = parseFloat(document.getElementById('cot_valor_total')?.value) || 0;
   const condicion = document.getElementById('cot_condicion')?.value;
   const bloqueFin = document.getElementById('cot_bloque_financiado');
   if (bloqueFin) bloqueFin.classList.toggle('hidden', condicion === 'contado');
@@ -5541,34 +5843,80 @@ function calcularCotizadorMatematica(){
   if (condicion === 'contado') {
     const disp = document.getElementById('cot_cuota_display');
     if (disp) disp.textContent = 'Pago al contado: S/ ' + valorTotal.toLocaleString('es-PE', {minimumFractionDigits:2});
+    const resDisp = document.getElementById('cot_resumen_display');
+    if (resDisp) resDisp.textContent = `Inversión total al contado: S/ ${valorTotal.toLocaleString('es-PE')} · Descuento de pronto pago`;
+    calcularComisionAsesorEscala();
     return;
   }
 
   let inicial = parseFloat(document.getElementById('cot_inicial')?.value);
   if (isNaN(inicial) || inicial < 0) {
     inicial = valorTotal * 0.10;
-    if (document.getElementById('cot_inicial')) document.getElementById('cot_inicial').value = inicial.toFixed(2);
+    const elIni = document.getElementById('cot_inicial');
+    if (elIni) elIni.value = inicial.toFixed(2);
   }
 
   const saldo = Math.max(0, valorTotal - inicial);
-  const meses = parseInt(document.getElementById('cot_meses')?.value) || 36;
+  const elSaldoDisp = document.getElementById('cot_saldo_display');
+  if (elSaldoDisp) elSaldoDisp.value = 'S/ ' + saldo.toLocaleString('es-PE', {minimumFractionDigits:2});
+
+  const meses = obtenerMesesFinanciamiento();
   const cuota = meses > 0 ? (saldo / meses) : 0;
 
   const disp = document.getElementById('cot_cuota_display');
   if (disp) disp.textContent = 'S/ ' + cuota.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' / mes';
 
   const resDisp = document.getElementById('cot_resumen_display');
-  if (resDisp) resDisp.textContent = `Inicial: S/ ${inicial.toLocaleString('es-PE')} · Saldo: S/ ${saldo.toLocaleString('es-PE')} en ${meses} cuotas fijas (Sin intereses)`;
+  if (resDisp) resDisp.textContent = `Inicial: S/ ${inicial.toLocaleString('es-PE')} · Saldo: S/ ${saldo.toLocaleString('es-PE')} en ${meses} cuotas fijas (Sin bancos)`;
+
+  calcularComisionAsesorEscala();
 }
 
+function calcularComisionAsesorEscala(){
+  const numLote = parseInt(document.getElementById('cot_escala_lote')?.value) || 6;
+  let comisionLote = 0;
+  let comisionAcumulada = 0;
+  let detalle = '';
 
-
-  const pctComision = parseFloat(document.getElementById('cot_pct_comision')?.value) || 0.03;
-  const comisionEstimada = valorTotal * pctComision;
-  const dispComision = document.getElementById('cot_comision_display');
-  if (dispComision) {
-    dispComision.textContent = 'S/ ' + comisionEstimada.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (numLote === 1) {
+    comisionLote = 0;
+    comisionAcumulada = 0;
+    detalle = 'El 1er lote cubre tu sueldo básico fijo. A partir del 2do lote comienzas a acumular comisiones.';
+  } else if (numLote === 2) {
+    comisionLote = 1000;
+    comisionAcumulada = 1000;
+    detalle = 'Comisión de S/ 1,000 por el 2do lote vendido en el mes.';
+  } else if (numLote === 3) {
+    comisionLote = 1500;
+    comisionAcumulada = 2500; // 1000 + 1500
+    detalle = 'Comisión de S/ 1,500 por el 3er lote. Acumulado en el mes: S/ 2,500.';
+  } else if (numLote === 4) {
+    comisionLote = 2000;
+    comisionAcumulada = 4500; // 1000 + 1500 + 2000
+    detalle = 'Comisión de S/ 2,000 por el 4to lote. Acumulado en el mes: S/ 4,500.';
+  } else if (numLote === 5) {
+    comisionLote = 2500;
+    comisionAcumulada = 7000; // 1000 + 1500 + 2000 + 2500
+    detalle = 'Comisión de S/ 2,500 por el 5to lote (Acumulado: S/ 7,000). ¡Estás a solo 1 lote de la META de S/ 12,500!';
+  } else if (numLote === 6) {
+    // REGLA: al completar el 6to lote, todos los 5 lotes comisionables anteriores se convierten en 2500 c/u
+    // 5 * 2500 = 12,500. Salto de 7,000 a 12,500 (+5500)
+    comisionLote = 5500;
+    comisionAcumulada = 12500;
+    detalle = '🏆 ¡META CUMPLIDA (6 LOTES)! Todos tus 5 lotes comisionables se bonifican retroactivamente a S/ 2,500 c/u (5 × S/ 2,500 = S/ 12,500 en comisiones).';
+  } else if (numLote > 6) {
+    comisionLote = 2500;
+    comisionAcumulada = 12500 + ((numLote - 6) * 2500);
+    detalle = `🚀 Superaste la meta mensual. Bono de S/ 2,500 por lote adicional. Total acumulado: S/ ${comisionAcumulada.toLocaleString('es-PE')}.`;
   }
+
+  const elLote = document.getElementById('cot_comision_este_lote');
+  if (elLote) elLote.textContent = 'S/ ' + comisionLote.toLocaleString('es-PE', {minimumFractionDigits:2});
+  const elAcum = document.getElementById('cot_comision_acumulada');
+  if (elAcum) elAcum.textContent = 'S/ ' + comisionAcumulada.toLocaleString('es-PE', {minimumFractionDigits:2});
+  const elDet = document.getElementById('cot_escala_detalle');
+  if (elDet) elDet.textContent = detalle;
+}
 
 function aplicarPorcentajeInicial(pct){
   const total = parseFloat(document.getElementById('cot_valor_total')?.value) || 0;
@@ -5594,158 +5942,170 @@ document.getElementById('cot_meses')?.addEventListener('change', calcularCotizad
 
 function enviarCotizacionWhatsApp(){
   const cliente = document.getElementById('cot_cliente')?.value.trim();
+  const dni = document.getElementById('cot_dni')?.value.trim();
   const celular = (document.getElementById('cot_celular')?.value || '').replace(/\D/g, '');
+  const direccion = document.getElementById('cot_direccion')?.value.trim();
+  const ocupacion = document.getElementById('cot_ocupacion')?.value.trim();
   const mz = document.getElementById('cot_manzana')?.value || 'A';
   const lt = document.getElementById('cot_lote')?.value || '—';
   const area = document.getElementById('cot_area')?.value || '160';
+  const precioM2 = Number(document.getElementById('cot_precio_m2')?.value || 0).toLocaleString('es-PE', {minimumFractionDigits:2});
   const valorTotal = Number(document.getElementById('cot_valor_total')?.value || 0).toLocaleString('es-PE', {minimumFractionDigits:2});
   const condicion = document.getElementById('cot_condicion')?.value;
   const inicial = Number(document.getElementById('cot_inicial')?.value || 0).toLocaleString('es-PE', {minimumFractionDigits:2});
-  const meses = document.getElementById('cot_meses')?.value || '36';
+  const meses = obtenerMesesFinanciamiento();
+  const saldo = Math.max(0, (parseFloat(document.getElementById('cot_valor_total')?.value) || 0) - (parseFloat(document.getElementById('cot_inicial')?.value) || 0)).toLocaleString('es-PE', {minimumFractionDigits:2});
   const cuota = document.getElementById('cot_cuota_display')?.textContent || '';
 
   let planTexto = '';
   if (condicion === 'contado') {
-    planTexto = `💰 *CONDICIÓN:* Al contado\n💵 *Inversión total:* S/ ${valorTotal} (Aplica descuento especial por pago directo)\n`;
+    planTexto = `💰 *CONDICIÓN DE PAGO:* Al contado\n💵 *Inversión Total:* S/ ${valorTotal} (Aplica bono especial por pronto pago)\n`;
   } else {
-    planTexto = `📋 *PLAN DE FINANCIAMIENTO DIRECTO (SIN INTERESES):*\n` +
-      `💵 *Cuota Inicial:* S/ ${inicial}\n` +
+    planTexto = `📋 *PLAN DE FINANCIAMIENTO DIRECTO (SIN BANCOS):*\n` +
+      `💵 *Cuota Inicial Pactada:* S/ ${inicial}\n` +
+      `📌 *Saldo a Financiar:* S/ ${saldo}\n` +
       `⏳ *Plazo:* ${meses} meses\n` +
-      `📌 *Inversión mensual:* ${cuota}\n`;
+      `📌 *Valor de Inversión Mensual:* ${cuota}\n`;
   }
 
-  const mensaje = `🏡 *COTIZACIÓN DE LOTE - COSTA DORADA CIUDAD SMART*\n` +
+  const datosClienteExtra = [
+    dni ? `📄 *DNI/RUC:* ${dni}` : '',
+    direccion ? `🏠 *Dirección:* ${direccion}` : '',
+    ocupacion ? `💼 *Ocupación:* ${ocupacion}` : ''
+  ].filter(Boolean).join('\n');
+
+  const mensaje = `🏡 *COTIZACIÓN OFICIAL DE LOTE · COSTA DORADA*\n` +
     `Constructora & Inmobiliaria Casa Dorada\n\n` +
     `👤 *Cliente:* ${cliente || 'Estimado(a) inversionista'}\n` +
+    (datosClienteExtra ? `${datosClienteExtra}\n` : '') +
     `📍 *Ubicación:* Manzana ${mz} · Lote ${lt}\n` +
-    `📐 *Área total:* ${area} m²\n` +
-    `💰 *Valor total:* S/ ${valorTotal}\n\n` +
+    `📐 *Metraje / Área:* ${area} m²\n` +
+    `🏷️ *Precio por m²:* S/ ${precioM2}\n` +
+    `💰 *Valor Total del Lote:* S/ ${valorTotal}\n\n` +
     `${planTexto}\n` +
-    `✨ *Beneficios del proyecto en Tacna:*\n` +
-    `✅ Habilitación urbana y título de propiedad garantizado\n` +
-    `✅ Servicios básicos proyectados (Agua, Luz y Desagüe)\n` +
-    `✅ Parques, zonas recreativas, ciclovías y zona comercial\n` +
-    `✅ Excelente clima y plusvalía garantizada\n\n` +
-    `📲 _Cotización válida por 48 horas. Contáctanos para agendar tu visita guiada al proyecto._`;
+    `✨ *Beneficios Exclusivos en Tacna (La Yarada Los Palos):*\n` +
+    `✅ Habilitación urbana con partida matriz en Sunarp\n` +
+    `✅ Servicios básicos proyectados (Agua, Luz y Saneamiento)\n` +
+    `✅ Parques, zonas recreativas, club house y ciclovías\n` +
+    `✅ Alta plusvalía y clima cálido todo el año\n\n` +
+    `📲 _Cotización válida por 48 horas. Reserva tu lote con solo S/ 500 para congelar precio y ubicación._`;
 
   const waUrl = celular ? `https://api.whatsapp.com/send?phone=51${celular.slice(-9)}&text=${encodeURIComponent(mensaje)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
   window.open(waUrl, '_blank');
 }
 
 async function descargarCotizacionPDF(){
-  toast('Generando proforma formal PDF…');
   try {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const marginX = 44;
-    const anchoUtil = pageWidth - (marginX * 2);
+  const doc = new jsPDF();
 
-    const logoBase64 = typeof cargarLogoBase64 === 'function' ? await cargarLogoBase64() : null;
-    if (logoBase64) {
-      doc.addImage(logoBase64, 'PNG', 0, 0, pageWidth, doc.internal.pageSize.getHeight());
-    }
+  const cliente = document.getElementById('cot_cliente')?.value.trim() || 'Estimado(a) Cliente';
+  const dni = document.getElementById('cot_dni')?.value.trim() || '—';
+  const celular = document.getElementById('cot_celular')?.value.trim() || '—';
+  const direccion = document.getElementById('cot_direccion')?.value.trim() || '—';
+  const ocupacion = document.getElementById('cot_ocupacion')?.value.trim() || '—';
+  const mz = document.getElementById('cot_manzana')?.value || 'A';
+  const lt = document.getElementById('cot_lote')?.value || '—';
+  const area = document.getElementById('cot_area')?.value || '160';
+  const precioM2 = Number(document.getElementById('cot_precio_m2')?.value || 0).toLocaleString('es-PE', {minimumFractionDigits:2});
+  const total = Number(document.getElementById('cot_valor_total')?.value || 0).toLocaleString('es-PE', {minimumFractionDigits:2});
+  const condicion = document.getElementById('cot_condicion')?.value;
+  const inicial = Number(document.getElementById('cot_inicial')?.value || 0).toLocaleString('es-PE', {minimumFractionDigits:2});
+  const meses = obtenerMesesFinanciamiento();
+  const saldo = Math.max(0, (parseFloat(document.getElementById('cot_valor_total')?.value) || 0) - (parseFloat(document.getElementById('cot_inicial')?.value) || 0)).toLocaleString('es-PE', {minimumFractionDigits:2});
+  const cuota = document.getElementById('cot_cuota_display')?.textContent || '—';
 
-    let y = 115;
-    doc.setTextColor(26, 35, 50);
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('PROFORMA COMERCIAL DE LOTE', marginX, y);
+  // Encabezado Corporativo
+  doc.setFillColor(20, 42, 77); // Navy
+  doc.rect(0, 0, 210, 32, 'F');
+  doc.setTextColor(200, 155, 60); // Gold
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CONSTRUCTORA E INMOBILIARIA CASA DORADA', 14, 15);
+  doc.setFontSize(11);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Proyecto Costa Dorada Ciudad Smart · La Yarada Los Palos, Tacna', 14, 23);
 
-    y += 14;
-    doc.setTextColor(201, 151, 62);
-    doc.setFontSize(8.5);
-    doc.text('CONSTRUCTORA & INMOBILIARIA CASA DORADA · PROYECTO COSTA DORADA', marginX, y);
+  // Título
+  doc.setTextColor(20, 42, 77);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('COTIZACIÓN Y PLAN DE INVERSIÓN', 14, 44);
 
-    y += 12;
-    doc.setFillColor(251, 250, 246);
-    doc.setDrawColor(229, 223, 207);
-    doc.roundedRect(marginX, y, anchoUtil, 45, 4, 4, 'FD');
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Fecha de emisión: ${new Date().toLocaleDateString('es-PE')} · Validez: 48 horas`, 14, 50);
 
-    const cliente = document.getElementById('cot_cliente')?.value.trim() || 'Estimado(a) Inversionista';
-    const cel = document.getElementById('cot_celular')?.value.trim() || '—';
-    const asesor = currentProfile?.nombre || 'Jorge Alexander Luque';
-    const fechaHoy = new Date().toLocaleDateString('es-PE', { day:'2-digit', month:'long', year:'numeric' });
+  // Datos del Cliente
+  doc.setFillColor(248, 246, 240);
+  doc.roundedRect(14, 55, 182, 34, 3, 3, 'F');
+  doc.setFontSize(10);
+  doc.setTextColor(20, 42, 77);
+  doc.setFont('helvetica', 'bold');
+  doc.text('DATOS DEL CLIENTE / INVERSIONISTA', 20, 63);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(`Cliente: ${cliente}`, 20, 71);
+  doc.text(`DNI / RUC: ${dni}`, 110, 71);
+  doc.text(`Celular: ${celular}`, 20, 78);
+  doc.text(`Ocupación: ${ocupacion}`, 110, 78);
+  doc.text(`Dirección: ${direccion}`, 20, 85);
 
-    doc.setFontSize(8.5);
-    doc.setTextColor(107, 114, 128);
-    doc.text('CLIENTE:', marginX + 12, y + 16);
-    doc.text('FECHA DE EMISIÓN:', marginX + 280, y + 16);
-    doc.text('CONTACTO:', marginX + 12, y + 32);
-    doc.text('ASESOR COMERCIAL:', marginX + 280, y + 32);
+  // Características del Lote
+  doc.setFillColor(240, 245, 252);
+  doc.roundedRect(14, 94, 182, 34, 3, 3, 'F');
+  doc.setFontSize(10);
+  doc.setTextColor(20, 42, 77);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CARACTERÍSTICAS DEL LOTE SELECCIONADO', 20, 102);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(`Ubicación: Manzana ${mz} · Lote ${lt}`, 20, 110);
+  doc.text(`Metraje / Área: ${area} m²`, 110, 110);
+  doc.text(`Precio por m²: S/ ${precioM2}`, 20, 118);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(190, 130, 20);
+  doc.text(`VALOR TOTAL DEL LOTE: S/ ${total}`, 110, 118);
 
-    doc.setTextColor(26, 35, 50);
-    doc.setFont(undefined, 'bold');
-    doc.text(cliente, marginX + 70, y + 16);
-    doc.text(fechaHoy, marginX + 380, y + 16);
-    doc.text(cel, marginX + 70, y + 32);
-    doc.text(asesor, marginX + 380, y + 32);
+  // Plan Financiero
+  doc.setFillColor(254, 250, 240);
+  doc.roundedRect(14, 133, 182, 42, 3, 3, 'F');
+  doc.setFontSize(10);
+  doc.setTextColor(20, 42, 77);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ESTRUCTURA DE FINANCIAMIENTO DIRECTO (SIN INTERESES)', 20, 142);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(`Condición de adquisición: ${condicion === 'contado' ? 'Al contado' : 'Financiamiento directo sin bancos'}`, 20, 150);
+  doc.text(`Cuota Inicial pactada: S/ ${inicial}`, 20, 157);
+  doc.text(`Saldo a financiar: S/ ${saldo}`, 110, 157);
+  doc.text(`Plazo financiado: ${meses} cuotas mensuales fijas`, 20, 164);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(20, 42, 77);
+  doc.setFontSize(11);
+  doc.text(`VALOR DE INVERSIÓN MENSUAL: ${cuota}`, 20, 171);
 
-    y += 65;
-    doc.setFontSize(10.5);
-    doc.setTextColor(26, 35, 50);
-    doc.text('DETALLE DEL LOTE COTIZADO', marginX, y);
-    y += 10;
+  // Beneficios y Separación
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(80, 80, 80);
+  doc.text('Condiciones comerciales y de reserva:', 14, 184);
+  doc.text('1. Reserva y congelamiento de precio con separación de S/ 500.00 (validez de 7 días calendario).', 14, 190);
+  doc.text('2. Financiamiento otorgado directamente por Constructora e Inmobiliaria Casa Dorada S.A.C.', 14, 195);
+  doc.text('3. Terreno con matriz inscrita en Registros Públicos (Sunarp Tacna). Elevación a Escritura Pública.', 14, 200);
 
-    const mz = document.getElementById('cot_manzana')?.value || 'A';
-    const lt = document.getElementById('cot_lote')?.value || '1';
-    const area = document.getElementById('cot_area')?.value || '160';
-    const precioM2 = document.getElementById('cot_precio_m2')?.value || '250';
-    const total = document.getElementById('cot_valor_total')?.value || '40000';
+  doc.setDrawColor(200, 155, 60);
+  doc.line(14, 208, 196, 208);
 
-    doc.setFillColor(26, 35, 50);
-    doc.rect(marginX, y, anchoUtil, 18, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(8.5);
-    doc.text('Ubicación', marginX + 10, y + 12);
-    doc.text('Área (m²)', marginX + 130, y + 12);
-    doc.text('Precio x m²', marginX + 230, y + 12);
-    doc.text('Valor Total', marginX + 350, y + 12);
+  doc.setFontSize(8);
+  doc.setTextColor(130, 130, 130);
+  doc.text('Oficina Central: Tacna, Perú · Constructora e Inmobiliaria Casa Dorada S.A.C.', 14, 214);
+  doc.text('Atendido por: ' + (currentProfile?.nombre || 'Asesor Comercial') + ' · ' + (currentProfile?.cargo || 'Fuerza de Ventas'), 14, 219);
 
-    y += 24;
-    doc.setTextColor(26, 35, 50);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Manzana ${mz} - Lote ${lt}`, marginX + 10, y);
-    doc.text(`${area} m²`, marginX + 130, y);
-    doc.text(`S/ ${precioM2}`, marginX + 230, y);
-    doc.setFont(undefined, 'bold');
-    doc.text(`S/ ${Number(total).toLocaleString('es-PE', {minimumFractionDigits:2})}`, marginX + 350, y);
-
-    y += 35;
-    doc.setFontSize(10.5);
-    doc.setTextColor(26, 35, 50);
-    doc.text('PLAN DE FINANCIAMIENTO DIRECTO (SIN INTERESES)', marginX, y);
-    y += 12;
-
-    const condicion = document.getElementById('cot_condicion')?.value;
-    const inicial = document.getElementById('cot_inicial')?.value || '0';
-    const meses = document.getElementById('cot_meses')?.value || '36';
-    const cuota = document.getElementById('cot_cuota_display')?.textContent || '';
-
-    doc.setFillColor(251, 250, 246);
-    doc.setDrawColor(229, 223, 207);
-    doc.roundedRect(marginX, y, anchoUtil, 65, 4, 4, 'FD');
-
-    doc.setFontSize(9);
-    doc.setTextColor(107, 114, 128);
-    doc.setFont(undefined, 'normal');
-    doc.text('Modalidad:', marginX + 14, y + 20);
-    doc.text('Cuota Inicial:', marginX + 14, y + 36);
-    doc.text('Plazo de Pago:', marginX + 14, y + 52);
-
-    doc.setTextColor(26, 35, 50);
-    doc.setFont(undefined, 'bold');
-    doc.text(condicion === 'contado' ? 'Al Contado' : 'Financiamiento Directo de la Inmobiliaria', marginX + 95, y + 20);
-    doc.text(`S/ ${Number(inicial).toLocaleString('es-PE', {minimumFractionDigits:2})}`, marginX + 95, y + 36);
-    doc.text(`${meses} meses`, marginX + 95, y + 52);
-
-    doc.setFontSize(13);
-    doc.setTextColor(201, 151, 62);
-    doc.text(cuota, marginX + 320, y + 38);
-
-    doc.save(`cotizacion-costadorada-mz${mz}-lt${lt}.pdf`);
-    toast('Proforma PDF descargada ✓');
-  } catch (e) {
+  doc.save(`Cotizacion_CostaDorada_${cliente.replace(/\s+/g, '_')}_Mz${mz}Lt${lt}.pdf`);
+  toast('PDF descargado con éxito ✓');
+} catch (e) {
     toast('Error al generar PDF');
     console.error(e);
   }
@@ -5925,7 +6285,7 @@ function cambiarPestanaPortafolio(tab){
 }
 
 async function cargarPortafolio(){
-  pfEsSuperAdmin = currentProfile?.rol === 'superadmin';
+  pfEsSuperAdmin = esUsuarioSuperAdmin() || currentProfile?.permisos?.gestionar_portafolio;
   document.getElementById('pfBrochureSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
   document.getElementById('pfVideoCDSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
   document.getElementById('pfTestimoniosSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
@@ -5985,14 +6345,16 @@ async function cargarPortafolio(){
   }
 
   const elDocs = document.getElementById('pfDocumentosLista');
-  elDocs.innerHTML = DOC_SUBCATEGORIAS.map(sub => {
+  
+  // Documentos oficiales predefinidos
+  const oficialesHtml = DOC_SUBCATEGORIAS.map(sub => {
     const doc = documentos.find(d => d.subcategoria === sub.key);
     return `
     <div class="pf-doc-item">
       <div class="pf-doc-title">📄 ${sub.label}</div>
       <div class="pf-doc-status">${doc ? '✅ Documento cargado' : '⚪ Sin documento'}</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        ${doc ? `<button class="chip-btn gold" onclick='abrirVisorDocumento(${JSON.stringify({url: doc.url, titulo: sub.label}).replace(/'/g, "&apos;")})'>👁️ Ver</button>` : ''}
+        ${doc ? `<button class="chip-btn gold" onclick='abrirVisorDocumento(${JSON.stringify({url: doc?.url || '', titulo: sub.label}).replace(/'/g, "&apos;")})'>👁️ Ver</button>` : ''}
         ${pfEsSuperAdmin ? `
           <label class="chip-btn" style="cursor:pointer;">
             📤 ${doc ? 'Reemplazar' : 'Subir'}
@@ -6002,6 +6364,29 @@ async function cargarPortafolio(){
       </div>
     </div>`;
   }).join('');
+
+  // Documentos adicionales / libres subidos para que NINGUNO DESAPAREZCA
+  const clavesOficiales = new Set(DOC_SUBCATEGORIAS.map(s => s.key));
+  const adicionales = documentos.filter(d => !clavesOficiales.has(d.subcategoria));
+  
+  let adicionalesHtml = '';
+  if (adicionales.length > 0) {
+    adicionalesHtml = `
+      <p style="font-size:12px; font-weight:800; color:var(--gold); text-transform:uppercase; margin:16px 0 8px; letter-spacing:0.5px;">📁 Documentos y Archivos Adicionales</p>
+      ${adicionales.map(doc => `
+        <div class="pf-doc-item">
+          <div class="pf-doc-title">📄 ${escapeHtml(doc.titulo || 'Documento')}</div>
+          <div class="pf-doc-status">✅ Activo</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="chip-btn gold" onclick='abrirVisorDocumento(${JSON.stringify({url: doc.url, titulo: doc.titulo || 'Documento'}).replace(/'/g, "&apos;")})'>👁️ Ver</button>
+            ${pfEsSuperAdmin ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarItemPortafolio('${doc.id}')">🗑️</button>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  elDocs.innerHTML = oficialesHtml + adicionalesHtml;
 }
 
 async function abrirVisorDocumento({ url, titulo }){
@@ -6242,6 +6627,42 @@ document.getElementById('pfVideoCDArchivo')?.addEventListener('change', async (e
     cargando.classList.add('hidden');
   }
 });
+
+async function subirDocumentoPersonalizadoPortafolio(){
+  const titulo = document.getElementById('pfNuevoDocTitulo')?.value.trim();
+  let file = document.getElementById('pfNuevoDocArchivo')?.files[0];
+  if (!titulo || !file) {
+    toast('Ingresa el título y selecciona un archivo');
+    return;
+  }
+  file = await prepararArchivoParaSubida(file);
+  toast('Subiendo archivo con compresión…');
+  try {
+    const ext = file.name.split('.').pop() || 'pdf';
+    const path = `documentos_libres/${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('portafolio-comercial').upload(path, file, { upsert: true });
+    if (upErr) { toast('Error al subir'); console.error(upErr); return; }
+    const { data: pub } = sb.storage.from('portafolio-comercial').getPublicUrl(path);
+
+    const { error: insErr } = await sb.from('portafolio_items').insert({
+      categoria: 'documento',
+      subcategoria: 'adicional_' + Date.now(),
+      titulo: titulo,
+      url: pub.publicUrl,
+      tipo: file.type.startsWith('image/') ? 'imagen' : 'pdf',
+      created_by: currentUser.id
+    });
+    if (insErr) { toast('Error al registrar'); console.error(insErr); return; }
+
+    toast('Documento agregado al portafolio ✓');
+    document.getElementById('pfNuevoDocTitulo').value = '';
+    document.getElementById('pfNuevoDocArchivo').value = '';
+    cargarPortafolio();
+  } catch (e) {
+    toast('Error inesperado al subir');
+    console.error(e);
+  }
+}
 
 async function subirDocumentoPortafolio(subcategoria, file){
   if (!file) return;
@@ -8302,6 +8723,25 @@ function generarRespuestaMAJOLocal(pregunta, contexto){
   return `Como **MAJO · Inteligencia Corporativa**, analizo todas las áreas de Casa Dorada (Comercial, Legal, Marketing y Operaciones).\n\nRespecto a tu consulta: *"**${pregunta}**"*, la información se encuentra integrada con la documentación del proyecto Costa Dorada en La Yarada Los Palos. Si requieres cotizar un lote, revisar el checklist legal de un expediente o enviar un speech de ventas, puedes acceder a los módulos correspondientes en el menú lateral.`;
 }
 
+/* ============ ACCIONES RÁPIDAS DE INICIO ============ */
+function abrirModalActividad(){
+  const f = document.getElementById('actFecha');
+  if (f) f.value = obtenerHoyLocal();
+  const t = document.getElementById('actTitulo');
+  if (t) t.value = '';
+  const d = document.getElementById('actDesc');
+  if (d) d.value = '';
+  actTemasAcuerdosTemp = [];
+  renderActTemasLista();
+  poblarSelectClientes('actClienteId');
+  openModal('modalActividad');
+}
+
+function abrirModalAgenda(){
+  poblarSelectClientes('agClienteId');
+  openModal('modalAgenda');
+}
+
 /* ============ CARGA DE PENDIENTES DESTACADOS EN INICIO ============ */
 async function cargarPendientesInicio(){
   const cont = document.getElementById('pi_lista_pendientes');
@@ -8309,47 +8749,59 @@ async function cargarPendientesInicio(){
 
   const hoy = obtenerHoyLocal();
   const elSub = document.getElementById('pi_subtitulo_fecha');
-  if (elSub) elSub.textContent = `${fmtFecha(hoy)} · Prioridades de tu jornada`;
+  if (elSub) elSub.textContent = `${fmtFecha(hoy)} · Prioridades operativas y pendientes`;
 
   try {
-    // 1. Tareas de hoy no completadas
+    // 1. Tareas no completadas: de HOY y de DÍAS ANTERIORES (atrasadas)
     const { data: acts } = await sb.from('actividades')
       .select('*')
       .eq('usuario_id', currentUser.id)
-      .eq('fecha_programada', hoy)
       .eq('archivada', false)
+      .eq('completada', false)
+      .lte('fecha_programada', hoy)
+      .order('fecha_programada', { ascending: true })
       .order('hora_inicio', { ascending: true, nullsFirst: false });
 
-    const tareasPendientes = (acts || []).filter(a => !a.completada);
+    const tareasPendientes = acts || [];
 
-    // 2. Citas de agenda para hoy
+    // 2. Citas de agenda pendientes (de hoy o anteriores sin resolver)
     const { data: citas } = await sb.from('agenda')
       .select('*')
       .eq('usuario_id', currentUser.id)
-      .gte('fecha_inicio', hoy + 'T00:00:00')
       .lte('fecha_inicio', hoy + 'T23:59:59')
       .order('fecha_inicio', { ascending: true });
 
-    // 3. Clientes en riesgo (>7 días sin contacto)
+    const citasPendientes = (citas || []).filter(c => c.estado !== 'realizada' && c.estado !== 'cancelada');
+
+    // 3. Solicitudes pendientes del usuario
+    const { data: sols } = await sb.from('solicitudes')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .eq('estado', 'pendiente')
+      .order('created_at', { ascending: false });
+    
+    const solicitudesPendientes = sols || [];
+
+    // 4. Clientes en riesgo (>7 días sin contacto)
     const clientesEnRiesgoLista = (clientesCache || []).filter(c => clienteEnRiesgo(c));
 
-    // 4. Separaciones por vencer hoy o vencidas
+    // 5. Separaciones por vencer hoy o vencidas
     const sepPorVencer = (separacionesPorVencerCache || []).filter(s => {
       return s.fecha_vencimiento && s.fecha_vencimiento <= hoy;
     });
 
-    const totalAlertas = tareasPendientes.length + (citas || []).length + sepPorVencer.length;
+    const totalAlertas = tareasPendientes.length + citasPendientes.length + solicitudesPendientes.length + sepPorVencer.length;
 
     const elNumT = document.getElementById('pi_num_tareas');
     if (elNumT) elNumT.textContent = tareasPendientes.length;
     const elNumC = document.getElementById('pi_num_citas');
-    if (elNumC) elNumC.textContent = (citas || []).length;
+    if (elNumC) elNumC.textContent = citasPendientes.length;
     const elNumR = document.getElementById('pi_num_riesgo');
     if (elNumR) elNumR.textContent = clientesEnRiesgoLista.length;
 
     const bTotal = document.getElementById('pi_badge_total');
     if (bTotal) {
-      bTotal.textContent = totalAlertas > 0 ? `${totalAlertas} pendientes hoy` : 'Al día ✓';
+      bTotal.textContent = totalAlertas > 0 ? `${totalAlertas} pendientes` : 'Al día ✓';
       bTotal.className = 'pendientes-badge-alerta' + (totalAlertas > 0 ? ' urgente' : '');
     }
 
@@ -8358,7 +8810,7 @@ async function cargarPendientesInicio(){
         <div style="background:#fff; border:1px dashed #C89B3C; border-radius:12px; padding:14px; text-align:center;">
           <span style="font-size:24px;">🎉</span>
           <p style="font-weight:700; color:#142A4D; margin:4px 0 2px; font-size:13.5px;">¡Excelente! Estás al día con tus actividades</p>
-          <p style="font-size:11.5px; color:var(--ink-dim); margin:0;">No tienes tareas pendientes ni separaciones vencidas hoy. Momento ideal para prospección comercial en Costa Dorada.</p>
+          <p style="font-size:11.5px; color:var(--ink-dim); margin:0;">No tienes tareas atrasadas, citas pendientes ni solicitudes en espera. Buen momento para prospección comercial en Costa Dorada.</p>
         </div>
       `;
       return;
@@ -8373,35 +8825,41 @@ async function cargarPendientesInicio(){
           <div>
             <span style="font-size:10px; font-weight:800; color:#D32F2F; text-transform:uppercase;">⚠️ Separación por vencer</span>
             <p style="font-weight:700; font-size:12.5px; margin:2px 0 0; color:#142A4D;">Lote ${escapeHtml(s.propiedades?.codigo || 'Costa Dorada')}</p>
-            <p style="font-size:11px; color:var(--ink-dim); margin:0;">${escapeHtml(s.clientes?.nombre || 'Cliente')} · Vence hoy</p>
+            <p style="font-size:11px; color:var(--ink-dim); margin:0;">${escapeHtml(s.clientes?.nombre || 'Cliente')} · Vence: ${fmtFecha(s.fecha_vencimiento)}</p>
           </div>
           <button class="chip-btn gold" onclick="irAVista('separaciones')" style="padding:4px 8px; font-size:11px;">Gestionar</button>
         </div>
       `);
     });
 
-    // Citas de agenda
-    (citas || []).slice(0, 3).forEach(c => {
+    // Citas de agenda pendientes (hoy o pasadas)
+    citasPendientes.slice(0, 3).forEach(c => {
+      const fechaCita = c.fecha_inicio ? c.fecha_inicio.split('T')[0] : hoy;
+      const esAtrasada = fechaCita < hoy;
       const hora = c.fecha_inicio ? c.fecha_inicio.split('T')[1]?.slice(0, 5) : 'Hoy';
       itemsHtml.push(`
-        <div class="item-pendiente-fila" style="border-left:4px solid #C89B3C;">
+        <div class="item-pendiente-fila" style="border-left:4px solid ${esAtrasada ? '#D32F2F' : '#C89B3C'};">
           <div>
-            <span style="font-size:10px; font-weight:800; color:#C89B3C; text-transform:uppercase;">📅 Cita Programada · ${hora}</span>
+            <span style="font-size:10px; font-weight:800; color:${esAtrasada ? '#D32F2F' : '#C89B3C'}; text-transform:uppercase;">
+              📅 ${esAtrasada ? 'Cita pasada por resolver (' + fmtFecha(fechaCita) + ')' : 'Cita Hoy · ' + hora}
+            </span>
             <p style="font-weight:700; font-size:12.5px; margin:2px 0 0; color:#142A4D;">${escapeHtml(c.titulo)}</p>
             <p style="font-size:11px; color:var(--ink-dim); margin:0;">${c.lugar ? '📍 ' + escapeHtml(c.lugar) : 'Visita / Llamada'}</p>
           </div>
-          <button class="chip-btn" onclick="irAVista('agenda')" style="padding:4px 8px; font-size:11px; border-color:#C89B3C; color:#142A4D;">Ver</button>
+          <button class="chip-btn" onclick="abrirResolverEvento('${c.id}')" style="padding:4px 8px; font-size:11px; border-color:#C89B3C; color:#142A4D;">Resolver</button>
         </div>
       `);
     });
 
-    // Tareas pendientes
-    tareasPendientes.slice(0, 3).forEach(t => {
+    // Tareas pendientes (atrasadas de días anteriores + hoy)
+    tareasPendientes.slice(0, 4).forEach(t => {
+      const esAtrasada = t.fecha_programada < hoy;
       itemsHtml.push(`
-        <div class="item-pendiente-fila" style="border-left:4px solid #1F3A63;">
+        <div class="item-pendiente-fila" style="border-left:4px solid ${esAtrasada ? '#D32F2F' : '#1F3A63'};">
           <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-            <input type="checkbox" style="transform:scale(1.15); cursor:pointer;" onchange="completarActividadDesdeInicio('${t.id}')" title="Marcar como realizada">
+            <input type="checkbox" style="transform:scale(1.2); cursor:pointer;" onchange="completarActividadDesdeInicio('${t.id}')" title="Marcar como realizada">
             <div style="min-width:0;">
+              ${esAtrasada ? `<span style="font-size:9.5px; font-weight:800; color:#D32F2F; text-transform:uppercase;">🔴 Atrasada (${fmtFecha(t.fecha_programada)})</span>` : ''}
               <p style="font-weight:700; font-size:12.5px; margin:0; color:#142A4D; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(t.titulo)}</p>
               <p style="font-size:11px; color:var(--ink-dim); margin:0;">${t.tipo_actividad ? escapeHtml(t.tipo_actividad) + ' · ' : ''}${t.hora_inicio ? t.hora_inicio.slice(0, 5) : 'Pendiente'}</p>
             </div>
@@ -8411,8 +8869,22 @@ async function cargarPendientesInicio(){
       `);
     });
 
-    // Cliente en riesgo si hay espacio
-    if (clientesEnRiesgoLista.length > 0 && itemsHtml.length < 5) {
+    // Solicitudes pendientes
+    solicitudesPendientes.slice(0, 2).forEach(sol => {
+      itemsHtml.push(`
+        <div class="item-pendiente-fila" style="border-left:4px solid #7C6BAF;">
+          <div>
+            <span style="font-size:10px; font-weight:800; color:#7C6BAF; text-transform:uppercase;">📝 Solicitud en trámite</span>
+            <p style="font-weight:700; font-size:12.5px; margin:2px 0 0; color:#142A4D;">${escapeHtml(sol.titulo)}</p>
+            <p style="font-size:11px; color:var(--ink-dim); margin:0;">Área: ${escapeHtml(sol.area_destino || 'Administración')}</p>
+          </div>
+          <button class="chip-btn" onclick="irAVista('solicitudes')" style="padding:4px 8px; font-size:11px; border-color:#7C6BAF; color:#7C6BAF;">Ver</button>
+        </div>
+      `);
+    });
+
+    // Clientes en riesgo
+    if (clientesEnRiesgoLista.length > 0 && itemsHtml.length < 6) {
       const primerRiesgo = clientesEnRiesgoLista[0];
       itemsHtml.push(`
         <div class="item-pendiente-fila" style="border-left:4px solid #FF9800;">
@@ -8438,6 +8910,318 @@ async function completarActividadDesdeInicio(actId){
   toast('Tarea completada ✓');
   cargarPendientesInicio();
   cargarActividadesHoy();
+}
+
+/* ============ CONTROL DE PRESENTACIONES Y MOVILIDAD (14 ASIENTOS) ============ */
+let filtroTipoVisitasActual = 'todas';
+let visitasPresentacionesCache = [];
+
+function cambiarFiltroTipoVisitas(tipo){
+  filtroTipoVisitasActual = tipo;
+  ['tabVisitasTodas', 'tabVisitasProyecto', 'tabVisitasOficina', 'tabVisitasVirtual'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  if (tipo === 'todas') document.getElementById('tabVisitasTodas')?.classList.add('active');
+  if (tipo === 'proyecto') document.getElementById('tabVisitasProyecto')?.classList.add('active');
+  if (tipo === 'oficina') document.getElementById('tabVisitasOficina')?.classList.add('active');
+  if (tipo === 'virtual') document.getElementById('tabVisitasVirtual')?.classList.add('active');
+
+  renderizarListaVisitas();
+}
+
+function alCambiarTipoVisitaModal(){
+  const tipo = document.getElementById('nv_tipo')?.value;
+  const bloqueMov = document.getElementById('nv_bloque_movilidad');
+  const usaVan = tipo === 'visita_proyecto' || tipo === 'oficina_visita';
+  if (bloqueMov) bloqueMov.classList.toggle('hidden', !usaVan);
+  verificarCruceMovilidadModal();
+}
+
+function alCambiarAsientosModal(){
+  const numCli = parseInt(document.getElementById('nv_num_clientes')?.value) || 1;
+  const totalAsientos = numCli + 1; // Clientes + Asesor
+  const elTot = document.getElementById('nv_num_asientos');
+  if (elTot) elTot.value = totalAsientos;
+  verificarCruceMovilidadModal();
+}
+
+function calcularHoraRetorno(horaInicio){
+  if (!horaInicio) return '11:15';
+  const [h, m] = horaInicio.split(':').map(Number);
+  const totalMin = (h * 60 + m) + 135; // 2 horas y 15 min de ciclo completo
+  const finH = Math.floor(totalMin / 60) % 24;
+  const finM = totalMin % 60;
+  return `${String(finH).padStart(2, '0')}:${String(finM).padStart(2, '0')}`;
+}
+
+function verificarCruceMovilidadModal(){
+  const tipo = document.getElementById('nv_tipo')?.value;
+  const usaVan = tipo === 'visita_proyecto' || tipo === 'oficina_visita';
+  const alerta = document.getElementById('nv_alerta_cruce_modal');
+  const horaInicio = document.getElementById('nv_hora')?.value || '09:00';
+  
+  const elRet = document.getElementById('nv_hora_retorno_display');
+  if (elRet) elRet.textContent = calcularHoraRetorno(horaInicio);
+
+  if (!usaVan || !alerta) {
+    if (alerta) alerta.classList.add('hidden');
+    return;
+  }
+
+  const fecha = document.getElementById('nv_fecha')?.value;
+  const nuevosAsientos = parseInt(document.getElementById('nv_num_asientos')?.value) || 2;
+
+  // Buscar cruces en visitasPresentacionesCache
+  const ocupadosEnTurno = calcularAsientosOcupadosEnHorario(fecha, horaInicio);
+  const totalConNuevo = ocupadosEnTurno + nuevosAsientos;
+
+  if (totalConNuevo > 14) {
+    alerta.classList.remove('hidden');
+    alerta.innerHTML = `⚠️ <b>¡Capacidad Excedida!</b> En este horario ya hay <b>${ocupadosEnTurno} asientos reservados</b> de 14. Al sumar ${nuevosAsientos}, se totalizan <b>${totalConNuevo} personas</b>. Deberás coordinar movilidad de apoyo o vehículo de accionista.`;
+  } else if (ocupadosEnTurno > 0) {
+    alerta.classList.remove('hidden');
+    alerta.style.background = '#EFF6FF';
+    alerta.style.borderColor = '#93C5FD';
+    alerta.style.color = '#1E40AF';
+    alerta.innerHTML = `ℹ️ <b>Van compartida:</b> Hay ${ocupadosEnTurno} asientos reservados en este turno. Quedarán <b>${14 - totalConNuevo} asientos libres</b>.`;
+  } else {
+    alerta.classList.add('hidden');
+  }
+}
+
+function calcularAsientosOcupadosEnHorario(fecha, horaNueva){
+  if (!fecha || !horaNueva) return 0;
+  const [hN, mN] = horaNueva.split(':').map(Number);
+  const minInicioNuevo = hN * 60 + mN;
+  const minFinNuevo = minInicioNuevo + 135;
+
+  let ocupados = 0;
+  visitasPresentacionesCache.forEach(v => {
+    if (v.fecha === fecha && (v.tipo === 'visita_proyecto' || v.tipo === 'oficina_visita') && v.estado !== 'cancelada') {
+      const [hE, mE] = (v.hora || '09:00').split(':').map(Number);
+      const minInicioExistente = hE * 60 + mE;
+      const minFinExistente = minInicioExistente + 135;
+
+      // Hay solape si (inicio1 < fin2) && (inicio2 < fin1)
+      const haySolape = (minInicioNuevo < minFinExistente) && (minInicioExistente < minFinNuevo);
+      if (haySolape) {
+        ocupados += (parseInt(v.num_asientos) || 2);
+      }
+    }
+  });
+
+  return ocupados;
+}
+
+async function cargarVisitasPresentaciones(){
+  const filtroFecha = document.getElementById('vis_filtro_fecha')?.value || obtenerHoyLocal();
+  if (document.getElementById('vis_filtro_fecha') && !document.getElementById('vis_filtro_fecha').value) {
+    document.getElementById('vis_filtro_fecha').value = filtroFecha;
+  }
+
+  // Intentar cargar de Supabase, con fallback a localStorage
+  let data = null;
+  try {
+    const res = await sb.from('visitas_presentaciones').select('*').eq('fecha', filtroFecha).order('hora', { ascending: true });
+    if (!res.error && res.data) data = res.data;
+  } catch (e) { console.warn('Tabla visitas_presentaciones no presente, usando almacenamiento local:', e); }
+
+  if (!data) {
+    const local = localStorage.getItem('cd_visitas_' + filtroFecha);
+    data = local ? JSON.parse(local) : [];
+  }
+
+  visitasPresentacionesCache = data || [];
+
+  // Calcular métricas de la Van para esa fecha
+  let maxOcupadosEnCualquierTurno = 0;
+  visitasPresentacionesCache.forEach(v => {
+    if (v.tipo === 'visita_proyecto' || v.tipo === 'oficina_visita') {
+      const ocup = calcularAsientosOcupadosEnHorario(filtroFecha, v.hora || '09:00');
+      if (ocup > maxOcupadosEnCualquierTurno) maxOcupadosEnCualquierTurno = ocup;
+    }
+  });
+
+  const libres = Math.max(0, 14 - maxOcupadosEnCualquierTurno);
+  const pct = Math.min(100, Math.round((maxOcupadosEnCualquierTurno / 14) * 100));
+
+  const elOcup = document.getElementById('vis_num_ocupados');
+  if (elOcup) elOcup.textContent = maxOcupadosEnCualquierTurno;
+  const elLib = document.getElementById('vis_num_libres');
+  if (elLib) elLib.textContent = libres;
+  const elPct = document.getElementById('vis_porcentaje_ocupacion');
+  if (elPct) elPct.textContent = `${pct}% (${maxOcupadosEnCualquierTurno}/14 asientos)`;
+  const elBar = document.getElementById('vis_barra_progreso');
+  if (elBar) {
+    elBar.style.width = pct + '%';
+    elBar.style.background = pct > 100 ? '#EF4444' : pct >= 80 ? '#F59E0B' : 'linear-gradient(90deg, #3B82F6 0%, #10B981 100%)';
+  }
+
+  const badgeVan = document.getElementById('vis_badge_estado_van');
+  const alertaCruce = document.getElementById('vis_alerta_cruce');
+
+  if (maxOcupadosEnCualquierTurno > 14) {
+    if (badgeVan) { badgeVan.textContent = '🔴 Capacidad Excedida'; badgeVan.className = 'badge badge-vencida'; }
+    if (alertaCruce) {
+      alertaCruce.classList.remove('hidden');
+      alertaCruce.innerHTML = `⚠️ <b>¡CRUCE DE HORARIOS Y EXCESO DE CAPACIDAD!</b> Hay turnos con <b>${maxOcupadosEnCualquierTurno} asientos solicitados</b> superando el límite de 14. Se requiere coordinar Van adicional o movilidad de accionista.`;
+    }
+  } else if (maxOcupadosEnCualquierTurno >= 10) {
+    if (badgeVan) { badgeVan.textContent = '🟡 Van Casi Llena'; badgeVan.className = 'badge badge-pendiente'; }
+    if (alertaCruce) alertaCruce.classList.add('hidden');
+  } else {
+    if (badgeVan) { badgeVan.textContent = '🟢 Van Disponible'; badgeVan.className = 'badge badge-completada'; }
+    if (alertaCruce) alertaCruce.classList.add('hidden');
+  }
+
+  renderizarListaVisitas();
+}
+
+function renderizarListaVisitas(){
+  const cont = document.getElementById('listaVisitasPresentaciones');
+  if (!cont) return;
+
+  let filtrados = visitasPresentacionesCache;
+  if (filtroTipoVisitasActual === 'proyecto') {
+    filtrados = filtrados.filter(v => v.tipo === 'visita_proyecto' || v.tipo === 'oficina_visita');
+  } else if (filtroTipoVisitasActual === 'oficina') {
+    filtrados = filtrados.filter(v => v.tipo === 'oficina');
+  } else if (filtroTipoVisitasActual === 'virtual') {
+    filtrados = filtrados.filter(v => v.tipo === 'virtual');
+  }
+
+  if (filtrados.length === 0) {
+    cont.innerHTML = emptyState('🚐', 'No hay presentaciones ni visitas programadas para esta fecha.');
+    return;
+  }
+
+  const tipoLabels = {
+    visita_proyecto: '🚗 Visita Directa a Terreno (La Yarada)',
+    oficina_visita: '🏢🚗 Oficina + Visita a Terreno',
+    oficina: '🏢 Presentación en Oficina Tacna',
+    virtual: '💻 Presentación Virtual (Meet/WhatsApp)'
+  };
+
+  cont.innerHTML = filtrados.map(v => {
+    const usaVan = v.tipo === 'visita_proyecto' || v.tipo === 'oficina_visita';
+    const retorno = calcularHoraRetorno(v.hora || '09:00');
+    return `
+      <div class="card" style="margin-bottom:10px; border-left:4px solid ${usaVan ? 'var(--gold)' : 'var(--navy)'};">
+        <div class="card-row">
+          <div>
+            <span style="font-size:10px; font-weight:800; color:${usaVan ? '#C89B3C' : '#142A4D'}; text-transform:uppercase;">
+              ${tipoLabels[v.tipo] || v.tipo}
+            </span>
+            <p class="card-title" style="font-size:14px; margin:2px 0 0;">${escapeHtml(v.cliente_nombre || 'Cliente')}</p>
+            <p class="card-sub">⏰ Salida: <b>${v.hora || '09:00'}</b> ${usaVan ? '· Retorno aprox: <b>' + retorno + '</b>' : ''}</p>
+            <p class="card-sub">🧑‍💼 Asesor: ${escapeHtml(v.asesor_nombre || 'Asesor Comercial')}</p>
+            ${usaVan ? `<p class="card-sub" style="font-weight:700; color:var(--navy);">🚐 Cupos en Van: ${v.num_asientos || 2} personas (${v.num_clientes || 1} cliente(s) + asesor)</p>` : ''}
+            ${v.observaciones ? `<p class="card-sub" style="font-style:italic;">📝 ${escapeHtml(v.observaciones)}</p>` : ''}
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+            <span class="badge ${usaVan ? 'badge-pendiente' : 'badge-completada'}">${usaVan ? 'Van Asignada' : 'Confirmada'}</span>
+            <button class="chip-btn" style="color:var(--danger); border-color:var(--danger); padding:2px 8px; font-size:11px;" onclick="eliminarVisitaPresentacion('${v.id}', '${v.fecha}')">🗑️</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function abrirModalNuevaVisita(){
+  poblarSelectClientes('nv_cliente_sel');
+  document.getElementById('nv_asesor_nombre').value = currentProfile?.nombre || 'Jorge Luque';
+  document.getElementById('nv_fecha').value = document.getElementById('vis_filtro_fecha')?.value || obtenerHoyLocal();
+  document.getElementById('nv_hora').value = '09:00';
+  document.getElementById('nv_num_clientes').value = '2';
+  document.getElementById('nv_num_asientos').value = '3';
+  document.getElementById('nv_observaciones').value = '';
+  alCambiarTipoVisitaModal();
+  openModal('modalNuevaVisita');
+}
+
+async function guardarNuevaVisita(){
+  const tipo = document.getElementById('nv_tipo').value;
+  const clienteSel = document.getElementById('nv_cliente_sel');
+  const clienteNombre = clienteSel.options[clienteSel.selectedIndex]?.text || 'Cliente';
+  const clienteId = clienteSel.value || null;
+  const fecha = document.getElementById('nv_fecha').value;
+  const hora = document.getElementById('nv_hora').value;
+  const numClientes = parseInt(document.getElementById('nv_num_clientes').value) || 1;
+  const numAsientos = parseInt(document.getElementById('nv_num_asientos').value) || (numClientes + 1);
+  const observaciones = document.getElementById('nv_observaciones').value.trim();
+
+  if (!fecha || !hora) {
+    toast('Por favor indica fecha y hora');
+    return;
+  }
+
+  const nuevaVisita = {
+    id: 'vis_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    tipo,
+    cliente_id: clienteId,
+    cliente_nombre: clienteNombre,
+    asesor_id: currentUser?.id,
+    asesor_nombre: currentProfile?.nombre || 'Asesor Comercial',
+    fecha,
+    hora,
+    num_clientes: numClientes,
+    num_asientos: numAsientos,
+    observaciones: observaciones || null,
+    estado: 'programada',
+    created_at: new Date().toISOString()
+  };
+
+  // Intentar guardar en Supabase
+  try {
+    await sb.from('visitas_presentaciones').insert(nuevaVisita);
+  } catch (e) {
+    console.warn('Fallback a guardado local para visita:', e);
+  }
+
+  // Guardado en fallback local
+  const key = 'cd_visitas_' + fecha;
+  const listaLocal = JSON.parse(localStorage.getItem(key) || '[]');
+  listaLocal.push(nuevaVisita);
+  localStorage.setItem(key, JSON.stringify(listaLocal));
+
+  // Sincronizar automáticamente con Agenda interna
+  try {
+    await sb.from('agenda').insert({
+      usuario_id: currentUser.id,
+      titulo: `${tipo === 'visita_proyecto' ? '🚐 Visita a Terreno' : '🤝 Presentación'}: ${clienteNombre}`,
+      fecha_inicio: `${fecha}T${hora}:00`,
+      fecha_fin: `${fecha}T${calcularHoraRetorno(hora)}:00`,
+      tipo: 'visita_campo',
+      lugar: tipo === 'visita_proyecto' || tipo === 'oficina_visita' ? 'Costa Dorada · La Yarada Los Palos' : 'Oficina Tacna',
+      notas: `Tipo: ${tipo}. Asientos en Van: ${numAsientos}. ${observaciones}`,
+      estado: 'programada'
+    });
+  } catch (errAg) { console.warn('Error sincronizando con agenda:', errAg); }
+
+  toast('Presentación / Visita agendada con éxito ✓');
+  closeModal('modalNuevaVisita');
+  
+  const elFiltro = document.getElementById('vis_filtro_fecha');
+  if (elFiltro) elFiltro.value = fecha;
+  cargarVisitasPresentaciones();
+  cargarPendientesInicio();
+}
+
+async function eliminarVisitaPresentacion(id, fecha){
+  if (!confirm('¿Eliminar esta presentación / visita?')) return;
+  try {
+    await sb.from('visitas_presentaciones').delete().eq('id', id);
+  } catch (e) {}
+
+  const key = 'cd_visitas_' + fecha;
+  let listaLocal = JSON.parse(localStorage.getItem(key) || '[]');
+  listaLocal = listaLocal.filter(v => v.id !== id);
+  localStorage.setItem(key, JSON.stringify(listaLocal));
+
+  toast('Visita eliminada');
+  cargarVisitasPresentaciones();
 }
 
 /* ============ REORGANIZACIÓN Y CONTROL DEL MENÚ DEPARTAMENTOS ============ */
