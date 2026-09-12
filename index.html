@@ -951,7 +951,12 @@
             <button class="chip-btn gold" id="btnAbrirNuevoCliente">+ Nuevo cliente</button>
           </div>
         </div>
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <button class="plano-tab-btn active" id="tabClientesLista" onclick="cambiarVistaClientes('lista')">📋 Lista</button>
+          <button class="plano-tab-btn" id="tabClientesPipeline" onclick="cambiarVistaClientes('pipeline')">🧭 Pipeline</button>
+        </div>
         <div id="listaClientes"></div>
+        <div id="pipelineClientes" class="hidden"></div>
       </div>
 
       <!-- VISTA: Planos Interactivos -->
@@ -4639,6 +4644,7 @@ async function cargarClientes(){
   query = query.order('created_at', { ascending: false });
 
   const { data } = await query;
+  clientesCache = data || []; // se reutiliza en la vista Pipeline sin volver a consultar
   const el = document.getElementById('listaClientes');
   if (!data || data.length === 0) { el.innerHTML = emptyState('👤', 'Aún no tienes clientes o prospectos registrados.'); return; }
 
@@ -4647,15 +4653,17 @@ async function cargarClientes(){
     const wspUrl = celLimpio ? `https://wa.me/51${celLimpio.slice(-9)}` : null;
     const origenStr = c.origen_prospeccion ? `📌 ${escapeHtml(c.origen_prospeccion)}` : '';
     const proximaAccionStr = c.proxima_accion ? `👉 Próxima acción: ${escapeHtml(c.proxima_accion)}` : '';
+    const enRiesgo = clienteEnRiesgo(c);
 
     return `
-      <div class="card">
+      <div class="card" style="${enRiesgo ? 'border-left:4px solid var(--danger);' : ''}">
         <div class="card-row">
           <div>
             <p class="card-title">${escapeHtml(c.nombre)}${c.codigo_correlativo ? ' · ' + escapeHtml(c.codigo_correlativo) : ''}</p>
             <p class="card-sub">📱 ${c.celular || c.telefono || 'Sin celular'}${origenStr ? ' · ' + origenStr : ''}</p>
             ${c.estado_prospecto ? `<p class="card-sub" style="font-weight:600; color:var(--gold); margin-top:2px;">Estado: ${escapeHtml(c.estado_prospecto)}</p>` : ''}
             ${proximaAccionStr ? `<p class="card-sub" style="font-weight:600; color:var(--navy); margin-top:3px;">${proximaAccionStr}</p>` : ''}
+            ${enRiesgo ? `<p class="card-sub" style="font-weight:700; color:var(--danger); margin-top:3px;">⚠️ Cliente en riesgo — sin contacto hace más de 7 días</p>` : ''}
           </div>
           ${c.estado_prospecto ? `<span class="badge badge-pendiente">${escapeHtml(c.estado_prospecto)}</span>` : ''}
         </div>
@@ -4667,6 +4675,77 @@ async function cargarClientes(){
       </div>
     `;
   }).join('');
+}
+
+/* ============ PIPELINE VISUAL (KANBAN) — corazón del CRM ============
+   Reutiliza exactamente las mismas 8 etapas ya definidas en el formulario
+   de cliente (cl_estado), sin cambios de esquema. Cada tarjeta tiene un
+   selector para "mover" de etapa al instante (más confiable en celular
+   que arrastrar y soltar con el dedo). */
+let clientesCache = [];
+const ETAPAS_PIPELINE = [
+  'Nuevo', 'En seguimiento', 'Interesado', 'Cita agendada',
+  'Visita realizada', 'Evaluación crediticia', 'Separado', 'No interesado'
+];
+
+/** Un cliente está "en riesgo" si lleva más de 7 días sin ninguna fecha de
+ *  contacto/próxima acción registrada y no está ya cerrado (separado o descartado). */
+function clienteEnRiesgo(c){
+  if (c.estado_prospecto === 'Separado' || c.estado_prospecto === 'No interesado') return false;
+  const ultimaFecha = c.proxima_fecha || c.fecha_contacto || c.created_at?.slice(0, 10);
+  if (!ultimaFecha) return false;
+  const dias = Math.floor((new Date(obtenerHoyLocal()) - new Date(ultimaFecha)) / 86400000);
+  return dias > 7;
+}
+
+function cambiarVistaClientes(vista){
+  document.getElementById('tabClientesLista').classList.toggle('active', vista === 'lista');
+  document.getElementById('tabClientesPipeline').classList.toggle('active', vista === 'pipeline');
+  document.getElementById('listaClientes').classList.toggle('hidden', vista !== 'lista');
+  document.getElementById('pipelineClientes').classList.toggle('hidden', vista !== 'pipeline');
+  if (vista === 'pipeline') renderPipelineClientes();
+}
+
+function renderPipelineClientes(){
+  const cont = document.getElementById('pipelineClientes');
+  if (clientesCache.length === 0) { cont.innerHTML = emptyState('🧭', 'Aún no tienes clientes para mostrar en el pipeline.'); return; }
+
+  cont.innerHTML = `
+    <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; -webkit-overflow-scrolling:touch;">
+      ${ETAPAS_PIPELINE.map(etapa => {
+        const clientesEtapa = clientesCache.filter(c => (c.estado_prospecto || 'Nuevo') === etapa);
+        return `
+        <div style="flex:0 0 240px; background:#F7F4EC; border-radius:14px; padding:10px;">
+          <p style="font-size:12px; font-weight:800; color:var(--navy); margin:0 0 8px; text-transform:uppercase; letter-spacing:0.02em;">
+            ${escapeHtml(etapa)} <span style="color:var(--gold);">(${clientesEtapa.length})</span>
+          </p>
+          <div style="display:flex; flex-direction:column; gap:8px; max-height:65vh; overflow-y:auto;">
+            ${clientesEtapa.length === 0 ? '<p style="font-size:11.5px; color:var(--ink-dim); padding:8px 0;">— vacío —</p>' : clientesEtapa.map(c => {
+              const enRiesgo = clienteEnRiesgo(c);
+              return `
+              <div style="background:#fff; border-radius:10px; padding:10px; border:1px solid #EFEAE0; ${enRiesgo ? 'border-left:3px solid var(--danger);' : ''} box-shadow:0 2px 6px rgba(26,35,50,0.06);">
+                <p style="font-size:12.5px; font-weight:700; margin:0;">${escapeHtml(c.nombre)}</p>
+                <p style="font-size:11px; color:var(--ink-dim); margin:2px 0 6px;">${c.celular || c.telefono || 'Sin celular'}</p>
+                ${enRiesgo ? `<p style="font-size:10.5px; color:var(--danger); font-weight:700; margin:0 0 6px;">⚠️ Sin contacto +7 días</p>` : ''}
+                <select onchange="moverClientePipeline('${c.id}', this.value)" style="width:100%; font-size:11px; padding:5px; border-radius:6px; border:1px solid #E5DFCF;">
+                  ${ETAPAS_PIPELINE.map(e2 => `<option value="${e2}" ${e2 === etapa ? 'selected' : ''}>➜ ${e2}</option>`).join('')}
+                </select>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+async function moverClientePipeline(id, nuevaEtapa){
+  const { error } = await sb.from('clientes').update({ estado_prospecto: nuevaEtapa }).eq('id', id);
+  if (error) { toast('Error al mover el cliente'); console.error(error); return; }
+  const c = clientesCache.find(x => x.id === id);
+  if (c) c.estado_prospecto = nuevaEtapa;
+  toast(`Movido a "${nuevaEtapa}" ✓`);
+  renderPipelineClientes();
 }
 
 async function eliminarCliente(id){
