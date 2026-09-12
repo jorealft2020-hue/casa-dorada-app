@@ -4752,6 +4752,11 @@ function prepararModalCliente(){
 }
 
 document.getElementById('btnGuardarCliente').addEventListener('click', async () => {
+  if (!currentUser?.id) {
+    toast('Tu sesión no está lista. Cierra este formulario y vuelve a intentar.');
+    return;
+  }
+
   const nombre = document.getElementById('cl_nombre').value.trim();
   const celular = document.getElementById('cl_celular').value.trim();
   const proximaAccion = document.getElementById('cl_proxima_accion').value.trim();
@@ -4769,30 +4774,25 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
     return;
   }
 
+  const btnGuardar = document.getElementById('btnGuardarCliente');
+  btnGuardar.disabled = true;
   toast('Registrando cliente…');
 
-  const { data: codigoGenerado } = await sb.rpc('generar_codigo_cliente', { p_vendedor_id: currentUser.id }).catch(() => ({ data: null }));
+  // BLINDAJE: todo el proceso queda envuelto en try/catch/finally para que,
+  // pase lo que pase, SIEMPRE se muestre un mensaje final (éxito o error) y
+  // el botón se reactive — antes, un fallo inesperado en cualquier paso
+  // (ej. generar el código, o la sincronización con Calendar) dejaba el
+  // mensaje "Registrando cliente…" congelado para siempre, sin avisar nada.
+  try {
+    let codigoGenerado = null;
+    try {
+      const resultado = await sb.rpc('generar_codigo_cliente', { p_vendedor_id: currentUser.id });
+      codigoGenerado = resultado?.data || null;
+    } catch (eCodigo) {
+      console.error('No se pudo generar el código de cliente (se continúa sin él):', eCodigo);
+    }
 
-  const payload = {
-    vendedor_id: currentUser.id,
-    nombre,
-    celular,
-    telefono: celular,
-    dni,
-    correo,
-    email: correo,
-    origen_prospeccion: origen,
-    fecha_contacto: fechaContacto,
-    hora_contacto: horaContacto,
-    estado_prospecto: estado,
-    proxima_accion: proximaAccion,
-    codigo_correlativo: codigoGenerado || null
-  };
-
-  let { error } = await sb.from('clientes').insert(payload);
-  
-  if (error && (error.message.includes('column') || error.message.includes('schema'))) {
-    const fallbackPayload = {
+    const payload = {
       vendedor_id: currentUser.id,
       nombre,
       celular,
@@ -4800,39 +4800,62 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
       dni,
       correo,
       email: correo,
-      direccion: `Origen: ${origen} | Próxima acción: ${proximaAccion}`
+      origen_prospeccion: origen,
+      fecha_contacto: fechaContacto,
+      hora_contacto: horaContacto,
+      estado_prospecto: estado,
+      proxima_accion: proximaAccion,
+      codigo_correlativo: codigoGenerado || null
     };
-    const { error: err2 } = await sb.from('clientes').insert(fallbackPayload);
-    if (err2) { toast('Error al guardar cliente'); console.error(err2); return; }
-  } else if (error) {
-    toast('Error al guardar cliente'); console.error(error); return;
-  }
 
-  // AUTO-AGENDAMIENTO DE LA PRÓXIMA ACCIÓN EN AGENDA Y CALENDAR:
-  if (proximaFecha && proximaHora) {
-    try {
-      const fInicioISO = new Date(`${proximaFecha}T${proximaHora}:00`).toISOString();
-      const { data: agendaEv } = await sb.from('agenda').insert({
-        usuario_id: currentUser.id,
-        titulo: `[Cliente: ${nombre}] ${proximaAccion}`,
-        locacion: `📱 Tel: ${celular} · Origen: ${origen}`,
-        fecha_inicio: fInicioISO,
-        estado: 'programada'
-      }).select().single();
+    let { error } = await sb.from('clientes').insert(payload);
 
-      if (agendaEv) {
-        sincronizarEventoCalendar(agendaEv);
-      }
-    } catch (eAgenda) {
-      console.error('No se pudo auto-agendar la próxima acción:', eAgenda);
+    if (error && (error.message.includes('column') || error.message.includes('schema'))) {
+      const fallbackPayload = {
+        vendedor_id: currentUser.id,
+        nombre,
+        celular,
+        telefono: celular,
+        dni,
+        correo,
+        email: correo,
+        direccion: `Origen: ${origen} | Próxima acción: ${proximaAccion}`
+      };
+      const { error: err2 } = await sb.from('clientes').insert(fallbackPayload);
+      if (err2) { toast('Error al guardar cliente'); console.error(err2); return; }
+    } else if (error) {
+      toast('Error al guardar cliente'); console.error(error); return;
     }
-  }
 
-  toast('Cliente registrado con éxito ✓');
-  closeModal('modalCliente');
-  cargarClientes();
-  cargarKPIs();
-  cargarAgenda();
+    // AUTO-AGENDAMIENTO DE LA PRÓXIMA ACCIÓN EN AGENDA Y CALENDAR:
+    if (proximaFecha && proximaHora) {
+      try {
+        const fInicioISO = new Date(`${proximaFecha}T${proximaHora}:00`).toISOString();
+        const { data: agendaEv } = await sb.from('agenda').insert({
+          usuario_id: currentUser.id,
+          titulo: `[Cliente: ${nombre}] ${proximaAccion}`,
+          locacion: `📱 Tel: ${celular} · Origen: ${origen}`,
+          fecha_inicio: fInicioISO,
+          estado: 'programada'
+        }).select().single();
+
+        if (agendaEv) sincronizarEventoCalendar(agendaEv);
+      } catch (eAgenda) {
+        console.error('No se pudo auto-agendar la próxima acción (el cliente sí se guardó):', eAgenda);
+      }
+    }
+
+    toast('Cliente registrado con éxito ✓');
+    closeModal('modalCliente');
+    cargarClientes();
+    cargarKPIs();
+    cargarAgenda();
+  } catch (eGeneral) {
+    toast('Error inesperado al guardar. Intenta de nuevo.');
+    console.error('Error general al guardar cliente:', eGeneral);
+  } finally {
+    btnGuardar.disabled = false;
+  }
 });
 
 async function cargarClientes(){
