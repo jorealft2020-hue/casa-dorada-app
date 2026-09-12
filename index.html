@@ -392,36 +392,131 @@
     accent-color: var(--gold); flex-shrink: 0; cursor: pointer; margin: 0 !important;
   }
 
-  .welcome-card{
-    background: linear-gradient(135deg, var(--navy) 0%, #223048 100%);
-    border-radius: 18px; padding: 22px 20px; color: #fff; margin-bottom: 14px;
-    box-shadow: 0 8px 24px rgba(26,35,50,0.25); position:relative; overflow:hidden;
-  }
-  .welcome-card::after{
-    content:''; position:absolute; top:-20%; right:-20%; width:140px; height:140px; border-radius:50%;
-    background: radial-gradient(circle, rgba(201,151,62,0.25) 0%, transparent 70%); pointer-events:none;
-  }
-  .welcome-badge{ display:inline-flex; align-items:center; gap:6px; background: rgba(201,151,62,0.2); border:1px solid rgba(201,151,62,0.4); color: var(--gold-soft); padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+  /* =========================================================================
+   TARJETA OCASO HIPERREALISTA: DEGRADÉ AZUL MARINO A SOL DORADO Y NUBES
+   ========================================================================= */
+.welcome-card{
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 26px 22px 22px;
+  margin-bottom: 14px;
+  background: linear-gradient(
+    0deg, 
+    #0E1A30 0%, 
+    #142A4D 26%, 
+    #25335C 44%, 
+    #6E3758 60%, 
+    #CC4E47 75%, 
+    #F39A35 88%, 
+    #FFD166 100%
+  );
+  box-shadow: 0 12px 36px rgba(14, 26, 48, 0.45);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.welcome-card::after{ display: none !important; }
 
-  .welcome-logos-3d{
-    display: flex; align-items: center; justify-content: center;
-    gap: 16px; perspective: 800px; margin: 4px 0 16px; flex-wrap: wrap;
-  }
-  .logo-3d-flotante{
-    width: 155px; height: 98px; max-width: 46%; object-fit: contain;
-    filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
-    animation: logoFlotar3D 4.5s ease-in-out infinite;
-    background: rgba(255, 255, 255, 0.09);
-    padding: 8px 14px;
-    border-radius: 14px;
-    border: 1.5px solid rgba(200, 155, 60, 0.45);
-    backdrop-filter: blur(8px);
-    transition: transform 0.3s ease, border-color 0.3s ease;
-  }
-  .logo-3d-flotante:hover{
-    transform: scale(1.05);
-    border-color: var(--gold);
-  }
+/* RESPLANDOR Y HALO SOLAR DEL OCASO */
+.wc-sol-resplandor{
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96%;
+  height: 155px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center, 
+    rgba(255, 245, 210, 0.88) 0%, 
+    rgba(255, 185, 75, 0.65) 35%, 
+    rgba(235, 90, 45, 0.32) 65%, 
+    transparent 85%
+  );
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: 1;
+  animation: pulsoSolOcaso 5s ease-in-out infinite alternate;
+}
+@keyframes pulsoSolOcaso{
+  0% { transform: translateX(-50%) scale(0.96); filter: blur(18px) brightness(1); }
+  100% { transform: translateX(-50%) scale(1.06); filter: blur(22px) brightness(1.15); }
+}
+
+/* NUBES EN MOVIMIENTO CONTINUO DE IZQUIERDA A DERECHA */
+.wc-nubes-stream{
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 200%;
+  height: 135px;
+  pointer-events: none;
+  z-index: 2;
+  will-change: transform;
+}
+.wc-nubes-frontal{
+  background:
+    radial-gradient(circle 46px at 15% 52%, rgba(255, 255, 255, 0.94) 98%, transparent 100%),
+    radial-gradient(circle 60px at 32% 38%, rgba(255, 255, 255, 0.96) 98%, transparent 100%),
+    radial-gradient(circle 52px at 48% 48%, rgba(255, 255, 255, 0.90) 98%, transparent 100%),
+    radial-gradient(circle 64px at 65% 36%, rgba(255, 255, 255, 0.96) 98%, transparent 100%),
+    radial-gradient(circle 48px at 82% 50%, rgba(255, 255, 255, 0.92) 98%, transparent 100%),
+    radial-gradient(circle 56px at 96% 40%, rgba(255, 255, 255, 0.94) 98%, transparent 100%);
+  filter: drop-shadow(0 4px 14px rgba(255, 240, 210, 0.45));
+  animation: moverNubesDerecha 22s linear infinite;
+}
+.wc-nubes-profunda{
+  top: 2px;
+  opacity: 0.84;
+  background:
+    radial-gradient(circle 40px at 22% 58%, rgba(255, 235, 215, 0.88) 98%, transparent 100%),
+    radial-gradient(circle 54px at 42% 42%, rgba(255, 245, 230, 0.92) 98%, transparent 100%),
+    radial-gradient(circle 46px at 58% 54%, rgba(255, 235, 215, 0.88) 98%, transparent 100%),
+    radial-gradient(circle 58px at 76% 42%, rgba(255, 245, 230, 0.92) 98%, transparent 100%);
+  filter: blur(2px);
+  animation: moverNubesDerecha 34s linear infinite;
+}
+@keyframes moverNubesDerecha{
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.welcome-card-contenido{
+  position: relative;
+  z-index: 4;
+}
+
+.welcome-logos-3d{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  perspective: 800px;
+  margin: 4px 0 16px;
+}
+
+.logo-3d-flotante{
+  width: 148px;
+  height: 84px;
+  max-width: 46%;
+  object-fit: contain;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  filter: drop-shadow(0 4px 8px rgba(14, 26, 48, 0.42));
+  animation: logoFlotar3D 4.5s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+.logo-3d-flotante:hover{
+  transform: scale(1.08);
+}
+@media (min-width: 600px){
+  .logo-3d-flotante{ width: 190px; height: 98px; }
+  .welcome-logos-3d{ gap: 40px; }
+}
   @media (min-width: 600px){
     .logo-3d-flotante{
       width: 195px; height: 115px; padding: 10px 20px;
@@ -1141,13 +1236,22 @@ main.app-content {
       <!-- VISTA: Inicio -->
       <div id="viewInicio">
         <div class="welcome-card">
+        <!-- Atmósfera de Ocaso y Resplandor Solar -->
+        <div class="wc-sol-resplandor"></div>
+        <!-- Capas de Nubes en movimiento continuo hacia la derecha -->
+        <div class="wc-nubes-stream wc-nubes-profunda"></div>
+        <div class="wc-nubes-stream wc-nubes-frontal"></div>
+
+        <!-- Contenido en Primer Plano (Logos limpios sin marcos y textos) -->
+        <div class="welcome-card-contenido">
           <div class="welcome-logos-3d">
             <img src="logo-casa-dorada.png" alt="Casa Dorada" class="logo-3d-flotante" style="animation-delay:0s;">
-            <img src="logo-costa-dorada.png" alt="Costa Dorada" class="logo-3d-flotante" style="animation-delay:0.4s;">
+            <img src="logo-costa-dorada.png" alt="Costa Dorada" class="logo-3d-flotante" style="animation-delay:0.5s;">
           </div>
           <h2 class="welcome-title" id="wb_saludo" style="margin-top:14px;">¡Buenos días!</h2>
           <p class="welcome-sub" id="wb_subtitulo" style="margin-bottom:0;">Bienvenido a tu jornada comercial y de gestión. Enfoque total en metas y cierres.</p>
         </div>
+      </div>
 
         <!-- TARJETA RESALTANTE DE PENDIENTES DEL DÍA -->
         <div class="card-pendientes-resaltante" id="cardPendientesInicio">
@@ -1473,6 +1577,25 @@ main.app-content {
           <!-- ALERTA DE CRUCE DE HORARIO / EXCESO DE CAPACIDAD -->
           <div id="vis_alerta_cruce" class="hidden" style="margin-top:12px; background:#FEE2E2; border:1.5px solid #F87171; border-radius:10px; padding:10px; color:#991B1B; font-size:12px; line-height:1.4;">
             ⚠️ <b>¡CRUCE DE HORARIOS / CAPACIDAD EXCEDIDA!</b> Se requieren más de 14 asientos en este turno. Se debe gestionar movilidad de apoyo o vehículo de accionista.
+          </div>
+        </div>
+
+        <!-- TARJETA DEL CONDUCTOR DESIGNADO PARA LA FECHA -->
+        <div class="card" style="background:#fff; border:1.5px solid #E2E8F0; border-radius:12px; padding:12px; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:22px;">🧑‍✈️</span>
+              <div>
+                <span style="font-size:10.5px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">Conductor Designado de Movilidad</span>
+                <p id="vis_conductor_nombre" style="margin:2px 0 0; font-size:13.5px; font-weight:700; color:var(--navy);">Sin conductor designado aún</p>
+                <p id="vis_conductor_detalles" style="margin:0; font-size:11.5px; color:var(--ink-dim);">Placa: — · Celular: —</p>
+              </div>
+            </div>
+            <div id="vis_bloque_btn_conductor">
+              <button type="button" class="chip-btn" id="btnAbrirDesignarConductor" onclick="abrirModalDesignarConductor()" style="font-size:11.5px; font-weight:700; padding:6px 12px; border-color:var(--gold); color:var(--navy); background:#FFFDF9;">
+                ✏️ Designar Conductor
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1833,6 +1956,61 @@ main.app-content {
   </div>
 
   
+  
+  <!-- MODAL: Designar Conductor de Movilidad (Administración) -->
+  <div class="modal-backdrop" id="modalDesignarConductor">
+    <div class="modal-sheet" style="max-height:85vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalDesignarConductor">✕</button>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <span style="font-size:26px;">🧑‍✈️</span>
+        <div>
+          <h3 style="margin:0; font-size:16px;">Designar Conductor de Movilidad</h3>
+          <p id="mdc_fecha_sub" style="font-size:12px; color:var(--ink-dim); margin:2px 0 0;">Asignación oficial para salidas a Costa Dorada</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Fecha designada *</label>
+        <input type="date" id="mdc_fecha" readonly style="background:#F8FAFC; font-weight:700;">
+      </div>
+
+      <div class="field">
+        <label>Nombre del Conductor / Chofer *</label>
+        <input type="text" id="mdc_nombre" placeholder="Nombres y apellidos del conductor">
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="field">
+          <label>Celular / WhatsApp *</label>
+          <input type="tel" id="mdc_celular" placeholder="9XXXXXXXX">
+        </div>
+        <div class="field">
+          <label>Placa del Vehículo / Van *</label>
+          <input type="text" id="mdc_placa" placeholder="Ej: Z1A-123">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tipo de Vehículo</label>
+        <select id="mdc_tipo_vehiculo">
+          <option value="Van Principal Corporativa (14 Asientos)" selected>Van Principal Corporativa (14 Asientos)</option>
+          <option value="Van de Apoyo / Alquiler">Van de Apoyo / Alquiler</option>
+          <option value="Vehículo de Accionista">Vehículo de Accionista</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Instrucciones de Recojo / Refrigerios / Observaciones</label>
+        <textarea id="mdc_notas" placeholder="Punto de encuentro, refrigerios cargados, combustible..." style="width:100%; min-height:60px;"></textarea>
+      </div>
+
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn-secondary" data-close="modalDesignarConductor">Cancelar</button>
+        <button class="btn-primary" onclick="guardarDesignacionConductor()">Guardar Conductor</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Agendar Presentación / Visita a Proyecto -->
   <div class="modal-backdrop" id="modalNuevaVisita">
     <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
@@ -2548,34 +2726,62 @@ main.app-content {
 
   <!-- MODAL: Nueva Solicitud -->
   <div class="modal-backdrop" id="modalNuevaSolicitud">
-    <div class="modal-sheet">
-      <h3>Nueva Solicitud</h3>
-      <div class="field">
-        <label>¿Quién la pide? (jefe, área, persona)</label>
-        <input type="text" id="sol_solicitante" placeholder="Ej: Gerencia Comercial, Jorge Luque...">
-      </div>
-      <div class="field">
-        <label>Título de la solicitud</label>
-        <input type="text" id="sol_titulo" placeholder="Ej: Enviar comunicado a Marketing">
-      </div>
-      <div class="field">
-        <label>Detalle</label>
-        <textarea id="sol_descripcion" placeholder="Describe qué se pide exactamente..."></textarea>
-      </div>
-      <div class="field">
-        <label>Asignar a</label>
-        <select id="sol_asignado_a"></select>
-      </div>
-      <div class="field">
-        <label>Fecha límite (opcional)</label>
-        <input type="date" id="sol_fecha_limite">
-      </div>
-      <div class="modal-actions">
-        <button class="btn-secondary" data-close="modalNuevaSolicitud">Cancelar</button>
-        <button class="btn-primary" id="btnGuardarSolicitud">Guardar</button>
+  <div class="modal-sheet">
+    <button class="modal-x-close" data-close="modalNuevaSolicitud">✕</button>
+    <h3 style="margin-top:0;">➕ Nueva Solicitud / Requerimiento</h3>
+
+    <!-- RESPONSABLE ASIGNADO AUTOMÁTICO (Tú mismo) -->
+    <div style="background:#F1F5F9; border:1px solid #CBD5E1; border-radius:10px; padding:9px 12px; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <span style="font-size:16px;">👤</span>
+      <div style="font-size:12px; color:var(--navy);">
+        <b>Responsable asignado:</b> <span id="sol_responsable_display" style="font-weight:700; color:var(--gold);">—</span> <span style="font-size:10.5px; color:var(--ink-dim);">(Automático)</span>
       </div>
     </div>
+
+    <!-- SOLICITADO POR / DESIGNADO POR CON OPCIÓN OTROS Y CONTEXTO -->
+    <div class="field">
+      <label>Solicitado por / Designado por *</label>
+      <select id="sol_solicitante_sel" onchange="alCambiarSolicitanteSelect()" style="margin-bottom:6px;">
+        <option value="">-- Seleccionar quién lo solicita --</option>
+      </select>
+      <!-- Sub-bloque si se elige 'Otros' -->
+      <div id="bloque_solicitante_otros" class="hidden" style="background:#F8FAFC; border:1.5px dashed #CBD5E1; border-radius:12px; padding:12px; margin-top:8px;">
+        <div style="margin-bottom:8px;">
+          <label style="font-size:11.5px; font-weight:700; color:var(--navy); margin-bottom:4px; display:block;">
+            Nombre o cargo de quien lo solicita *
+          </label>
+          <input type="text" id="sol_solicitante_otro_nombre" placeholder="Ej: Ing. Residente de Obra, Notaría, Proveedor, Cliente...">
+        </div>
+        <div>
+          <label style="font-size:11.5px; font-weight:700; color:var(--navy); margin-bottom:4px; display:block;">
+            Contexto / Circunstancia del requerimiento (opcional)
+          </label>
+          <input type="text" id="sol_solicitante_contexto" placeholder="Ej: Acordado en recorrido en terreno, por llamada WhatsApp, reunión de coordinación...">
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Título de la solicitud / requerimiento *</label>
+      <input type="text" id="sol_titulo" placeholder="Ej: Enviar reporte de ventas consolidado...">
+    </div>
+
+    <div class="field">
+      <label>Detalle del requerimiento</label>
+      <textarea id="sol_descripcion" placeholder="Describe exactamente lo solicitado por tu superior..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Fecha límite de entrega (opcional)</label>
+      <input type="date" id="sol_fecha_limite">
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;">
+      <button type="button" class="btn-secondary" data-close="modalNuevaSolicitud">Cancelar</button>
+      <button type="button" class="btn-primary" id="btnGuardarSolicitud">Guardar Requerimiento</button>
+    </div>
   </div>
+</div>
 
   <!-- MODAL: Configuración Rápida -->
   <div class="modal-backdrop" id="modalConfigRapida">
@@ -2646,6 +2852,7 @@ main.app-content {
   <div class="toast" id="toast"></div>
 </div>
 <script>
+const NUMERO_WHATSAPP_ADMINISTRACION = '51942236677'; // +51 942 236 677
 /* ============ CONFIGURACIÓN SUPABASE ============ */
 const SUPABASE_URL = 'https://nboikojylmkujdxinztj.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib2lrb2p5bG1rdWpkeGluenRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyOTU1NzksImV4cCI6MjEwMzg3MTU3OX0.O6yaQPFwjYmIhQD--smhX1IRY0D1KETHsX30kFOmU5s';
@@ -2941,6 +3148,7 @@ const PERMISOS_CATALOGO = [
   { key: 'ver_solicitudes',          label: 'Ver Solicitudes y Requerimientos',       dept: 'Administración', default: true },
   { key: 'crear_solicitudes',        label: 'Registrar Nuevas Solicitudes',           dept: 'Administración', default: true },
   { key: 'aprobar_solicitudes',      label: 'Aprobar/Rechazar Requerimientos',        dept: 'Administración', default: false },
+  { key: 'designar_conductor_movilidad', label: 'Designar Conductor y Placa de Movilidad', dept: 'Administración', default: false },
   { key: 'ver_reporte_equipo',       label: 'Ver Reporte Diario del Equipo (9pm)',    dept: 'Administración', default: false },
   { key: 'reportes_pasados',         label: 'Emitir Reportes de Fechas Anteriores',   dept: 'Administración', default: false },
   { key: 'generar_informes',         label: 'Generar Informes Formales en PDF',       dept: 'Administración', default: false },
@@ -3118,7 +3326,7 @@ function aplicarPresetPermisos(prefix, tipo){
       'crear_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio',
       'gestionar_portafolio', 'ver_manualventas', 'gestionar_manualventas', 'ver_majo_assistant', 'gestionar_base_majo',
       'ver_checklist_legal', 'marcar_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes',
-      'crear_solicitudes', 'aprobar_solicitudes', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes'
+      'crear_solicitudes', 'aprobar_solicitudes', 'designar_conductor_movilidad', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes'
     ],
     admin: [
       'ver_control', 'ver_kpi_monto', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_proyeccion_ventas',
@@ -3128,7 +3336,7 @@ function aplicarPresetPermisos(prefix, tipo){
       'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'gestionar_portafolio', 'ver_manualventas',
       'gestionar_manualventas', 'ver_majo_assistant', 'gestionar_base_majo', 'ver_checklist_legal', 'marcar_checklist_legal',
       'usar_generador_doc', 'ver_cobranzas', 'gestionar_cobranzas', 'ver_rendimiento', 'ver_solicitudes',
-      'crear_solicitudes', 'aprobar_solicitudes', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes',
+      'crear_solicitudes', 'aprobar_solicitudes', 'designar_conductor_movilidad', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes',
       'ver_ajustes', 'descargar_respaldos'
     ]
   };
@@ -3378,6 +3586,7 @@ async function mostrarApp(){
 
   cargarPortadaInicio();
   cargarPendientesInicio();
+  procesarParametrosEnlaceDirecto();
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
 }
 
@@ -8115,11 +8324,58 @@ async function eliminarSolicitud(id){
 }
 
 async function abrirModalNuevaSolicitud(){
-  const sel = document.getElementById('sol_asignado_a');
-  if (!sel.dataset.cargado) {
-    const { data: usuarios } = await sb.from('usuarios').select('id, nombre').eq('activo', true).order('nombre');
-    sel.innerHTML = (usuarios || []).map(u => `<option value="${u.id}" ${u.id === currentUser.id ? 'selected' : ''}>${escapeHtml(u.nombre)}</option>`).join('');
-    sel.dataset.cargado = '1';
+  // 1. Asignar automáticamente como responsable al usuario conectado
+  const nombreUsuario = currentProfile?.nombre || 'Mi Usuario';
+  const displayEl = document.getElementById('sol_responsable_display');
+  if (displayEl) displayEl.textContent = `${nombreUsuario} (Tú)`;
+
+  // 2. Limpiar bloque 'Otros'
+  document.getElementById('bloque_solicitante_otros')?.classList.add('hidden');
+  const inputOtro = document.getElementById('sol_solicitante_otro_nombre');
+  const inputCtx = document.getElementById('sol_solicitante_contexto');
+  if (inputOtro) inputOtro.value = '';
+  if (inputCtx) inputCtx.value = '';
+
+  // 3. Cargar supervisores y jefaturas en 'Solicitado por'
+  const selSolicitante = document.getElementById('sol_solicitante_sel');
+  if (!selSolicitante) return;
+  selSolicitante.innerHTML = '<option value="">Cargando jefaturas...</option>';
+
+  try {
+    const { data: lideres } = await sb
+      .from('usuarios')
+      .select('id, nombre, cargo, rol')
+      .in('rol', ['Director Comercial', 'Gerencia General', 'Supervisor de Área', 'Administrador de la Empresa', 'SuperAdmin (Desarrollador / Matriz)', 'superadmin', 'admin', 'director_comercial', 'gerencia'])
+      .order('nombre', { ascending: true });
+
+    let htmlOpts = '<option value="">-- Seleccionar quién lo solicita --</option>';
+    const supervisorDefecto = currentProfile?.supervisor_id || '';
+
+    (lideres || []).forEach(l => {
+      const seleccionado = (l.id === supervisorDefecto) ? 'selected' : '';
+      htmlOpts += `<option value="${escapeHtml(l.nombre)}" ${seleccionado}>${escapeHtml(l.nombre)} (${l.cargo || l.rol})</option>`;
+    });
+
+    htmlOpts += `<option value="OTRO">✏️ Otros (Especificar persona y contexto)...</option>`;
+    selSolicitante.innerHTML = htmlOpts;
+
+    if (!selSolicitante.value && selSolicitante.options.length > 1) {
+      selSolicitante.selectedIndex = 1;
+    }
+  } catch (errLideres) {
+    console.warn('Error cargando líderes:', errLideres);
+    selSolicitante.innerHTML = '<option value="Dirección Comercial">Dirección Comercial</option><option value="Gerencia General">Gerencia General</option><option value="OTRO">✏️ Otros (Especificar persona y contexto)...</option>';
+  }
+}
+
+function alCambiarSolicitanteSelect(){
+  const sel = document.getElementById('sol_solicitante_sel');
+  const bloqueOtros = document.getElementById('bloque_solicitante_otros');
+  if (sel?.value === 'OTRO') {
+    bloqueOtros?.classList.remove('hidden');
+    document.getElementById('sol_solicitante_otro_nombre')?.focus();
+  } else {
+    bloqueOtros?.classList.add('hidden');
   }
 }
 
@@ -8486,30 +8742,43 @@ document.getElementById('btnAgregarSitioMajo')?.addEventListener('click', async 
 });
 
 document.getElementById('btnGuardarSolicitud')?.addEventListener('click', async () => {
-  const solicitante = document.getElementById('sol_solicitante').value.trim();
+  const sel = document.getElementById('sol_solicitante_sel');
+  let solicitanteFinal = sel ? sel.value : '';
+
+  if (solicitanteFinal === 'OTRO') {
+    const otroNombre = document.getElementById('sol_solicitante_otro_nombre')?.value.trim();
+    const contexto = document.getElementById('sol_solicitante_contexto')?.value.trim();
+    if (!otroNombre) {
+      toast('Por favor indica el nombre de quién solicita el requerimiento');
+      return;
+    }
+    solicitanteFinal = contexto ? (otroNombre + ' [Contexto: ' + contexto + ']') : otroNombre;
+  }
+
   const titulo = document.getElementById('sol_titulo').value.trim();
   const descripcion = document.getElementById('sol_descripcion').value.trim();
-  const asignadoA = document.getElementById('sol_asignado_a').value;
   const fechaLimite = document.getElementById('sol_fecha_limite').value;
 
-  if (!solicitante || !titulo || !asignadoA) {
-    toast('Completa quién la pide, el título y a quién se asigna');
+  if (!solicitanteFinal || !titulo) {
+    toast('Completa quién la pide y el título del requerimiento');
     return;
   }
 
+  // Responsable asignado: Siempre es automáticamente el usuario conectado
   const { data: nuevaSol, error } = await sb.from('solicitudes').insert({
-    solicitante_nombre: solicitante,
+    solicitante_nombre: solicitanteFinal,
     titulo,
     descripcion: descripcion || null,
-    asignado_a: asignadoA,
+    asignado_a: currentUser.id,
     fecha_limite: fechaLimite || null,
     created_by: currentUser.id,
   }).select().single();
-  if (error) { toast('Error al guardar'); console.error(error); return; }
+  if (error) { toast('Error al guardar requerimiento'); console.error(error); return; }
 
-  toast('Solicitud creada ✓');
+  toast('Requerimiento registrado ✓');
   closeModal('modalNuevaSolicitud');
-  document.getElementById('sol_solicitante').value = '';
+  if (document.getElementById('sol_solicitante_otro_nombre')) document.getElementById('sol_solicitante_otro_nombre').value = '';
+  if (document.getElementById('sol_solicitante_contexto')) document.getElementById('sol_solicitante_contexto').value = '';
   document.getElementById('sol_titulo').value = '';
   document.getElementById('sol_descripcion').value = '';
   document.getElementById('sol_fecha_limite').value = '';
@@ -9213,6 +9482,102 @@ async function completarActividadDesdeInicio(actId){
   cargarActividadesHoy();
 }
 
+/* ============ GESTIÓN DE CONDUCTOR DE MOVILIDAD (ADMINISTRACIÓN) ============ */
+let conductorDesignadoCache = {};
+
+async function cargarConductorFecha(fecha){
+  const elNom = document.getElementById('vis_conductor_nombre');
+  const elDet = document.getElementById('vis_conductor_detalles');
+  const btnDesignar = document.getElementById('btnAbrirDesignarConductor');
+  if (!elNom || !elDet) return;
+
+  const rol = currentProfile?.rol;
+  const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
+  const puedeDesignar = esUsuarioSuperAdmin() || rol === 'admin' || perm.designar_conductor_movilidad === true;
+
+  if (btnDesignar) btnDesignar.classList.toggle('hidden', !puedeDesignar);
+
+  // Buscar en Supabase con fallback a localStorage
+  let data = null;
+  try {
+    const res = await sb.from('conductores_movilidad').select('*').eq('fecha', fecha).maybeSingle();
+    if (!res.error && res.data) data = res.data;
+  } catch (e) {
+    console.warn('Tabla conductores_movilidad no presente, usando fallback local:', e);
+  }
+
+  if (!data) {
+    const local = localStorage.getItem('cd_conductor_' + fecha);
+    data = local ? JSON.parse(local) : null;
+  }
+
+  conductorDesignadoCache[fecha] = data;
+
+  if (data) {
+    elNom.textContent = data.nombre || 'Conductor asignado';
+    elDet.innerHTML = `🚐 Placa: <b>${escapeHtml(data.placa || '—')}</b> · 📱 WhatsApp: <a href="https://wa.me/51${(data.celular || '').replace(/\D/g, '').slice(-9)}" target="_blank" style="color:#25D366; text-decoration:none; font-weight:700;">+51 ${escapeHtml(data.celular || '—')}</a>${data.tipo_vehiculo ? ' · ' + escapeHtml(data.tipo_vehiculo) : ''}`;
+  } else {
+    elNom.textContent = 'Sin conductor designado aún';
+    elDet.textContent = 'Pendiente de asignación por el Administrador';
+  }
+}
+
+function abrirModalDesignarConductor(){
+  const fecha = document.getElementById('vis_filtro_fecha')?.value || obtenerHoyLocal();
+  document.getElementById('mdc_fecha').value = fecha;
+  document.getElementById('mdc_fecha_sub').textContent = `Asignación para el ${fmtFecha(fecha)}`;
+
+  const actual = conductorDesignadoCache[fecha];
+  document.getElementById('mdc_nombre').value = actual ? actual.nombre : '';
+  document.getElementById('mdc_celular').value = actual ? actual.celular : '';
+  document.getElementById('mdc_placa').value = actual ? actual.placa : '';
+  document.getElementById('mdc_tipo_vehiculo').value = actual ? actual.tipo_vehiculo : 'Van Principal Corporativa (14 Asientos)';
+  document.getElementById('mdc_notas').value = actual ? actual.notas : '';
+
+  openModal('modalDesignarConductor');
+}
+
+async function guardarDesignacionConductor(){
+  const fecha = document.getElementById('mdc_fecha').value;
+  const nombre = document.getElementById('mdc_nombre').value.trim();
+  const celular = document.getElementById('mdc_celular').value.trim();
+  const placa = document.getElementById('mdc_placa').value.trim().toUpperCase();
+  const tipo_vehiculo = document.getElementById('mdc_tipo_vehiculo').value;
+  const notas = document.getElementById('mdc_notas').value.trim();
+
+  if (!fecha || !nombre || !celular || !placa) {
+    toast('Completa nombre, celular y placa del vehículo');
+    return;
+  }
+
+  const payload = {
+    fecha,
+    nombre,
+    celular,
+    placa,
+    tipo_vehiculo,
+    notas: notas || null,
+    asignado_por: currentUser?.id,
+    asignado_nombre: currentProfile?.nombre || 'Administrador',
+    updated_at: new Date().toISOString()
+  };
+
+  // Guardar en Supabase
+  try {
+    await sb.from('conductores_movilidad').upsert(payload, { onConflict: 'fecha' });
+  } catch (e) {
+    console.warn('Error guardando conductor en Supabase:', e);
+  }
+
+  // Guardar en localStorage
+  localStorage.setItem('cd_conductor_' + fecha, JSON.stringify(payload));
+  conductorDesignadoCache[fecha] = payload;
+
+  toast('Conductor de movilidad designado ✓');
+  closeModal('modalDesignarConductor');
+  cargarConductorFecha(fecha);
+}
+
 /* ============ CONTROL DEL DOCK FLOTANTE HORIZONTAL Y SOLICITUD ============ */
 let dockHorizontalAbierto = false;
 
@@ -9497,21 +9862,34 @@ function contactarAdministracionPorMovilidad(){
   const fecha = document.getElementById('nv_fecha')?.value || obtenerHoyLocal();
   const hora = document.getElementById('nv_hora')?.value || '09:00';
   const numAsientos = document.getElementById('nv_num_asientos')?.value || '3';
+  const numClientes = document.getElementById('nv_num_clientes')?.value || '2';
   const clienteSel = document.getElementById('nv_cliente_sel');
-  const clienteNombre = clienteSel.options[clienteSel.selectedIndex]?.text || 'Cliente';
+  const clienteId = clienteSel?.value || null;
+  const cliObj = (clientesCache || []).find(c => c.id === clienteId);
+  const clienteNombre = cliObj ? cliObj.nombre : (clienteSel?.options[clienteSel.selectedIndex]?.text || 'Cliente');
+  const clienteCelular = cliObj ? (cliObj.celular || cliObj.telefono || '—') : '—';
+  const clienteDni = cliObj ? (cliObj.dni || '—') : '—';
   const asesorNombre = currentProfile?.nombre || 'Asesor Comercial';
+  const retornoEstimado = calcularHoraRetorno(hora);
 
-  const mensaje = `🚐 *SOLICITUD URGENTE DE MOVILIDAD ADICIONAL / ACCIONISTA*\n` +
-    `*Constructora e Inmobiliaria Casa Dorada S.A.C.*\n\n` +
-    `Hola Administración, requiero coordinar una movilidad de apoyo para visita al proyecto Costa Dorada (La Yarada Los Palos):\n\n` +
-    `📅 *Fecha:* ${fmtFecha(fecha)}\n` +
-    `⏰ *Hora solicitada:* ${hora}\n` +
-    `👥 *Cliente:* ${clienteNombre}\n` +
-    `🪑 *Asientos requeridos:* ${numAsientos} personas\n` +
-    `🧑‍💼 *Asesor:* ${asesorNombre}\n\n` +
-    `⚠️ *Motivo:* La Van oficial de 14 asientos se encuentra ocupada / con cruce de horario en ese rango. Por favor confirmar disponibilidad de movilidad de apoyo o vehículo de accionista.`;
+  const mensaje = `🚐 *SOLICITUD URGENTE DE MOVILIDAD ADICIONAL Y REFRIGERIOS*\n` +
+    `*Constructora e Inmobiliaria Casa Dorada S.A.C.*\n` +
+    `*Atención: Área de Administración (+51 942 236 677)*\n\n` +
+    `Estimada Administración, debido a que la *Van oficial de 14 asientos se encuentra ocupada / con cruce de horario*, se solicita su oportuna gestión para coordinar *movilidad adicional (alquiler o vehículo de apoyo/accionista)* y *refrigerios corporativos* para la siguiente visita a terreno:\n\n` +
+    `📅 *Fecha requerida:* ${fmtFecha(fecha)}\n` +
+    `⏰ *Hora de partida:* ${hora} (Retorno aprox: ${retornoEstimado})\n` +
+    `📍 *Destino:* Proyecto Costa Dorada · La Yarada Los Palos, Tacna\n\n` +
+    `👤 *Asesor Comercial:* ${asesorNombre}\n` +
+    `👥 *Cliente Inversionista:* ${clienteNombre}\n` +
+    `📱 *Celular del cliente:* ${clienteCelular}\n` +
+    `📄 *DNI / RUC:* ${clienteDni}\n` +
+    `🪑 *Asientos requeridos:* ${numAsientos} personas (${numClientes} cliente(s) + asesor)\n` +
+    `🥪 *Refrigerios:* ${numAsientos} refrigerios para el recorrido\n\n` +
+    `🎯 *Objetivo:* Mantener el flujo continuo de ventas, la excelencia en el servicio y brindar la atención adecuada y profesional a nuestros clientes.\n\n` +
+    `_Enviado desde Planner Corporativo Casa Dorada._`;
 
-  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`, '_blank');
+  const waUrl = `https://api.whatsapp.com/send?phone=51942236677&text=${encodeURIComponent(mensaje)}`;
+  window.open(waUrl, '_blank');
 }
 
 function abrirModalNuevaVisita(){
@@ -9599,6 +9977,18 @@ async function guardarNuevaVisita(){
     });
   } catch (errAg) { console.warn('Error sincronizando con agenda:', errAg); }
 
+  // Si la visita usa la Van corporativa, alertar silenciosamente a Administración
+  if (tipo === 'visita_proyecto' || tipo === 'oficina_visita') {
+    notificarAdminConductorSilencioso({
+      fecha,
+      hora,
+      tipoVisita: tipo === 'visita_proyecto' ? 'Visita Directa a Terreno (Van)' : 'Oficina + Terreno (Van)',
+      clienteNombre,
+      asesorNombre,
+      totalAsientos: numAsientos
+    });
+  }
+
   closeModal('modalNuevaVisita');
 
   // Calcular asientos ocupados en el turno y libres
@@ -9624,6 +10014,7 @@ async function guardarNuevaVisita(){
     `👥 *Cliente:* ${clienteNombre}\n` +
     `📱 *Celular:* ${clienteCelular}\n` +
     `📄 *DNI / RUC:* ${clienteDni}\n\n` +
+    `🧑‍✈️ *Conductor designado:* ${conductorDesignadoCache[fecha] ? `${conductorDesignadoCache[fecha].nombre} (📱 ${conductorDesignadoCache[fecha].celular}) · Placa: ${conductorDesignadoCache[fecha].placa}` : 'Por confirmar por Administración'}\n\n` +
     `🚐 *DETALLE DE MOVILIDAD (VAN 14 ASIENTOS):*\n` +
     `🪑 *Asientos solicitados por el cliente:* ${numClientes}\n` +
     `🪑 *Total asientos separados (cliente + asesor):* ${numAsientos}\n` +
@@ -9814,10 +10205,84 @@ function filtrarClientesEnVivo(texto){
 }
 
 // Exposición explícita de funciones globales para eventos inline de botones
+
+/* =========================================================================
+   NOTIFICACIÓN SILENCIOSA A ADMINISTRACIÓN (OCULTA PARA EL ASESOR)
+   ========================================================================= */
+async function notificarAdminConductorSilencioso(datosCita){
+  try {
+    const { fecha, hora, tipoVisita, clienteNombre, asesorNombre, totalAsientos } = datosCita;
+    
+    // 1. Guardar alerta urgente en la tabla de notificaciones de Supabase
+    await sb.from('notificaciones').insert({
+      area_destinataria: 'Administración',
+      rol_destinatario: 'Administrador de la Empresa',
+      titulo: '🚨 URGENTE: Designar Conductor de Movilidad',
+      mensaje: `Cita con Van para el ${fecha} (${hora}). Asesor: ${asesorNombre} · Cupos: ${totalAsientos}.`,
+      tipo: 'urgencia_conductor',
+      prioridad: 'alta',
+      leida: false,
+      fecha_evento: fecha,
+      metadata: datosCita
+    });
+
+    // 2. Disparo silencioso en segundo plano (Edge Function o Webhook)
+    const linkDirecto = `https://jorealft2020-hue.github.io/casa-dorada-app/?vista=visitas&fecha=${fecha}&accion=designar_conductor`;
+    fetch('https://nboikojylmkujdxinztj.supabase.co/functions/v1/enviar-whatsapp-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({
+        telefonoDestino: NUMERO_WHATSAPP_ADMINISTRACION,
+        fecha,
+        hora,
+        tipoVisita,
+        clienteNombre,
+        asesorNombre,
+        numAsientos: totalAsientos,
+        linkDirecto
+      })
+    }).catch(e => console.warn('Disparo background procesado:', e));
+  } catch(err) {
+    console.warn('Error en notificación silenciosa:', err);
+  }
+}
+
+/* =========================================================================
+   PROCESAMIENTO DE ENLACE DIRECTO (DEEP LINKING PARA ADMINISTRACIÓN)
+   ========================================================================= */
+function procesarParametrosEnlaceDirecto(){
+  const urlParams = new URLSearchParams(window.location.search);
+  const accion = urlParams.get('accion');
+  const fecha = urlParams.get('fecha');
+  const vista = urlParams.get('vista');
+
+  if (accion === 'designar_conductor' && fecha) {
+    irAVista('visitas');
+    const filtroFecha = document.getElementById('vis_filtro_fecha');
+    if (filtroFecha) {
+      filtroFecha.value = fecha;
+      if (typeof cargarVisitasPresentaciones === 'function') {
+        cargarVisitasPresentaciones();
+      }
+    }
+    setTimeout(() => {
+      abrirModalDesignarConductor();
+      const mdcFecha = document.getElementById('mdc_fecha');
+      if (mdcFecha) mdcFecha.value = fecha;
+      toast('Asignación de conductor para el ' + fecha);
+    }, 400);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } else if (vista) {
+    irAVista(vista);
+  }
+}
+
 window.abrirModalActividad = abrirModalActividad;
 window.abrirModalAgenda = abrirModalAgenda;
-window.abrirModalNuevaSolicitud = abrirModalNuevaSolicitud;
+window.abrirModalNuevaSolicitud = abrirModalNuevaSolicitud; window.alCambiarSolicitanteSelect = alCambiarSolicitanteSelect; window.procesarParametrosEnlaceDirecto = procesarParametrosEnlaceDirecto;
 window.abrirModalNuevaVisita = abrirModalNuevaVisita;
+window.abrirModalDesignarConductor = abrirModalDesignarConductor;
+window.guardarDesignacionConductor = guardarDesignacionConductor;
 window.toggleDockHorizontal = toggleDockHorizontal;
 window.navegarDesdeDockHorizontal = navegarDesdeDockHorizontal;
 window.irARegistrarSolicitudDesdeInicio = irARegistrarSolicitudDesdeInicio;
