@@ -961,9 +961,20 @@
         <div style="display:flex; gap:8px; margin-bottom:12px;">
           <button class="plano-tab-btn active" id="tabClientesLista" onclick="cambiarVistaClientes('lista')">📋 Lista</button>
           <button class="plano-tab-btn" id="tabClientesPipeline" onclick="cambiarVistaClientes('pipeline')">🧭 Pipeline</button>
+          <button class="plano-tab-btn" id="tabClientesArchivados" onclick="cambiarVistaClientes('archivados')">🗄️ Archivados</button>
+        </div>
+        <div id="barraAccionesMasivasClientes" class="hidden" style="display:flex; align-items:center; gap:8px; background:#F7F4EC; border-radius:10px; padding:10px; margin-bottom:10px; flex-wrap:wrap;">
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700;">
+            <input type="checkbox" id="chkSeleccionarTodosClientes" onchange="toggleSeleccionarTodosClientes(this.checked)"> Todos
+          </label>
+          <span id="contadorSeleccionados" style="font-size:12px; color:var(--ink-dim);">0 seleccionados</span>
+          <select id="selAsesorAsignarMasivo" style="font-size:12px; padding:6px; border-radius:6px; border:1px solid #E5DFCF;"></select>
+          <button class="chip-btn gold" onclick="asignarAsesorMasivo()">👤 Asignar</button>
+          <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="archivarClientesMasivo()">🗄️ Archivar</button>
         </div>
         <div id="listaClientes"></div>
         <div id="pipelineClientes" class="hidden"></div>
+        <div id="listaClientesArchivados" class="hidden"></div>
       </div>
 
       <!-- VISTA: Planos Interactivos -->
@@ -4862,7 +4873,7 @@ async function cargarClientes(){
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
   
-  let query = sb.from('clientes').select('*');
+  let query = sb.from('clientes').select('*').eq('archivado', false);
   if (!esSuperAdminODirector) {
     query = query.eq('vendedor_id', currentUser.id);
   }
@@ -4870,19 +4881,39 @@ async function cargarClientes(){
 
   const { data } = await query;
   clientesCache = data || []; // se reutiliza en la vista Pipeline sin volver a consultar
+  clientesSeleccionados.clear();
+  actualizarContadorSeleccionados();
+  document.getElementById('barraAccionesMasivasClientes')?.classList.toggle('hidden', !esSuperAdminODirector);
+  if (esSuperAdminODirector) poblarSelectAsesoresMasivo();
+
   const el = document.getElementById('listaClientes');
   if (!data || data.length === 0) { el.innerHTML = emptyState('👤', 'Aún no tienes clientes o prospectos registrados.'); return; }
 
-  el.innerHTML = data.map(c => {
-    const celLimpio = (c.celular || c.telefono || '').replace(/\D/g, '');
-    const wspUrl = celLimpio ? `https://wa.me/51${celLimpio.slice(-9)}` : null;
-    const origenStr = c.origen_prospeccion ? `📌 ${escapeHtml(c.origen_prospeccion)}` : '';
-    const proximaAccionStr = c.proxima_accion ? `👉 Próxima acción: ${escapeHtml(c.proxima_accion)}` : '';
-    const enRiesgo = clienteEnRiesgo(c);
+  el.innerHTML = data.map(c => renderTarjetaCliente(c, esSuperAdminODirector)).join('');
+}
 
-    return `
-      <div class="card" style="${enRiesgo ? 'border-left:4px solid var(--danger);' : ''}">
-        <div class="card-row">
+/** Color de borde por estado, igual idea que el semáforo amarillo/rojo visto
+ *  en el CRM de referencia: rojo = perdido, verde = cerrado, ámbar = en riesgo. */
+function colorEstadoCliente(c){
+  if (c.estado_prospecto === 'No interesado') return 'var(--danger)';
+  if (c.estado_prospecto === 'Separado') return 'var(--ok)';
+  if (clienteEnRiesgo(c)) return 'var(--danger)';
+  return null;
+}
+
+function renderTarjetaCliente(c, esSuperAdminODirector){
+  const celLimpio = (c.celular || c.telefono || '').replace(/\D/g, '');
+  const wspUrl = celLimpio ? `https://wa.me/51${celLimpio.slice(-9)}` : null;
+  const origenStr = c.origen_prospeccion ? `📌 ${escapeHtml(c.origen_prospeccion)}` : '';
+  const proximaAccionStr = c.proxima_accion ? `👉 Próxima acción: ${escapeHtml(c.proxima_accion)}` : '';
+  const enRiesgo = clienteEnRiesgo(c);
+  const colorBorde = colorEstadoCliente(c);
+
+  return `
+    <div class="card" style="${colorBorde ? `border-left:4px solid ${colorBorde};` : ''}">
+      <div class="card-row">
+        <div style="display:flex; gap:8px; align-items:flex-start;">
+          ${esSuperAdminODirector ? `<input type="checkbox" style="margin-top:4px;" onchange="toggleSeleccionCliente('${c.id}', this.checked)" ${clientesSeleccionados.has(c.id) ? 'checked' : ''}>` : ''}
           <div>
             <p class="card-title">${escapeHtml(c.nombre)}${c.codigo_correlativo ? ' · ' + escapeHtml(c.codigo_correlativo) : ''}</p>
             <p class="card-sub">📱 ${c.celular || c.telefono || 'Sin celular'}${origenStr ? ' · ' + origenStr : ''}</p>
@@ -4890,19 +4921,95 @@ async function cargarClientes(){
             ${proximaAccionStr ? `<p class="card-sub" style="font-weight:600; color:var(--navy); margin-top:3px;">${proximaAccionStr}</p>` : ''}
             ${enRiesgo ? `<p class="card-sub" style="font-weight:700; color:var(--danger); margin-top:3px;">⚠️ Cliente en riesgo — sin contacto hace más de 7 días</p>` : ''}
           </div>
-          ${c.estado_prospecto ? `<span class="badge badge-pendiente">${escapeHtml(c.estado_prospecto)}</span>` : ''}
         </div>
-        <div class="card-actions" style="margin-top:8px;">
-          <button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">🕒 Historial</button>
-          <button class="chip-btn" style="color:#2C5691; border-color:#2C5691;" onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">📋 Legal</button>
-          <button class="chip-btn" style="color:var(--gold); border-color:var(--gold);" onclick="abrirGenerarDocumento('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}', '${(c.celular || '').replace(/'/g, "\\'")}')">📝 Minuta</button>
-          ${wspUrl ? `<a class="chip-btn gold" href="${wspUrl}" target="_blank" style="text-decoration:none;">💬 WhatsApp</a>` : ''}
-          ${c.celular ? `<a class="chip-btn" href="tel:${c.celular}" style="text-decoration:none;">📞 Llamar</a>` : ''}
-          ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarCliente('${c.id}')">🗑️</button>` : ''}
-        </div>
+        ${c.estado_prospecto ? `<span class="badge badge-pendiente">${escapeHtml(c.estado_prospecto)}</span>` : ''}
       </div>
-    `;
-  }).join('');
+      <div class="card-actions" style="margin-top:8px;">
+        <button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">🕒 Historial</button>
+        <button class="chip-btn" style="color:#2C5691; border-color:#2C5691;" onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">📋 Legal</button>
+        <button class="chip-btn" style="color:var(--gold); border-color:var(--gold);" onclick="abrirGenerarDocumento('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}', '${(c.celular || '').replace(/'/g, "\\'")}')">📝 Minuta</button>
+        ${wspUrl ? `<a class="chip-btn gold" href="${wspUrl}" target="_blank" style="text-decoration:none;">💬 WhatsApp</a>` : ''}
+        ${c.celular ? `<a class="chip-btn" href="tel:${c.celular}" style="text-decoration:none;">📞 Llamar</a>` : ''}
+        ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarCliente('${c.id}')">🗑️</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/* ============ ACCIONES MASIVAS Y ARCHIVADO DE CLIENTES ============
+   Inspirado en un patron visto en otro CRM del cliente: seleccionar varios
+   clientes y asignarlos/archivarlos de una vez, util para admins con
+   carteras grandes. Sigue el mismo criterio de "archivar, no borrar" que
+   ya usamos en Actividades. */
+let clientesSeleccionados = new Set();
+
+function toggleSeleccionCliente(id, marcado){
+  if (marcado) clientesSeleccionados.add(id); else clientesSeleccionados.delete(id);
+  actualizarContadorSeleccionados();
+}
+
+function toggleSeleccionarTodosClientes(marcado){
+  clientesSeleccionados.clear();
+  if (marcado) clientesCache.forEach(c => clientesSeleccionados.add(c.id));
+  cargarClientes();
+}
+
+function actualizarContadorSeleccionados(){
+  const el = document.getElementById('contadorSeleccionados');
+  if (el) el.textContent = `${clientesSeleccionados.size} seleccionados`;
+}
+
+async function poblarSelectAsesoresMasivo(){
+  const sel = document.getElementById('selAsesorAsignarMasivo');
+  if (!sel || sel.options.length > 0) return;
+  const { data } = await sb.from('usuarios').select('id, nombre').eq('activo', true).order('nombre');
+  sel.innerHTML = '<option value="">Asignar a…</option>' + (data || []).map(u => `<option value="${u.id}">${escapeHtml(u.nombre)}</option>`).join('');
+}
+
+async function asignarAsesorMasivo(){
+  const asesorId = document.getElementById('selAsesorAsignarMasivo').value;
+  if (!asesorId) { toast('Elige un asesor primero'); return; }
+  if (clientesSeleccionados.size === 0) { toast('Selecciona al menos un cliente'); return; }
+  const { error } = await sb.from('clientes').update({ vendedor_id: asesorId }).in('id', Array.from(clientesSeleccionados));
+  if (error) { toast('Error al asignar'); console.error(error); return; }
+  toast(`${clientesSeleccionados.size} cliente(s) reasignado(s) ✓`);
+  cargarClientes();
+}
+
+async function archivarClientesMasivo(){
+  if (clientesSeleccionados.size === 0) { toast('Selecciona al menos un cliente'); return; }
+  if (!confirm(`¿Archivar ${clientesSeleccionados.size} cliente(s)? No se borran, solo se ocultan de la lista activa.`)) return;
+  const { error } = await sb.from('clientes').update({ archivado: true }).in('id', Array.from(clientesSeleccionados));
+  if (error) { toast('Error al archivar'); console.error(error); return; }
+  toast(`${clientesSeleccionados.size} cliente(s) archivado(s) ✓`);
+  cargarClientes();
+}
+
+async function cargarClientesArchivados(){
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  let query = sb.from('clientes').select('*').eq('archivado', true).order('updated_at', { ascending: false });
+  if (!esSuperAdminODirector) query = query.eq('vendedor_id', currentUser.id);
+  const { data } = await query;
+
+  const el = document.getElementById('listaClientesArchivados');
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🗄️', 'No hay clientes archivados.'); return; }
+  el.innerHTML = data.map(c => `
+    <div class="card" style="opacity:.75;">
+      <p class="card-title">${escapeHtml(c.nombre)}</p>
+      <p class="card-sub">📱 ${c.celular || c.telefono || 'Sin celular'} · Estado: ${escapeHtml(c.estado_prospecto || '—')}</p>
+      <div class="card-actions" style="margin-top:8px;">
+        <button class="chip-btn gold" onclick="desarchivarCliente('${c.id}')">↩️ Restaurar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function desarchivarCliente(id){
+  const { error } = await sb.from('clientes').update({ archivado: false }).eq('id', id);
+  if (error) { toast('Error al restaurar'); console.error(error); return; }
+  toast('Cliente restaurado ✓');
+  cargarClientesArchivados(); cargarClientes();
 }
 
 /* ============ PIPELINE VISUAL (KANBAN) — corazón del CRM ============
@@ -4929,9 +5036,14 @@ function clienteEnRiesgo(c){
 function cambiarVistaClientes(vista){
   document.getElementById('tabClientesLista').classList.toggle('active', vista === 'lista');
   document.getElementById('tabClientesPipeline').classList.toggle('active', vista === 'pipeline');
+  document.getElementById('tabClientesArchivados').classList.toggle('active', vista === 'archivados');
   document.getElementById('listaClientes').classList.toggle('hidden', vista !== 'lista');
   document.getElementById('pipelineClientes').classList.toggle('hidden', vista !== 'pipeline');
+  document.getElementById('listaClientesArchivados').classList.toggle('hidden', vista !== 'archivados');
+  if (vista !== 'lista') document.getElementById('barraAccionesMasivasClientes')?.classList.add('hidden');
+  else cargarClientes(); // recalcula la visibilidad de la barra según el rol, sin duplicar lógica
   if (vista === 'pipeline') renderPipelineClientes();
+  if (vista === 'archivados') cargarClientesArchivados();
 }
 
 function renderPipelineClientes(){
