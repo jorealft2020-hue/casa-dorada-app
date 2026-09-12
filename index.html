@@ -684,60 +684,149 @@
   }
 
 
-/* ============ BARRA DE NAVEGACIÓN INFERIOR (MÓVIL) ============ */
-.bottom-nav {
+/* ============ MENÚ FLOTANTE CENTRAL Y DOCK HORIZONTAL ============ */
+.dock-flotante-contenedor {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: rgba(20, 42, 77, 0.97);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1.5px solid rgba(200, 155, 60, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 999;
-  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.25);
-}
-@media (min-width: 901px) {
-  .bottom-nav {
-    display: none !important;
-  }
-}
-@media (max-width: 900px) {
-  main.app-content {
-    padding-bottom: 78px !important;
-  }
-}
-.bottom-nav-item {
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  flex: 1;
-  height: 100%;
-  background: none;
-  border: none;
-  color: #A3B8CC;
-  font-size: 10px;
+  max-width: 96vw;
+  pointer-events: none;
+}
+
+.btn-dock-central {
+  pointer-events: auto;
+  background: rgba(20, 42, 77, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(200, 155, 60, 0.55);
+  border-radius: 28px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(200, 155, 60, 0.2);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.btn-dock-central:hover, .btn-dock-central:active {
+  background: rgba(20, 42, 77, 0.95);
+  border-color: var(--gold);
+  transform: scale(1.05);
+}
+.btn-dock-hamburguesa {
+  font-size: 16px;
+  color: var(--gold);
+  line-height: 1;
+}
+.btn-dock-texto {
+  font-size: 12px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+}
+
+/* DOCK HORIZONTAL DESGLOSABLE Y DESLIZABLE A DERECHA / IZQUIERDA */
+.dock-menu-horizontal {
+  pointer-events: auto;
+  background: rgba(18, 36, 64, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1.5px solid rgba(200, 155, 60, 0.6);
+  border-radius: 22px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 94vw;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  animation: animDockSubir 0.25s ease-out;
+  position: relative;
+}
+@keyframes animDockSubir {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.dock-items-scroll {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding: 2px 4px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.dock-items-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.dock-item-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 7px 12px;
+  color: #E2E8F0;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 4px 0;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
   text-decoration: none;
+  user-select: none;
 }
-.bottom-nav-item .bn-icon {
-  font-size: 19px;
-  margin-bottom: 2px;
-  transition: transform 0.2s ease;
+.dock-item-chip:hover, .dock-item-chip.active {
+  background: rgba(200, 155, 60, 0.25);
+  border-color: var(--gold);
+  color: #FFF8E7;
+  transform: translateY(-1px);
 }
-.bottom-nav-item.active {
-  color: var(--gold);
+.dock-item-chip.active {
+  background: var(--gold);
+  color: #142A4D;
+  font-weight: 800;
+  border-color: var(--gold);
 }
-.bottom-nav-item.active .bn-icon {
-  transform: scale(1.18);
+.dock-item-chip .dock-icon {
+  font-size: 14px;
+}
+
+.dock-cerrar-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #CBD5E1;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 2px;
+  transition: all 0.2s ease;
+}
+.dock-cerrar-btn:hover {
+  background: rgba(239, 68, 68, 0.8);
+  color: #fff;
+  border-color: #EF4444;
+}
+
+/* El contenido principal tiene suficiente espacio al pie para no ser tapado */
+main.app-content {
+  padding-bottom: 95px !important;
 }
 
 /* ============ ESTILOS ACORDEÓN DEPARTAMENTOS ============ */
@@ -1087,7 +1176,7 @@
           <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;">
             <button class="chip-btn gold" onclick="abrirModalActividad()" style="font-size:11.5px; padding:7px 12px; font-weight:700;">+ Registrar Actividad</button>
             <button class="chip-btn" onclick="abrirModalAgenda()" style="font-size:11.5px; padding:7px 12px; border-color:var(--gold); color:var(--navy); background:#fff; font-weight:700;">📅 Agendar Cita</button>
-            <button class="chip-btn" onclick="abrirModalNuevaSolicitud()" style="font-size:11.5px; padding:7px 12px; border-color:#CBD5E1; color:var(--navy); background:#fff; font-weight:700;">📝 Registrar Solicitud</button>
+            <button class="chip-btn" onclick="irARegistrarSolicitudDesdeInicio()" style="font-size:11.5px; padding:7px 12px; border-color:#CBD5E1; color:var(--navy); background:#fff; font-weight:700;">📝 Registrar Solicitud</button>
             <button class="chip-btn" onclick="irAVista('agenda')" style="font-size:11.5px; padding:7px 10px; color:var(--ink-dim); background:#fff; margin-left:auto;">Agenda →</button>
           </div>
         </div>
@@ -1647,29 +1736,23 @@
       </div>
     </main>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR FIJA (MÓVIL) -->
-  <nav class="bottom-nav" id="bottomNav">
-    <button class="bottom-nav-item active" data-bn="inicio" onclick="irAVista('inicio')">
-      <span class="bn-icon">🏠</span>
-      <span>Inicio</span>
+  <!-- MENÚ FLOTANTE CENTRAL SEMI-TRANSPARENTE Y DOCK DESLIZABLE HORIZONTAL -->
+  <div id="dockMenuFlotanteContenedor" class="dock-flotante-contenedor">
+    
+    <!-- DOCK DESGLOSABLE HORIZONTAL (DESLIZABLE IZQUIERDA / DERECHA SEGÚN PERMISOS) -->
+    <div id="dockMenuHorizontal" class="dock-menu-horizontal hidden">
+      <div class="dock-items-scroll" id="dockItemsScroll">
+        <!-- Generado dinámicamente según permisos del usuario -->
+      </div>
+      <button type="button" class="dock-cerrar-btn" onclick="toggleDockHorizontal()" title="Cerrar menú">✕</button>
+    </div>
+
+    <!-- BOTÓN CENTRAL FLOTANTE SEMI-TRANSPARENTE (3 LÍNEAS DE MENÚ) -->
+    <button type="button" id="btnDockCentral" class="btn-dock-central" onclick="toggleDockHorizontal()" title="Menú de módulos autorizados">
+      <span class="btn-dock-hamburguesa">☰</span>
+      <span class="btn-dock-texto">Menú</span>
     </button>
-    <button class="bottom-nav-item" data-bn="clientes" onclick="irAVista('clientes')">
-      <span class="bn-icon">👥</span>
-      <span>Clientes</span>
-    </button>
-    <button class="bottom-nav-item" data-bn="agenda" onclick="irAVista('agenda')">
-      <span class="bn-icon">📅</span>
-      <span>Agenda</span>
-    </button>
-    <button class="bottom-nav-item" data-bn="planos" onclick="irAVista('planos')">
-      <span class="bn-icon">🗺️</span>
-      <span>Planos</span>
-    </button>
-    <button class="bottom-nav-item" onclick="abrirDrawer()">
-      <span class="bn-icon">☰</span>
-      <span>Menú</span>
-    </button>
-  </nav>
+  </div>
 
 
     <div style="text-align:center; padding:4px 8px 6px; flex-shrink:0;">
@@ -1997,8 +2080,12 @@
   <div class="modal-backdrop" id="modalChecklistLegal">
     <div class="modal-sheet">
       <button class="modal-x-close" data-close="modalChecklistLegal">✕</button>
-      <h3 id="chk_titulo">Checklist Legal</h3>
-      <p id="chk_progreso" style="font-size:12.5px; color:var(--ink-dim); margin:-10px 0 14px;"></p>
+      <h3 id="chk_titulo" style="margin-top:0;">📋 Checklist Legal de Expedientes</h3>
+      <div class="field" style="margin-bottom:12px;">
+        <label style="font-weight:700; color:var(--navy);">Cliente / Expediente Seleccionado *</label>
+        <select id="chk_cliente_sel" onchange="alCambiarClienteEnChecklistModal(this.value)" style="font-weight:600;"></select>
+      </div>
+      <p id="chk_progreso" style="font-size:12.5px; color:var(--ink-dim); margin:0 0 14px; font-weight:600;"></p>
       <div id="chk_contenido"></div>
     </div>
   </div>
@@ -5646,34 +5733,122 @@ const DOCUMENTOS_LEGALES = [
 
 let checklistClienteActualId = null;
 
+async function poblarSelectClientesChecklist(clienteIdSeleccionado){
+  const sel = document.getElementById('chk_cliente_sel');
+  if (!sel) return;
+
+  let lista = clientesCache || [];
+  if (lista.length === 0) {
+    try {
+      const { data } = await sb.from('clientes').select('id, nombre, celular, dni').order('nombre');
+      lista = data || [];
+    } catch (e) { console.warn('Error poblando select clientes checklist:', e); }
+  }
+
+  if (lista.length === 0) {
+    sel.innerHTML = '<option value="">— Aún no tienes clientes registrados —</option>';
+    return;
+  }
+
+  sel.innerHTML = lista.map(c => `<option value="${c.id}" ${c.id === clienteIdSeleccionado ? 'selected' : ''}>${escapeHtml(c.nombre)} ${c.dni ? `(DNI: ${escapeHtml(c.dni)})` : ''}</option>`).join('');
+}
+
+async function alCambiarClienteEnChecklistModal(clienteId){
+  if (!clienteId) return;
+  const c = (clientesCache || []).find(cli => cli.id === clienteId);
+  const nombre = c ? c.nombre : 'Cliente';
+  await abrirChecklistLegal(clienteId, nombre);
+}
+
 async function abrirChecklistLegal(clienteId, nombreCliente){
-  checklistClienteActualId = clienteId;
-  document.getElementById('chk_titulo').textContent = `Checklist Legal · ${nombreCliente}`;
+  let cid = clienteId;
+  let nom = nombreCliente;
+
+  let lista = clientesCache || [];
+  if (lista.length === 0) {
+    try {
+      const { data } = await sb.from('clientes').select('*').order('created_at', { ascending: false });
+      lista = data || [];
+      clientesCache = lista;
+    } catch (e) {}
+  }
+
+  if (!cid) {
+    if (lista.length > 0) {
+      cid = lista[0].id;
+      nom = lista[0].nombre;
+    } else {
+      toast('Registra primero al menos un cliente en tu Cartera');
+      irAVista('clientes');
+      return;
+    }
+  } else if (!nom) {
+    const enc = lista.find(c => c.id === cid);
+    if (enc) nom = enc.nombre;
+  }
+
+  checklistClienteActualId = cid;
+  await poblarSelectClientesChecklist(cid);
+
+  const elTit = document.getElementById('chk_titulo');
+  if (elTit) elTit.textContent = `📋 Checklist Legal · ${nom || 'Cliente'}`;
   openModal('modalChecklistLegal');
 
-  const { data: c } = await sb.from('clientes').select('checklist_legal').eq('id', clienteId).single();
-  const checklist = c?.checklist_legal || {};
-  renderChecklistLegal(checklist);
+  try {
+    const { data: c } = await sb.from('clientes').select('checklist_legal').eq('id', cid).maybeSingle();
+    const checklist = c?.checklist_legal || {};
+    renderChecklistLegal(checklist);
+  } catch (err) {
+    console.error('Error cargando checklist legal:', err);
+    renderChecklistLegal({});
+  }
 }
 
 function renderChecklistLegal(checklist){
-  const completos = DOCUMENTOS_LEGALES.filter(d => checklist[d.key] === true).length;
-  document.getElementById('chk_progreso').textContent = `${completos} de ${DOCUMENTOS_LEGALES.length} documentos completos`;
+  const completos = DOCUMENTOS_LEGALES.filter(d => checklist && checklist[d.key] === true).length;
+  const elProg = document.getElementById('chk_progreso');
+  if (elProg) elProg.textContent = `${completos} de ${DOCUMENTOS_LEGALES.length} documentos completos (${Math.round((completos/DOCUMENTOS_LEGALES.length)*100)}%)`;
 
-  document.getElementById('chk_contenido').innerHTML = DOCUMENTOS_LEGALES.map(d => `
-    <label class="perm-card" style="margin-bottom:8px;">
-      <div class="perm-card-info"><span class="perm-card-title">${checklist[d.key] ? '✅' : '⬜'} ${d.label}</span></div>
-      <input type="checkbox" ${checklist[d.key] ? 'checked' : ''} onchange="marcarDocumentoLegal('${d.key}', this.checked)">
+  const elCont = document.getElementById('chk_contenido');
+  if (!elCont) return;
+  elCont.innerHTML = DOCUMENTOS_LEGALES.map(d => `
+    <label class="perm-card" style="margin-bottom:8px; cursor:pointer;">
+      <div class="perm-card-info">
+        <span class="perm-card-title">${(checklist && checklist[d.key]) ? '✅' : '⬜'} ${d.label}</span>
+      </div>
+      <input type="checkbox" ${(checklist && checklist[d.key]) ? 'checked' : ''} onchange="marcarDocumentoLegal('${d.key}', this.checked)">
     </label>
   `).join('');
 }
 
 async function marcarDocumentoLegal(key, valor){
-  const { data: c } = await sb.from('clientes').select('checklist_legal').eq('id', checklistClienteActualId).single();
-  const checklistActualizado = { ...(c?.checklist_legal || {}), [key]: valor };
-  const { error } = await sb.from('clientes').update({ checklist_legal: checklistActualizado }).eq('id', checklistClienteActualId);
-  if (error) { toast('Error al guardar'); console.error(error); return; }
-  renderChecklistLegal(checklistActualizado);
+  if (!checklistClienteActualId) {
+    toast('Selecciona primero un cliente para el checklist');
+    return;
+  }
+
+  try {
+    const { data: c } = await sb.from('clientes').select('checklist_legal').eq('id', checklistClienteActualId).maybeSingle();
+    const checklistActualizado = { ...(c?.checklist_legal || {}), [key]: valor };
+    const { error } = await sb.from('clientes').update({ checklist_legal: checklistActualizado }).eq('id', checklistClienteActualId);
+    
+    if (error) { 
+      toast('Error al guardar: ' + error.message); 
+      console.error(error); 
+      return; 
+    }
+
+    if (clientesCache) {
+      const idx = clientesCache.findIndex(cl => cl.id === checklistClienteActualId);
+      if (idx !== -1) clientesCache[idx].checklist_legal = checklistActualizado;
+    }
+
+    toast(valor ? 'Documento validado ✓' : 'Documento desmarcado');
+    renderChecklistLegal(checklistActualizado);
+  } catch (e) {
+    toast('Error al actualizar checklist');
+    console.error(e);
+  }
 }
 
 /* ============ GENERADOR DE DOCUMENTOS CON IA ============ */
@@ -7526,31 +7701,49 @@ function renderizarTarjetaAgenda(ev){
 }
 
 async function cargarAgenda(){
+  actualizarTituloNavCal();
+  renderizarVistaActiva(); // Renderizar inmediatamente la cuadrícula
+
+  if (!currentUser) return;
+
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  const esSuperAdminODirector = esUsuarioSuperAdmin();
   const esSupervisor = rol === 'supervisor';
 
-  let query = sb.from('agenda').select('*, usuarios(nombre, area)').order('fecha_inicio', { ascending: false });
+  try {
+    let query = sb.from('agenda').select('*, usuarios(nombre, area)').order('fecha_inicio', { ascending: false });
 
-  if (!esSuperAdminODirector) {
-    if (esSupervisor) {
-      const { data: equipo } = await sb.from('usuarios').select('id').eq('area', currentProfile?.area || 'Comercial');
-      const ids = (equipo || []).map(u => u.id);
-      query = query.in('usuario_id', ids.length > 0 ? ids : [currentUser.id]);
-    } else {
-      query = query.eq('usuario_id', currentUser.id);
+    if (!esSuperAdminODirector) {
+      if (esSupervisor) {
+        const { data: equipo } = await sb.from('usuarios').select('id').eq('area', currentProfile?.area || 'Comercial');
+        const ids = (equipo || []).map(u => u.id);
+        query = query.in('usuario_id', ids.length > 0 ? ids : [currentUser.id]);
+      } else {
+        query = query.eq('usuario_id', currentUser.id);
+      }
     }
-  }
 
-  const { data } = await query;
-  calEstado.eventos = data || [];
+    let { data, error } = await query;
+    if (error) {
+      console.warn('Fallback cargando agenda sin join...', error.message);
+      let qSimple = sb.from('agenda').select('*').order('fecha_inicio', { ascending: false });
+      if (!esSuperAdminODirector && !esSupervisor) qSimple = qSimple.eq('usuario_id', currentUser.id);
+      const res = await qSimple;
+      data = res.data;
+    }
 
-  actualizarTituloNavCal();
-  renderizarVistaActiva();
+    calEstado.eventos = data || [];
+    actualizarTituloNavCal();
+    renderizarVistaActiva();
 
-  const pendientesPropios = (data || []).filter(ev => ev.usuario_id === currentUser.id && !ev.google_calendar_event_id && (ev.sync_calendar_intentos || 0) < 3);
-  for (const ev of pendientesPropios) {
-    sincronizarEventoCalendar(ev);
+    const pendientesPropios = (data || []).filter(ev => ev.usuario_id === currentUser.id && !ev.google_calendar_event_id && (ev.sync_calendar_intentos || 0) < 3);
+    for (const ev of pendientesPropios) {
+      sincronizarEventoCalendar(ev);
+    }
+  } catch (err) {
+    console.error('Error cargando agenda:', err);
+    calEstado.eventos = [];
+    renderizarVistaActiva();
   }
 }
 
@@ -7594,6 +7787,10 @@ async function cargarChecklist(){
     </div>
   `;
   }).join('');
+}
+
+function abrirResolverEvento(id){
+  abrirResolverAgenda(id, 'realizada');
 }
 
 function abrirResolverAgenda(id, estado){
@@ -7940,22 +8137,32 @@ async function obtenerTokenSesion(){
 
 async function iniciarMajoAssistant(){
   const rol = currentProfile?.rol;
-  const puedeAdministrar = rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || fusionarPermisosConCatalogo(currentProfile?.permisos).gestionar_equipo;
+  const puedeAdministrar = esUsuarioSuperAdmin() || fusionarPermisosConCatalogo(currentProfile?.permisos).gestionar_base_majo;
   document.getElementById('tabMajoBaseConocimiento')?.classList.toggle('hidden', !puedeAdministrar);
 
-  if (!majoConversacionActual) {
-    const { data: nueva, error } = await sb.from('majo_conversaciones').insert({
-      usuario_id: currentUser.id, titulo: 'Conversación ' + new Date().toLocaleDateString('es-PE'),
-    }).select().single();
-    if (error) { toast('Error al iniciar el chat con MAJO'); console.error(error); return; }
-    majoConversacionActual = nueva.id;
-    document.getElementById('majoChatMensajes').innerHTML = `
+  // Asegurar siempre que el contenedor de mensajes tenga contenido inicial
+  const cont = document.getElementById('majoChatMensajes');
+  if (cont && (!cont.innerHTML || cont.innerHTML.trim() === '')) {
+    cont.innerHTML = `
       <div class="majo-burbuja-fila">
-        <div class="majo-mini-avatar">😊</div>
+        <div class="majo-mini-avatar">🤖</div>
         <div class="majo-burbuja majo-burbuja-asistente">
-          👋 Hola, soy <b>MAJO ASSISTANT</b>. Puedo responder preguntas sobre los documentos del proyecto que suban a mi base de conocimiento, y también investigar en los sitios oficiales autorizados (SUNARP, SUNAT, COFOPRI, etc). ¿En qué te ayudo?
+          👋 Hola, soy <b>MAJO · Inteligencia Corporativa</b>. Tengo acceso transversal a toda la documentación de Casa Dorada (Portafolio, Legal, Manual de Ventas y Lotes de Costa Dorada en La Yarada Los Palos). ¿En qué te puedo asesorar hoy?
         </div>
       </div>`;
+  }
+
+  if (!majoConversacionActual) {
+    let convId = null;
+    try {
+      const { data: nueva } = await sb.from('majo_conversaciones').insert({
+        usuario_id: currentUser?.id, titulo: 'Conversación ' + new Date().toLocaleDateString('es-PE'),
+      }).select().single();
+      if (nueva) convId = nueva.id;
+    } catch (e) {
+      console.warn('Fallback sesión local para MAJO:', e);
+    }
+    majoConversacionActual = convId || ('local_' + Date.now());
   }
 }
 
@@ -8009,7 +8216,8 @@ function renderBurbujaMajo(rol, contenido, fuentes, imagenes){
 async function enviarMensajeMajo(){
   const input = document.getElementById('majoChatInput');
   const mensaje = input.value.trim();
-  if (!mensaje || !majoConversacionActual) return;
+  if (!mensaje) return;
+  if (!majoConversacionActual) majoConversacionActual = 'local_' + Date.now();
   input.value = '';
   renderBurbujaMajo('user', mensaje);
 
@@ -8729,8 +8937,8 @@ function abrirModalActividad(){
   if (f) f.value = obtenerHoyLocal();
   const t = document.getElementById('actTitulo');
   if (t) t.value = '';
-  const d = document.getElementById('actDesc');
-  if (d) d.value = '';
+  const loc = document.getElementById('actLocacion');
+  if (loc) loc.value = '';
   actTemasAcuerdosTemp = [];
   renderActTemasLista();
   poblarSelectClientes('actClienteId');
@@ -8910,6 +9118,113 @@ async function completarActividadDesdeInicio(actId){
   toast('Tarea completada ✓');
   cargarPendientesInicio();
   cargarActividadesHoy();
+}
+
+/* ============ CONTROL DEL DOCK FLOTANTE HORIZONTAL Y SOLICITUD ============ */
+let dockHorizontalAbierto = false;
+
+function irARegistrarSolicitudDesdeInicio(){
+  irAVista('solicitudes');
+  abrirModalNuevaSolicitud();
+}
+
+function toggleDockHorizontal(){
+  const dock = document.getElementById('dockMenuHorizontal');
+  const btn = document.getElementById('btnDockCentral');
+  if (!dock) return;
+
+  dockHorizontalAbierto = !dockHorizontalAbierto;
+  dock.classList.toggle('hidden', !dockHorizontalAbierto);
+
+  if (dockHorizontalAbierto) {
+    actualizarItemsDockHorizontal();
+    if (btn) btn.style.background = 'rgba(200, 155, 60, 0.9)';
+    const txt = btn?.querySelector('.btn-dock-texto');
+    if (txt) txt.style.color = '#142A4D';
+    const ico = btn?.querySelector('.btn-dock-hamburguesa');
+    if (ico) ico.style.color = '#142A4D';
+  } else {
+    if (btn) btn.style.background = 'rgba(20, 42, 77, 0.82)';
+    const txt = btn?.querySelector('.btn-dock-texto');
+    if (txt) txt.style.color = '#FFFFFF';
+    const ico = btn?.querySelector('.btn-dock-hamburguesa');
+    if (ico) ico.style.color = 'var(--gold)';
+  }
+}
+
+function cerrarDockHorizontal(){
+  dockHorizontalAbierto = false;
+  const dock = document.getElementById('dockMenuHorizontal');
+  const btn = document.getElementById('btnDockCentral');
+  if (dock) dock.classList.add('hidden');
+  if (btn) {
+    btn.style.background = 'rgba(20, 42, 77, 0.82)';
+    const txt = btn.querySelector('.btn-dock-texto');
+    if (txt) txt.style.color = '#FFFFFF';
+    const ico = btn.querySelector('.btn-dock-hamburguesa');
+    if (ico) ico.style.color = 'var(--gold)';
+  }
+}
+
+function navegarDesdeDockHorizontal(opcion){
+  cerrarDockHorizontal();
+  if (opcion === 'cotizador') {
+    abrirModalCotizador();
+  } else if (opcion === 'checklist_legal') {
+    abrirChecklistLegal(null);
+  } else if (opcion === 'generador_doc') {
+    abrirGenerarDocumento(null, '', '');
+  } else if (opcion === 'cobranzas') {
+    irACobranzas();
+  } else if (opcion === 'respaldos') {
+    descargarRespaldo();
+  } else {
+    irAVista(opcion);
+  }
+}
+
+function actualizarItemsDockHorizontal(){
+  const cont = document.getElementById('dockItemsScroll');
+  if (!cont) return;
+
+  const rol = currentProfile?.rol;
+  const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
+  const esSA = esUsuarioSuperAdmin();
+
+  const catalogoModulos = [
+    { key: 'inicio',          label: 'Inicio',           icon: '🏠', visible: true },
+    { key: 'control',         label: 'Tablero',          icon: '📊', visible: esSA || perm.ver_control !== false },
+    { key: 'clientes',        label: 'Clientes',         icon: '👥', visible: esSA || perm.ver_clientes !== false },
+    { key: 'visitas',         label: 'Visitas Van (14)', icon: '🚐', visible: esSA || perm.ver_control_visitas !== false },
+    { key: 'actividades',     label: 'Actividades',      icon: '✓',  visible: esSA || perm.ver_actividades !== false },
+    { key: 'agenda',          label: 'Agenda',           icon: '📅', visible: esSA || perm.ver_agenda !== false },
+    { key: 'separaciones',    label: 'Separaciones',     icon: '🏷️', visible: esSA || perm.ver_separaciones !== false },
+    { key: 'planos',          label: 'Planos',           icon: '🗺️', visible: esSA || perm.ver_planos !== false },
+    { key: 'cotizador',       label: 'Cotizador',        icon: '🧮', visible: esSA || perm.ver_cotizador !== false },
+    { key: 'portafolio',      label: 'Portafolio',       icon: '📁', visible: esSA || perm.ver_portafolio !== false },
+    { key: 'manualventas',    label: 'Speeches',         icon: '🎯', visible: esSA || perm.ver_manualventas !== false },
+    { key: 'majo_assistant',  label: 'MAJO IA',          icon: '🤖', visible: esSA || perm.ver_majo_assistant !== false },
+    { key: 'checklist_legal', label: 'Legal',            icon: '📋', visible: esSA || perm.ver_checklist_legal !== false },
+    { key: 'generador_doc',   label: 'Minutas IA',       icon: '✍️', visible: esSA || perm.usar_generador_doc !== false },
+    { key: 'cobranzas',       label: 'Cobranzas',        icon: '💳', visible: esSA || perm.ver_cobranzas !== false },
+    { key: 'solicitudes',     label: 'Solicitudes',      icon: '📝', visible: esSA || perm.ver_solicitudes !== false },
+    { key: 'rendimiento',     label: 'Rendimiento',      icon: '📈', visible: esSA || perm.ver_rendimiento !== false },
+    { key: 'reporte_equipo',  label: 'Reporte 9pm',      icon: '🧑‍🤝‍🧑', visible: esSA || perm.ver_reporte_equipo === true },
+    { key: 'admin',           label: 'Equipo',           icon: '🧑‍💼', visible: esSA || perm.gestionar_equipo },
+    { key: 'sistema',         label: 'Ajustes',          icon: '⚙️', visible: esSA || perm.ver_ajustes === true }
+  ];
+
+  const permitidos = catalogoModulos.filter(m => m.visible);
+
+  cont.innerHTML = permitidos.map(m => {
+    const esActivo = currentView === m.key;
+    return `
+      <button type="button" class="dock-item-chip ${esActivo ? 'active' : ''}" onclick="navegarDesdeDockHorizontal('${m.key}')">
+        <span class="dock-icon">${m.icon}</span>
+        <span>${escapeHtml(m.label)}</span>
+      </button>
+    `;
+  }).join('');
 }
 
 /* ============ CONTROL DE PRESENTACIONES Y MOVILIDAD (14 ASIENTOS) ============ */
@@ -9359,6 +9674,20 @@ function filtrarClientesEnVivo(texto){
     el.innerHTML = filtrados.map(c => renderTarjetaCliente(c, esSuperAdminODirector)).join('');
   }
 }
+
+// Exposición explícita de funciones globales para eventos inline de botones
+window.abrirModalActividad = abrirModalActividad;
+window.abrirModalAgenda = abrirModalAgenda;
+window.abrirModalNuevaSolicitud = abrirModalNuevaSolicitud;
+window.abrirModalNuevaVisita = abrirModalNuevaVisita;
+window.toggleDockHorizontal = toggleDockHorizontal;
+window.navegarDesdeDockHorizontal = navegarDesdeDockHorizontal;
+window.irARegistrarSolicitudDesdeInicio = irARegistrarSolicitudDesdeInicio;
+window.abrirModalCotizador = abrirModalCotizador;
+window.abrirModalWhatsAppRapido = abrirModalWhatsAppRapido;
+window.abrirChecklistLegal = abrirChecklistLegal;
+window.abrirResolverEvento = abrirResolverEvento;
+window.abrirResolverAgenda = abrirResolverAgenda;
 
 (async function init(){
   const { data: { session } } = await sb.auth.getSession();
