@@ -1572,6 +1572,27 @@
   </div>
 
   <!-- MODAL: nuevo cliente / prospecto -->
+  <div class="modal-backdrop" id="modalGenerarDocumento">
+    <div class="modal-sheet">
+      <button class="modal-x-close" data-close="modalGenerarDocumento">✕</button>
+      <h3>📝 Generar Minuta / Documento</h3>
+      <div class="field">
+        <label>Tipo de documento</label>
+        <select id="doc_tipo">
+          <option value="Minuta de compraventa de lote">Minuta de compraventa de lote</option>
+          <option value="Contrato de separación de lote">Contrato de separación de lote</option>
+          <option value="Carta de compromiso de pago">Carta de compromiso de pago</option>
+          <option value="Constancia de pago recibido">Constancia de pago recibido</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="btnGenerarDocumento" style="width:100%;">Generar con IA</button>
+      <div id="doc_resultado_wrap" class="hidden" style="margin-top:16px;">
+        <textarea id="doc_resultado" style="width:100%; min-height:280px; font-size:12px; font-family:monospace; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px;" readonly></textarea>
+        <button class="chip-btn gold" id="btnCopiarDocumento" style="width:100%; margin-top:8px; justify-content:center;">📋 Copiar texto</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="modalChecklistLegal">
     <div class="modal-sheet">
       <button class="modal-x-close" data-close="modalChecklistLegal">✕</button>
@@ -4797,6 +4818,7 @@ async function cargarClientes(){
         <div class="card-actions" style="margin-top:8px;">
           <button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">🕒 Historial</button>
           <button class="chip-btn" style="color:#2C5691; border-color:#2C5691;" onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">📋 Legal</button>
+          <button class="chip-btn" style="color:var(--gold); border-color:var(--gold);" onclick="abrirGenerarDocumento('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}', '${(c.celular || '').replace(/'/g, "\\'")}')">📝 Minuta</button>
           ${wspUrl ? `<a class="chip-btn gold" href="${wspUrl}" target="_blank" style="text-decoration:none;">💬 WhatsApp</a>` : ''}
           ${c.celular ? `<a class="chip-btn" href="tel:${c.celular}" style="text-decoration:none;">📞 Llamar</a>` : ''}
           ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarCliente('${c.id}')">🗑️</button>` : ''}
@@ -4963,6 +4985,65 @@ async function marcarDocumentoLegal(key, valor){
   if (error) { toast('Error al guardar'); console.error(error); return; }
   renderChecklistLegal(checklistActualizado);
 }
+
+/* ============ GENERADOR DE MINUTAS/DOCUMENTOS CON IA ============
+   Usa la misma infraestructura gratuita de Gemini que MAJO ASSISTANT.
+   Siempre incluye la advertencia de que es un borrador para revisión legal. */
+let documentoClienteActual = null;
+
+function abrirGenerarDocumento(clienteId, nombreCliente, celular){
+  documentoClienteActual = { id: clienteId, nombre: nombreCliente, celular };
+  document.getElementById('doc_resultado_wrap').classList.add('hidden');
+  document.getElementById('doc_resultado').value = '';
+  openModal('modalGenerarDocumento');
+}
+
+document.getElementById('btnGenerarDocumento')?.addEventListener('click', async () => {
+  const tipo = document.getElementById('doc_tipo').value;
+  const btn = document.getElementById('btnGenerarDocumento');
+  btn.disabled = true;
+  btn.textContent = 'Generando…';
+
+  try {
+    const { data: sep } = await sb.from('separaciones').select('*').eq('cliente_id', documentoClienteActual.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    const datos = {
+      cliente: documentoClienteActual.nombre,
+      celular: documentoClienteActual.celular || '[___]',
+      manzana: sep?.manzana || '[___]',
+      lote: sep?.lote || '[___]',
+      area_m2: sep?.area_m2 || '[___]',
+      valor_total: sep?.valor_total ? `S/ ${Number(sep.valor_total).toLocaleString('es-PE')}` : '[___]',
+      monto_inicial: sep?.valor_inicial ? `S/ ${Number(sep.valor_inicial).toLocaleString('es-PE')}` : '[___]',
+      saldo: sep?.saldo ? `S/ ${Number(sep.saldo).toLocaleString('es-PE')}` : '[___]',
+      proyecto: 'Costa Dorada, La Yarada-Los Palos, Tacna',
+      fecha: new Date().toLocaleDateString('es-PE'),
+    };
+
+    const token = (await sb.auth.getSession()).data?.session?.access_token;
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/generar-documento-legal`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tipo_documento: tipo, datos }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || data.error) throw new Error(data.error || 'Error del servidor');
+
+    document.getElementById('doc_resultado').value = data.texto;
+    document.getElementById('doc_resultado_wrap').classList.remove('hidden');
+  } catch (e) {
+    toast('Error al generar el documento');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generar con IA';
+  }
+});
+
+document.getElementById('btnCopiarDocumento')?.addEventListener('click', () => {
+  const ta = document.getElementById('doc_resultado');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(() => toast('Copiado al portapapeles ✓')).catch(() => toast('No se pudo copiar automáticamente, selecciona y copia manualmente'));
+});
 
 
 async function eliminarCliente(id){
