@@ -403,32 +403,11 @@
   }
   .welcome-badge{ display:inline-flex; align-items:center; gap:6px; background: rgba(201,151,62,0.2); border:1px solid rgba(201,151,62,0.4); color: var(--gold-soft); padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
 
-  .welcome-logos-3d{
-    display: flex; align-items: center; justify-content: center;
-    gap: 16px; perspective: 800px; margin: 4px 0 16px; flex-wrap: wrap;
-  }
+  .welcome-logos-3d{ display:flex; align-items:center; justify-content:center; gap:22px; perspective: 600px; }
   .logo-3d-flotante{
-    width: 155px; height: 98px; max-width: 46%; object-fit: contain;
-    filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
+    width: 84px; height: 84px; object-fit: contain;
+    filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
     animation: logoFlotar3D 4.5s ease-in-out infinite;
-    background: rgba(255, 255, 255, 0.09);
-    padding: 8px 14px;
-    border-radius: 14px;
-    border: 1.5px solid rgba(200, 155, 60, 0.45);
-    backdrop-filter: blur(8px);
-    transition: transform 0.3s ease, border-color 0.3s ease;
-  }
-  .logo-3d-flotante:hover{
-    transform: scale(1.05);
-    border-color: var(--gold);
-  }
-  @media (min-width: 600px){
-    .logo-3d-flotante{
-      width: 195px; height: 115px; padding: 10px 20px;
-    }
-    .welcome-logos-3d{
-      gap: 28px;
-    }
   }
   @keyframes logoFlotar3D{
     0%, 100% { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
@@ -1005,12 +984,9 @@
         </div>
 
         <div class="video-card">
-          <div class="video-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-              <span style="font-size:18px;">🎬</span>
-              <h4 id="vd_titulo" style="margin:0; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Píldora de mentalidad y ventas de hoy</h4>
-            </div>
-            <button class="chip-btn" onclick="siguienteVideoMotivacional()" style="font-size:11px; padding:3px 9px; border-color:var(--gold); color:var(--navy); background:#fff; flex-shrink:0; cursor:pointer;" title="Ver otro video">🔄 Cambiar</button>
+          <div class="video-header">
+            <span style="font-size:18px;">🎬</span>
+            <h4 id="vd_titulo">Píldora de mentalidad y ventas de hoy</h4>
           </div>
           <div class="video-wrapper">
             <iframe id="vd_iframe" src="https://www.youtube-nocookie.com/embed/Hq0V_pBDRy8" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -2559,35 +2535,12 @@ const FRASES_MOTIVACIONALES = [
 ];
 
 const VIDEOS_MOTIVACIONALES = [
-  { id: "OD_8cIkCMos", t: "Inteligencia Emocional para Vender Más · Sandro Meléndez (Perú)" },
-  { id: "XeJbPQgnenM", t: "Domina el Arte de Cerrar Ventas: 4 Estrategias · Alex Dey" },
-  { id: "osK3rxLTfu0", t: "5 Técnicas que SOLO los Mejores Vendedores Conocen · Margarita Pasos" },
-  { id: "iQiQ5Sx2gKM", t: "Vender es Fácil: Neuroventas y Persuasión · Jürgen Klarić" },
-  { id: "mIanxrqiRUs", t: "A Conquistar la Venta de Bienes Raíces · Carlos Muñoz" },
-  { id: "M1pUEFzGjyk", t: "El Poder de tu Actitud y Entusiasmo Comercial · Víctor Küppers" },
-  { id: "pwY7MqZyqOc", t: "Liderazgo, Superación y Motivación Personal · David Fischman (Perú)" },
-  { id: "g9Q5Pf9sijE", t: "Psicología de Ventas: Cómo Ser un Mejor Cerrador · Brian Tracy (Español)" },
-  { id: "zTr2Z_x-wLk", t: "Los 3 Cierres de Ventas que Transforman Resultados · Alex Dey" },
-  { id: "BjLWfXZsIcg", t: "Lo que Todo Vendedor y Cerrador Debe Saber · Margarita Pasos" },
-  { id: "6ysDItlfznA", t: "Cómo Vender Inmuebles: Frases Clave de Cierre · Carlos Pérez-Newman" },
-  { id: "Swn0xgqUVyA", t: "Técnicas de Cierre: El Cierre Boomerang · Alex Dey" },
-  { id: "w9bN5tJ0js8", t: "Los Mejores Tips de Neuroventas en Campo · Jürgen Klarić" },
-  { id: "zsI0x78OiCo", t: "Aprende a Desaprender: Mentalidad Ganadora · Sandro Meléndez (TEDx)" },
-  { id: "I8S9nm1Ef78", t: "Actitud es Pasión y Enfoque en Metas · Víctor Küppers" }
+  { id: "Hq0V_pBDRy8", t: "5 Estrategias para organizar tu día y vender más · Brian Tracy" },
+  { id: "nweBVbCPaLU", t: "Close the Deal — Motivación de ventas y bienes raíces · Grant Cardone" },
+  { id: "CWqW35lVGrQ", t: "¿El vendedor nace o se hace? Mentalidad y ambición en ventas · Sandro Meléndez" },
+  { id: "ahi1QO0s_YE", t: "Los 12 cierres de ventas más poderosos · Alex Dey" },
+  { id: "osK3rxLTfu0", t: "Técnicas de mentalidad y cierre comercial · Margarita Pasos" }
 ];
-
-let videoIndiceManual = null;
-function siguienteVideoMotivacional(){
-  const diaNum = new Date().getDate();
-  const baseIdx = videoIndiceManual !== null ? videoIndiceManual : ((diaNum - 1) % VIDEOS_MOTIVACIONALES.length);
-  videoIndiceManual = (baseIdx + 1) % VIDEOS_MOTIVACIONALES.length;
-  const videoObj = VIDEOS_MOTIVACIONALES[videoIndiceManual];
-  const elVidTit = document.getElementById('vd_titulo');
-  if (elVidTit) elVidTit.textContent = videoObj.t;
-  const elIframe = document.getElementById('vd_iframe');
-  if (elIframe) elIframe.src = `https://www.youtube-nocookie.com/embed/${videoObj.id}?autoplay=1`;
-  toast('🎬 Píldora: ' + videoObj.t.split('·')[0].trim());
-}
 
 function cargarPortadaInicio(){
   const hoy = new Date();
