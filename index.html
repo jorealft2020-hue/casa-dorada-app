@@ -403,11 +403,32 @@
   }
   .welcome-badge{ display:inline-flex; align-items:center; gap:6px; background: rgba(201,151,62,0.2); border:1px solid rgba(201,151,62,0.4); color: var(--gold-soft); padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
 
-  .welcome-logos-3d{ display:flex; align-items:center; justify-content:center; gap:22px; perspective: 600px; }
+  .welcome-logos-3d{
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; perspective: 800px; margin: 4px 0 16px; flex-wrap: wrap;
+  }
   .logo-3d-flotante{
-    width: 84px; height: 84px; object-fit: contain;
-    filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
+    width: 155px; height: 98px; max-width: 46%; object-fit: contain;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
     animation: logoFlotar3D 4.5s ease-in-out infinite;
+    background: rgba(255, 255, 255, 0.09);
+    padding: 8px 14px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(200, 155, 60, 0.45);
+    backdrop-filter: blur(8px);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  .logo-3d-flotante:hover{
+    transform: scale(1.05);
+    border-color: var(--gold);
+  }
+  @media (min-width: 600px){
+    .logo-3d-flotante{
+      width: 195px; height: 115px; padding: 10px 20px;
+    }
+    .welcome-logos-3d{
+      gap: 28px;
+    }
   }
   @keyframes logoFlotar3D{
     0%, 100% { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
@@ -662,6 +683,113 @@
     align-items: center; justify-content: space-between;
   }
 
+
+/* ============ BARRA DE NAVEGACIÓN INFERIOR (MÓVIL) ============ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(20, 42, 77, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1.5px solid rgba(200, 155, 60, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 999;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.25);
+}
+@media (min-width: 901px) {
+  .bottom-nav {
+    display: none !important;
+  }
+}
+@media (max-width: 900px) {
+  main.app-content {
+    padding-bottom: 78px !important;
+  }
+}
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  background: none;
+  border: none;
+  color: #A3B8CC;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 4px 0;
+  text-decoration: none;
+}
+.bottom-nav-item .bn-icon {
+  font-size: 19px;
+  margin-bottom: 2px;
+  transition: transform 0.2s ease;
+}
+.bottom-nav-item.active {
+  color: var(--gold);
+}
+.bottom-nav-item.active .bn-icon {
+  transform: scale(1.18);
+}
+
+/* ============ ESTILOS ACORDEÓN DEPARTAMENTOS ============ */
+.dr-dept-group {
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.dr-dept-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  border-radius: 8px;
+  color: #C89B3C;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+.dr-dept-toggle:hover {
+  background: rgba(200, 155, 60, 0.1);
+}
+.dr-dept-arrow {
+  font-size: 12px;
+  transition: transform 0.25s ease;
+  color: #C89B3C;
+}
+.dr-dept-group.cerrado .dr-dept-arrow {
+  transform: rotate(-90deg);
+}
+.dr-dept-items {
+  max-height: 800px;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+  padding-left: 6px;
+}
+.dr-dept-group.cerrado .dr-dept-items {
+  max-height: 0;
+}
+.dr-badge-count {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
 </style>
 </head>
 <body>
@@ -685,89 +813,126 @@
           <span class="dr-label">Inicio / Portada</span>
         </button>
 
+        <!-- 1. DEPARTAMENTO COMERCIAL -->
         <div class="dr-dept-group" data-dept="comercial">
-          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')">
-            <span>💼 COMERCIAL</span><span class="dr-dept-arrow">▾</span>
+          <button class="dr-dept-toggle" onclick="toggleDeptoMenu(this)">
+            <span>💼 1. COMERCIAL (VENTAS & CIERRES)</span><span class="dr-dept-arrow">▾</span>
           </button>
           <div class="dr-dept-items">
             <button class="drawer-item" data-nav="control" id="drNavControl" data-modkey="control">
               <span class="dr-icon">📊</span>
-              <span class="dr-label">Tablero de Control</span>
+              <span class="dr-label">Tablero de Control & KPIs</span>
+            </button>
+            <button class="drawer-item" data-nav="clientes" id="drNavClientes" data-modkey="clientes">
+              <span class="dr-icon">👥</span>
+              <span class="dr-label">Cartera de Clientes & Kanban</span>
+              <span class="badge hidden" id="drBadgeRiesgo" style="background:#FFEAEA; color:#D32F2F; font-size:10px; margin-left:auto;">0</span>
             </button>
             <button class="drawer-item" data-nav="actividades" id="drNavTareas" data-modkey="actividades">
               <span class="dr-icon">✓</span>
-              <span class="dr-label">Actividades Realizadas</span>
+              <span class="dr-label">Actividades y Tareas Hoy</span>
+              <span class="badge hidden" id="drBadgeTareas" style="background:#EBF3FC; color:#1E4B82; font-size:10px; margin-left:auto;">0</span>
             </button>
             <button class="drawer-item" data-nav="agenda" id="drNavAgenda" data-modkey="agenda">
               <span class="dr-icon">📅</span>
-              <span class="dr-label">Agenda y Calendario</span>
+              <span class="dr-label">Agenda & Google Calendar</span>
             </button>
-            <button class="drawer-item" data-nav="clientes" id="drNavClientes" data-modkey="clientes">
-              <span class="dr-icon">👤</span>
-              <span class="dr-label">Cartera de Clientes</span>
+            <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones" data-modkey="separaciones">
+              <span class="dr-icon">🏷️</span>
+              <span class="dr-label">Separaciones de Lotes</span>
+              <span class="badge hidden" id="drBadgeSeparaciones" style="background:#FFF3E0; color:#E65100; font-size:10px; margin-left:auto;">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. DEPARTAMENTO MARKETING & PROSPECCIÓN -->
+        <div class="dr-dept-group" data-dept="marketing">
+          <button class="dr-dept-toggle" onclick="toggleDeptoMenu(this)">
+            <span>📣 2. MARKETING & PROSPECCIÓN</span><span class="dr-dept-arrow">▾</span>
+          </button>
+          <div class="dr-dept-items">
+            <button class="drawer-item" data-nav="planos" id="drNavPlanos" data-modkey="planos">
+              <span class="dr-icon">🗺️</span>
+              <span class="dr-label">Planos Interactivos Costa Dorada</span>
             </button>
             <button class="drawer-item" id="drNavCotizador" data-modkey="cotizador" onclick="abrirModalCotizador(); cerrarDrawer();">
               <span class="dr-icon">🧮</span>
               <span class="dr-label">Cotizador Rápido de Lotes</span>
             </button>
-            <button class="drawer-item" data-nav="planos" id="drNavPlanos" data-modkey="planos">
-              <span class="dr-icon">🗺️</span>
-              <span class="dr-label">Planos Interactivos</span>
-            </button>
             <button class="drawer-item" data-nav="portafolio" id="drNavPortafolio" data-modkey="portafolio">
               <span class="dr-icon">📁</span>
-              <span class="dr-label">Portafolio Comercial</span>
+              <span class="dr-label">Portafolio Multimedia (La Yarada)</span>
             </button>
             <button class="drawer-item" data-nav="manualventas" id="drNavManualVentas" data-modkey="manualventas">
               <span class="dr-icon">🎯</span>
-              <span class="dr-label">Manual de Ventas</span>
+              <span class="dr-label">Manual de Ventas & Speeches</span>
             </button>
-            <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones" data-modkey="separaciones">
-              <span class="dr-icon">🏷️</span>
-              <span class="dr-label">Separaciones de Lotes</span>
+            <button class="drawer-item" data-nav="majo_assistant" id="drNavMajoAssistant" data-modkey="majo_assistant">
+              <span class="dr-icon">🤖</span>
+              <span class="dr-label">MAJO ASSISTANT (IA)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. DEPARTAMENTO LEGAL & CONTRATACIÓN -->
+        <div class="dr-dept-group" data-dept="legal">
+          <button class="dr-dept-toggle" onclick="toggleDeptoMenu(this)">
+            <span>⚖️ 3. LEGAL & CONTRATACIÓN</span><span class="dr-dept-arrow">▾</span>
+          </button>
+          <div class="dr-dept-items">
+            <button class="drawer-item" id="drNavChecklistLegal" data-modkey="checklist_legal" onclick="abrirChecklistLegal(null); cerrarDrawer();">
+              <span class="dr-icon">📋</span>
+              <span class="dr-label">Checklist Legal de Expedientes</span>
+            </button>
+            <button class="drawer-item" id="drNavGenerarDoc" data-modkey="generador_doc" onclick="abrirGenerarDocumento(null, '', ''); cerrarDrawer();">
+              <span class="dr-icon">✍️</span>
+              <span class="dr-label">Generador de Minutas y Contratos (IA)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. DEPARTAMENTO ADMINISTRACIÓN & COBRANZAS -->
+        <div class="dr-dept-group" data-dept="administracion">
+          <button class="dr-dept-toggle" onclick="toggleDeptoMenu(this)">
+            <span>🗂️ 4. ADMINISTRACIÓN & COBRANZAS</span><span class="dr-dept-arrow">▾</span>
+          </button>
+          <div class="dr-dept-items">
+            <button class="drawer-item" id="drNavCobranzas" data-modkey="cobranzas" onclick="irACobranzas(); cerrarDrawer();">
+              <span class="dr-icon">💳</span>
+              <span class="dr-label">Control de Cobranzas y Cuotas</span>
             </button>
             <button class="drawer-item" data-nav="rendimiento" id="drNavRendimiento" data-modkey="rendimiento">
               <span class="dr-icon">📈</span>
               <span class="dr-label">Rendimiento por Área</span>
             </button>
             <button class="drawer-item" data-nav="solicitudes" id="drNavSolicitudes" data-modkey="solicitudes">
-              <span class="dr-icon">📋</span>
+              <span class="dr-icon">📝</span>
               <span class="dr-label">Solicitudes y Requerimientos</span>
             </button>
             <button class="drawer-item hidden" data-nav="reporte_equipo" id="drNavReporteEquipo" data-modkey="reporte_equipo">
               <span class="dr-icon">🧑‍🤝‍🧑</span>
               <span class="dr-label">Reporte Diario del Equipo</span>
             </button>
-            <button class="drawer-item" data-nav="majo_assistant" id="drNavMajoAssistant" data-modkey="majo_assistant">
-              <span class="dr-icon">🤖</span>
-              <span class="dr-label">MAJO ASSISTANT</span>
-            </button>
           </div>
         </div>
 
-        <div class="dr-dept-group dr-dept-vacio" data-dept="marketing">
-          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>📣 MARKETING</span><span class="dr-dept-arrow">▾</span></button>
-          <div class="dr-dept-items"></div>
-        </div>
-        <div class="dr-dept-group dr-dept-vacio" data-dept="administracion">
-          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>🗂️ ADMINISTRACIÓN</span><span class="dr-dept-arrow">▾</span></button>
-          <div class="dr-dept-items"></div>
-        </div>
-        <div class="dr-dept-group dr-dept-vacio" data-dept="legal">
-          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>⚖️ LEGAL</span><span class="dr-dept-arrow">▾</span></button>
-          <div class="dr-dept-items"></div>
-        </div>
-
+        <!-- 5. DEPARTAMENTO GERENCIA & AJUSTES -->
         <div class="dr-dept-group hidden" data-dept="ajustes" id="drDeptAjustes">
-          <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>⚙️ AJUSTES</span><span class="dr-dept-arrow">▾</span></button>
+          <button class="dr-dept-toggle" onclick="toggleDeptoMenu(this)">
+            <span>⚙️ 5. GERENCIA & AJUSTES</span><span class="dr-dept-arrow">▾</span>
+          </button>
           <div class="dr-dept-items">
-            <button class="drawer-item hidden" data-nav="admin" id="drNavAdmin">
+            <button class="drawer-item hidden" data-nav="admin" id="drNavAdmin" data-modkey="gestion_equipo">
               <span class="dr-icon">🧑‍💼</span>
-              <span class="dr-label">Gestión de Equipo</span>
+              <span class="dr-label">Gestión de Equipo & Permisos</span>
             </button>
-            <button class="drawer-item hidden" data-nav="sistema" id="drNavSistema">
+            <button class="drawer-item hidden" data-nav="sistema" id="drNavSistema" data-modkey="configuracion_sistema">
               <span class="dr-icon">🛠️</span>
               <span class="dr-label">Configuración del Sistema</span>
+            </button>
+            <button class="drawer-item" id="drNavRespaldos" data-modkey="respaldos" onclick="descargarRespaldo(); cerrarDrawer();">
+              <span class="dr-icon">💾</span>
+              <span class="dr-label">Descargar Respaldo JSON</span>
             </button>
             <button class="drawer-item" id="drBtnConfigRapida">
               <span class="dr-icon">🔄</span>
@@ -840,9 +1005,12 @@
         </div>
 
         <div class="video-card">
-          <div class="video-header">
-            <span style="font-size:18px;">🎬</span>
-            <h4 id="vd_titulo">Píldora de mentalidad y ventas de hoy</h4>
+          <div class="video-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <span style="font-size:18px;">🎬</span>
+              <h4 id="vd_titulo" style="margin:0; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Píldora de mentalidad y ventas de hoy</h4>
+            </div>
+            <button class="chip-btn" onclick="siguienteVideoMotivacional()" style="font-size:11px; padding:3px 9px; border-color:var(--gold); color:var(--navy); background:#fff; flex-shrink:0; cursor:pointer;" title="Ver otro video">🔄 Cambiar</button>
           </div>
           <div class="video-wrapper">
             <iframe id="vd_iframe" src="https://www.youtube-nocookie.com/embed/Hq0V_pBDRy8" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -915,7 +1083,24 @@
           <button class="chip-btn gold" onclick="asignarAsesorMasivo()">👤 Asignar</button>
           <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="archivarClientesMasivo()">🗄️ Archivar</button>
         </div>
+        
+        <!-- BARRA DE BÚSQUEDA Y FILTROS RÁPIDOS -->
+        <div style="margin-bottom: 12px;">
+          <div style="position:relative; margin-bottom:8px;">
+            <input type="text" id="inputBuscarClientes" placeholder="🔍 Buscar por nombre, teléfono o manzana/lote..." 
+              style="width:100%; padding:9px 12px 9px 34px; border:1.5px solid #E5DFCF; border-radius:10px; font-size:13px; background:#fff;"
+              oninput="filtrarClientesEnVivo(this.value)">
+            <span style="position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:14px; opacity:0.5;">🔍</span>
+          </div>
+          <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px;" id="chipsFiltrosClientes">
+            <button class="chip-btn active" data-filtro="todos" onclick="aplicarFiltroChipClientes('todos')">Todos</button>
+            <button class="chip-btn" data-filtro="riesgo" onclick="aplicarFiltroChipClientes('riesgo')" style="color:#D32F2F; border-color:#FFCDD2;">⚠️ En riesgo (>7d)</button>
+            <button class="chip-btn" data-filtro="separados" onclick="aplicarFiltroChipClientes('separados')" style="color:#2E7D32; border-color:#C8E6C9;">🏷️ Separados</button>
+            <button class="chip-btn" data-filtro="visitas" onclick="aplicarFiltroChipClientes('visitas')" style="color:#1976D2; border-color:#BBDEFB;">🚗 Visitas agendadas</button>
+          </div>
+        </div>
         <div id="listaClientes"></div>
+
         <div id="pipelineClientes" class="hidden"></div>
         <div id="listaClientesArchivados" class="hidden"></div>
       </div>
@@ -1268,6 +1453,31 @@
       </div>
     </main>
 
+  <!-- BARRA DE NAVEGACIÓN INFERIOR FIJA (MÓVIL) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bottom-nav-item active" data-bn="inicio" onclick="irAVista('inicio')">
+      <span class="bn-icon">🏠</span>
+      <span>Inicio</span>
+    </button>
+    <button class="bottom-nav-item" data-bn="clientes" onclick="irAVista('clientes')">
+      <span class="bn-icon">👥</span>
+      <span>Clientes</span>
+    </button>
+    <button class="bottom-nav-item" data-bn="agenda" onclick="irAVista('agenda')">
+      <span class="bn-icon">📅</span>
+      <span>Agenda</span>
+    </button>
+    <button class="bottom-nav-item" data-bn="planos" onclick="irAVista('planos')">
+      <span class="bn-icon">🗺️</span>
+      <span>Planos</span>
+    </button>
+    <button class="bottom-nav-item" onclick="abrirDrawer()">
+      <span class="bn-icon">☰</span>
+      <span>Menú</span>
+    </button>
+  </nav>
+
+
     <div style="text-align:center; padding:4px 8px 6px; flex-shrink:0;">
       <p style="font-size:9px; color:#B8B2A0; margin:0;">© <span id="footerCopyrightYear"></span> CRM MAJO · Jorge Luque — Todos los derechos reservados</p>
     </div>
@@ -1615,10 +1825,24 @@
           </select>
         </div>
       </div>
+
       <div class="card" style="background:#FBF6EC; border-color:#E8D9B5;">
         <p class="card-title" id="cot_cuota_display" style="font-size:18px;">—</p>
         <p class="card-sub" id="cot_resumen_display">—</p>
       </div>
+      <div class="card" style="background:#EBF3FC; border-color:#B8D5F5; margin-top:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; font-weight:700; color:var(--navy);">💼 Comisión Estimada del Asesor:</span>
+          <select id="cot_pct_comision" style="padding:2px 6px; font-size:11px; border-radius:6px; border:1px solid #B8D5F5;" onchange="calcularCotizadorMatematica()">
+            <option value="0.03" selected>3% Estándar</option>
+            <option value="0.04">4% Bono Meta</option>
+            <option value="0.05">5% Senior/Cierre</option>
+          </select>
+        </div>
+        <p class="card-title" id="cot_comision_display" style="font-size:16px; color:#1E4B82; margin-top:4px;">S/ 0.00</p>
+        <p class="card-sub" style="font-size:11px; color:#5A7B9D;">Ganancia estimada por cierre directo de este lote</p>
+      </div>
+
       <div class="modal-actions" style="flex-wrap:wrap;">
         <button class="btn-secondary" data-close="modalCotizador">Cerrar</button>
         <button class="btn-primary" onclick="enviarCotizacionWhatsApp()">📲 WhatsApp</button>
@@ -1626,6 +1850,50 @@
       <div class="modal-actions" style="flex-wrap:wrap;">
         <button class="btn-secondary" onclick="descargarCotizacionPDF()">📄 Descargar PDF</button>
         <button class="btn-primary" onclick="pasarCotizacionASeparacion()">🏷️ Pasar a Separación</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- MODAL: WhatsApp Rápido con Scripts "Del Clic a la Firma" -->
+  <div class="modal-backdrop" id="modalWhatsAppRapido">
+    <div class="modal-sheet">
+      <button class="modal-x-close" data-close="modalWhatsAppRapido">✕</button>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <span style="font-size:24px;">💬</span>
+        <div>
+          <h3 style="margin:0; font-size:16px;">WhatsApp Rápido · Del Clic a la Firma</h3>
+          <p id="wsp_cliente_nombre" style="font-size:12px; color:var(--ink-dim); margin:2px 0 0;">Cliente</p>
+        </div>
+      </div>
+      
+      <p style="font-size:12px; color:var(--ink-dim); margin-bottom:10px;">Selecciona una plantilla predeterminada para iniciar la conversación en 1 toque:</p>
+      
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div class="card" style="cursor:pointer; border:1px solid #C8E6C9; background:#F1F8E9; padding:12px;" onclick="enviarWspPlantilla(1)">
+          <p style="font-weight:700; color:#2E7D32; margin:0 0 4px; font-size:13px;">👋 1. Bienvenida y Primer Contacto (&lt;5 min)</p>
+          <p style="font-size:11.5px; color:#33691E; margin:0; line-height:1.4;">"¡Hola {nombre}! Te saluda {asesor} de Casa Dorada. Vi tu interés en los lotes de playa Costa Dorada en Tacna..."</p>
+        </div>
+
+        <div class="card" style="cursor:pointer; border:1px solid #BBDEFB; background:#E3F2FD; padding:12px;" onclick="enviarWspPlantilla(2)">
+          <p style="font-weight:700; color:#1565C0; margin:0 0 4px; font-size:13px;">🚗 2. Invitación a Visita Guiada (La Yarada)</p>
+          <p style="font-size:11.5px; color:#0D47A1; margin:0; line-height:1.4;">"Estimado(a) {nombre}, tenemos salidas guiadas a Costa Dorada con movilidad incluida. ¿Te gustaría reservar 2 cupos para este sábado o domingo?..."</p>
+        </div>
+
+        <div class="card" style="cursor:pointer; border:1px solid #FFE0B2; background:#FFF8E1; padding:12px;" onclick="enviarWspPlantilla(3)">
+          <p style="font-weight:700; color:#E65100; margin:0 0 4px; font-size:13px;">🏷️ 3. Cotización y Separación Inmediata</p>
+          <p style="font-size:11.5px; color:#BF360C; margin:0; line-height:1.4;">"Hola {nombre}, puedes separar tu lote preferido con solo S/ 500 para congelar precio y ubicación. ¿Deseas que te envíe los números de cuenta oficiales?..."</p>
+        </div>
+
+        <div class="card" style="cursor:pointer; border:1px solid #E1BEE7; background:#F3E5F5; padding:12px;" onclick="enviarWspPlantilla(4)">
+          <p style="font-weight:700; color:#6A1B9A; margin:0 0 4px; font-size:13px;">🔥 4. Reactivación de Prospecto en Riesgo</p>
+          <p style="font-size:11.5px; color:#4A148C; margin:0; line-height:1.4;">"Hola {nombre}, gusto en saludarte. Quería contarte que lanzamos nuevas ubicaciones en Costa Dorada con facilidades de pago directo..."</p>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn-secondary" data-close="modalWhatsAppRapido">Cancelar</button>
+        <button class="btn-primary" onclick="enviarWspPlantilla(0)">💬 Chat Libre (Sin texto)</button>
       </div>
     </div>
   </div>
@@ -2291,12 +2559,35 @@ const FRASES_MOTIVACIONALES = [
 ];
 
 const VIDEOS_MOTIVACIONALES = [
-  { id: "Hq0V_pBDRy8", t: "5 Estrategias para organizar tu día y vender más · Brian Tracy" },
-  { id: "nweBVbCPaLU", t: "Close the Deal — Motivación de ventas y bienes raíces · Grant Cardone" },
-  { id: "CWqW35lVGrQ", t: "¿El vendedor nace o se hace? Mentalidad y ambición en ventas · Sandro Meléndez" },
-  { id: "ahi1QO0s_YE", t: "Los 12 cierres de ventas más poderosos · Alex Dey" },
-  { id: "osK3rxLTfu0", t: "Técnicas de mentalidad y cierre comercial · Margarita Pasos" }
+  { id: "OD_8cIkCMos", t: "Inteligencia Emocional para Vender Más · Sandro Meléndez (Perú)" },
+  { id: "XeJbPQgnenM", t: "Domina el Arte de Cerrar Ventas: 4 Estrategias · Alex Dey" },
+  { id: "osK3rxLTfu0", t: "5 Técnicas que SOLO los Mejores Vendedores Conocen · Margarita Pasos" },
+  { id: "iQiQ5Sx2gKM", t: "Vender es Fácil: Neuroventas y Persuasión · Jürgen Klarić" },
+  { id: "mIanxrqiRUs", t: "A Conquistar la Venta de Bienes Raíces · Carlos Muñoz" },
+  { id: "M1pUEFzGjyk", t: "El Poder de tu Actitud y Entusiasmo Comercial · Víctor Küppers" },
+  { id: "pwY7MqZyqOc", t: "Liderazgo, Superación y Motivación Personal · David Fischman (Perú)" },
+  { id: "g9Q5Pf9sijE", t: "Psicología de Ventas: Cómo Ser un Mejor Cerrador · Brian Tracy (Español)" },
+  { id: "zTr2Z_x-wLk", t: "Los 3 Cierres de Ventas que Transforman Resultados · Alex Dey" },
+  { id: "BjLWfXZsIcg", t: "Lo que Todo Vendedor y Cerrador Debe Saber · Margarita Pasos" },
+  { id: "6ysDItlfznA", t: "Cómo Vender Inmuebles: Frases Clave de Cierre · Carlos Pérez-Newman" },
+  { id: "Swn0xgqUVyA", t: "Técnicas de Cierre: El Cierre Boomerang · Alex Dey" },
+  { id: "w9bN5tJ0js8", t: "Los Mejores Tips de Neuroventas en Campo · Jürgen Klarić" },
+  { id: "zsI0x78OiCo", t: "Aprende a Desaprender: Mentalidad Ganadora · Sandro Meléndez (TEDx)" },
+  { id: "I8S9nm1Ef78", t: "Actitud es Pasión y Enfoque en Metas · Víctor Küppers" }
 ];
+
+let videoIndiceManual = null;
+function siguienteVideoMotivacional(){
+  const diaNum = new Date().getDate();
+  const baseIdx = videoIndiceManual !== null ? videoIndiceManual : ((diaNum - 1) % VIDEOS_MOTIVACIONALES.length);
+  videoIndiceManual = (baseIdx + 1) % VIDEOS_MOTIVACIONALES.length;
+  const videoObj = VIDEOS_MOTIVACIONALES[videoIndiceManual];
+  const elVidTit = document.getElementById('vd_titulo');
+  if (elVidTit) elVidTit.textContent = videoObj.t;
+  const elIframe = document.getElementById('vd_iframe');
+  if (elIframe) elIframe.src = `https://www.youtube-nocookie.com/embed/${videoObj.id}?autoplay=1`;
+  toast('🎬 Píldora: ' + videoObj.t.split('·')[0].trim());
+}
 
 function cargarPortadaInicio(){
   const hoy = new Date();
@@ -4651,6 +4942,7 @@ async function cargarClientes(){
   }
 
   clientesCache = data || [];
+  actualizarBadgesMenu();
   clientesSeleccionados.clear();
   actualizarContadorSeleccionados();
   document.getElementById('barraAccionesMasivasClientes')?.classList.toggle('hidden', !esSuperAdminODirector);
@@ -4696,7 +4988,7 @@ function renderTarjetaCliente(c, esSuperAdminODirector){
         <button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\\\'")}');">🕒 Historial</button>
         <button class="chip-btn" style="color:#2C5691; border-color:#2C5691;" onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\\\'")}');">📋 Legal</button>
         <button class="chip-btn" style="color:var(--gold); border-color:var(--gold);" onclick="abrirGenerarDocumento('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\\\'")}','${(c.celular || '').replace(/'/g, "\\\\'")}')">📝 Minuta</button>
-        ${wspUrl ? `<a class="chip-btn gold" href="${wspUrl}" target="_blank" style="text-decoration:none;">💬 WhatsApp</a>` : ''}
+        ${wspUrl ? `<button class="chip-btn gold" onclick="abrirModalWhatsAppRapido('${escapeHtml(c.nombre).replace(/'/g, "\\\'")}', '${c.celular || c.telefono || ''}')">💬 WhatsApp</button>` : ''}
         ${c.celular ? `<a class="chip-btn" href="tel:${c.celular}" style="text-decoration:none;">📞 Llamar</a>` : ''}
         ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarCliente('${c.id}')">🗑️</button>` : ''}
       </div>
@@ -5046,6 +5338,15 @@ function calcularCotizadorMatematica(){
   const resDisp = document.getElementById('cot_resumen_display');
   if (resDisp) resDisp.textContent = `Inicial: S/ ${inicial.toLocaleString('es-PE')} · Saldo: S/ ${saldo.toLocaleString('es-PE')} en ${meses} cuotas fijas (Sin intereses)`;
 }
+
+
+
+  const pctComision = parseFloat(document.getElementById('cot_pct_comision')?.value) || 0.03;
+  const comisionEstimada = valorTotal * pctComision;
+  const dispComision = document.getElementById('cot_comision_display');
+  if (dispComision) {
+    dispComision.textContent = 'S/ ' + comisionEstimada.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
 function aplicarPorcentajeInicial(pct){
   const total = parseFloat(document.getElementById('cot_valor_total')?.value) || 0;
@@ -5973,18 +6274,43 @@ async function cargarSeparacionesTodas(){
   const el = document.getElementById('listaSeparacionesTodas');
   if (!data || data.length === 0) { el.innerHTML = emptyState('🏷️', 'No tienes separaciones registradas.'); return; }
 
-  el.innerHTML = data.map(s => `
-    <div class="card">
-      <div class="card-row">
-        <div>
-          <p class="card-title">${escapeHtml(s.propiedades?.codigo || '—')}</p>
-          <p class="card-sub">${escapeHtml(s.clientes?.nombre || '—')} · vence ${fmtFecha(s.fecha_vencimiento)}</p>
+  el.innerHTML = data.map(s => {
+    const hoy = new Date();
+    const vto = s.fecha_vencimiento ? new Date(s.fecha_vencimiento + 'T23:59:59') : null;
+    let badgeVto = '';
+    if (vto) {
+      const diffDays = Math.ceil((vto - hoy) / (1000 * 60 * 60 * 24));
+      if (diffDays < 0) badgeVto = `<span class="badge" style="background:#FFEAEA; color:#D32F2F; border:1px solid #FFCDD2;">🔴 Vencida hace ${Math.abs(diffDays)}d</span>`;
+      else if (diffDays === 0) badgeVto = `<span class="badge" style="background:#FFF3E0; color:#E65100; border:1px solid #FFE0B2;">⚠️ Vence HOY</span>`;
+      else if (diffDays <= 2) badgeVto = `<span class="badge" style="background:#FFF8E1; color:#F57F17; border:1px solid #FFECB3;">🟡 Quedan ${diffDays}d</span>`;
+      else badgeVto = `<span class="badge" style="background:#E8F5E9; color:#2E7D32; border:1px solid #C8E6C9;">🟢 Vigente (${diffDays}d)</span>`;
+    }
+
+    const celCliente = s.clientes?.celular || '';
+    const nomCliente = s.clientes?.nombre || 'Cliente';
+
+    return `
+      <div class="card" style="border-left: 4px solid ${s.estado === 'activa' ? 'var(--gold)' : 'var(--border)'};">
+        <div class="card-row">
+          <div>
+            <p class="card-title">🏷️ ${escapeHtml(s.propiedades?.codigo || 'Lote sin código')}</p>
+            <p class="card-sub">${escapeHtml(nomCliente)} · Vence: ${fmtFecha(s.fecha_vencimiento)}</p>
+            ${s.monto ? `<p class="card-sub" style="font-weight:700; color:var(--navy); margin-top:2px;">Separación: S/ ${parseFloat(s.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</p>` : ''}
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+            <span class="badge badge-${s.estado}">${estadoLabel(s.estado)}</span>
+            ${badgeVto}
+          </div>
         </div>
-        <span class="badge badge-${s.estado}">${estadoLabel(s.estado)}</span>
+        <div class="card-actions" style="margin-top:8px;">
+          ${celCliente ? `<button class="chip-btn gold" onclick="abrirModalWhatsAppRapido('${escapeHtml(nomCliente).replace(/'/g, "\'")}', '${celCliente}')">💬 WhatsApp</button>` : ''}
+          <button class="chip-btn" style="color:var(--gold); border-color:var(--gold);" onclick="abrirGenerarDocumento('${s.cliente_id}', '${escapeHtml(nomCliente).replace(/'/g, "\'")}', '${celCliente}')">📝 Minuta</button>
+          <button class="chip-btn" style="color:#2C5691; border-color:#2C5691;" onclick="abrirChecklistLegal('${s.cliente_id}', '${escapeHtml(nomCliente).replace(/'/g, "\'")}')">📋 Legal</button>
+          ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarSeparacion('${s.id}')">🗑️</button>` : ''}
+        </div>
       </div>
-      ${puedeEliminar ? `<div class="card-actions"><button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarSeparacion('${s.id}')">🗑️ Eliminar</button></div>` : ''}
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 async function eliminarSeparacion(id){
@@ -7658,6 +7984,142 @@ function escapeHtml(str){
   const d = document.createElement('div');
   d.textContent = str ?? '';
   return d.innerHTML;
+}
+
+/* ============ REORGANIZACIÓN Y CONTROL DEL MENÚ DEPARTAMENTOS ============ */
+function toggleDeptoMenu(btn){
+  const group = btn.closest('.dr-dept-group');
+  if (!group) return;
+  group.classList.toggle('cerrado');
+  const dept = group.dataset.dept;
+  if (dept) {
+    localStorage.setItem('cd_dept_' + dept, group.classList.contains('cerrado') ? 'cerrado' : 'abierto');
+  }
+}
+
+function restaurarEstadoMenuDeptos(){
+  document.querySelectorAll('.dr-dept-group').forEach(g => {
+    const dept = g.dataset.dept;
+    if (dept) {
+      const st = localStorage.getItem('cd_dept_' + dept);
+      if (st === 'cerrado') g.classList.add('cerrado');
+      else if (st === 'abierto') g.classList.remove('cerrado');
+    }
+  });
+}
+
+function irACobranzas(){
+  irAVista('separaciones');
+  cambiarPestanaSeparaciones('cobranzas');
+}
+
+function actualizarBadgesMenu(){
+  const cantTareas = (actividadesHoyCache || []).filter(a => !a.completada).length;
+  const bTareas = document.getElementById('drBadgeTareas');
+  if (bTareas) {
+    bTareas.textContent = cantTareas;
+    bTareas.classList.toggle('hidden', cantTareas === 0);
+  }
+
+  const cantRiesgo = (clientesCache || []).filter(c => clienteEnRiesgo(c)).length;
+  const bRiesgo = document.getElementById('drBadgeRiesgo');
+  if (bRiesgo) {
+    bRiesgo.textContent = cantRiesgo;
+    bRiesgo.classList.toggle('hidden', cantRiesgo === 0);
+  }
+
+  const cantSep = (separacionesPorVencerCache || []).length;
+  const bSep = document.getElementById('drBadgeSeparaciones');
+  if (bSep) {
+    bSep.textContent = cantSep;
+    bSep.classList.toggle('hidden', cantSep === 0);
+  }
+}
+
+/* ============ WHATSAPP RÁPIDO "DEL CLIC A LA FIRMA" ============ */
+let wspClienteActual = null;
+
+function abrirModalWhatsAppRapido(nombre, celular){
+  const celLimpio = (celular || '').replace(/\D/g, '');
+  if (!celLimpio) {
+    toast('El cliente no tiene un número celular registrado');
+    return;
+  }
+  wspClienteActual = { nombre, celular: celLimpio.slice(-9) };
+  document.getElementById('wsp_cliente_nombre').textContent = `${nombre} (📱 +51 ${celLimpio.slice(-9)})`;
+  openModal('modalWhatsAppRapido');
+}
+
+function enviarWspPlantilla(opcion){
+  if (!wspClienteActual) return;
+  const nombre = wspClienteActual.nombre.split(' ')[0];
+  const asesor = currentProfile?.nombre?.split(' ')[0] || 'tu asesor';
+  let msg = '';
+  
+  if (opcion === 1) {
+    msg = `¡Hola ${nombre}! Te saluda ${asesor} de Constructora e Inmobiliaria Casa Dorada. Vi tu interés en nuestro proyecto de casas de campo y playa Costa Dorada en Tacna. ¿En qué horario te vendría bien conversar 5 minutos para enviarte los planos y opciones disponibles?`;
+  } else if (opcion === 2) {
+    msg = `Estimado(a) ${nombre}, te saluda ${asesor} de Casa Dorada. Este fin de semana tenemos salidas guiadas a nuestro proyecto Costa Dorada en La Yarada Los Palos con movilidad incluida. ¿Te gustaría reservar 2 cupos para conocer la zona y los lotes disponibles este sábado o domingo?`;
+  } else if (opcion === 3) {
+    msg = `Hola ${nombre}, te saluda ${asesor} de Casa Dorada. Recuerda que puedes asegurar la ubicación de tu lote preferido en Costa Dorada con una separación de solo S/ 500 para congelar precio. ¿Deseas que te comparta los números de cuenta oficiales de la constructora?`;
+  } else if (opcion === 4) {
+    msg = `¡Hola ${nombre}! Gusto en saludarte nuevamente, te escribe ${asesor} de Casa Dorada. Te escribo porque acabamos de aperturar nuevas ubicaciones frente a parque y avenidas en Costa Dorada (La Yarada Los Palos) con financiamiento directo sin bancos. ¿Te gustaría que te envíe el plano actualizado?`;
+  }
+
+  const url = msg 
+    ? `https://wa.me/51${wspClienteActual.celular}?text=${encodeURIComponent(msg)}`
+    : `https://wa.me/51${wspClienteActual.celular}`;
+  
+  window.open(url, '_blank');
+  closeModal('modalWhatsAppRapido');
+}
+
+/* ============ BUSCADOR Y FILTROS DE CLIENTES EN VIVO ============ */
+let filtroChipClienteActivo = 'todos';
+let textoBusquedaClienteActivo = '';
+
+function aplicarFiltroChipClientes(tipo){
+  filtroChipClienteActivo = tipo;
+  document.querySelectorAll('#chipsFiltrosClientes .chip-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filtro === tipo);
+  });
+  filtrarClientesEnVivo(textoBusquedaClienteActivo);
+}
+
+function filtrarClientesEnVivo(texto){
+  textoBusquedaClienteActivo = (texto || '').toLowerCase().trim();
+  const el = document.getElementById('listaClientes');
+  if (!el || !clientesCache) return;
+
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+
+  let filtrados = clientesCache.filter(c => {
+    if (textoBusquedaClienteActivo) {
+      const matchNom = (c.nombre || '').toLowerCase().includes(textoBusquedaClienteActivo);
+      const matchTel = (c.celular || c.telefono || '').includes(textoBusquedaClienteActivo);
+      const matchCod = (c.codigo_correlativo || '').toLowerCase().includes(textoBusquedaClienteActivo);
+      const matchManzana = (c.manzana || '').toLowerCase().includes(textoBusquedaClienteActivo);
+      const matchLote = (c.lote || '').toLowerCase().includes(textoBusquedaClienteActivo);
+      if (!matchNom && !matchTel && !matchCod && !matchManzana && !matchLote) return false;
+    }
+    if (filtroChipClienteActivo === 'riesgo') {
+      return clienteEnRiesgo(c);
+    }
+    if (filtroChipClienteActivo === 'separados') {
+      return c.estado_prospecto === 'Separado' || c.estado_prospecto === 'Separación formalizada' || c.etapa_pipeline === 'separacion';
+    }
+    if (filtroChipClienteActivo === 'visitas') {
+      return (c.proxima_accion || '').toLowerCase().includes('visita') || c.etapa_pipeline === 'visita_agendada';
+    }
+    return true;
+  });
+
+  if (filtrados.length === 0) {
+    el.innerHTML = emptyState('🔍', 'No se encontraron clientes con esos criterios.');
+  } else {
+    el.innerHTML = filtrados.map(c => renderTarjetaCliente(c, esSuperAdminODirector)).join('');
+  }
 }
 
 (async function init(){
