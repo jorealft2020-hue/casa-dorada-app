@@ -548,10 +548,21 @@
   }
   .menu-btn:active{ background: #DDD6C4; }
   .drawer-backdrop{
-    position: fixed; inset: 0; background: rgba(26, 35, 50, 0.55);
-    z-index: 100; display: none; opacity: 0; transition: opacity 0.25s ease;
+    position: fixed; inset: 0; background: rgba(26, 35, 50, 0.65);
+    z-index: 100000 !important; display: none; opacity: 0; transition: opacity 0.25s ease;
   }
-  .drawer-backdrop.open{ display: flex; opacity: 1; }
+  .drawer-backdrop.open{ display: flex !important; opacity: 1 !important; }
+  
+  /* Cuando el menú lateral (drawer) está abierto, el menú flotante central NUNCA debe aparecer ni interactuar */
+  body.drawer-abierto #dockMenuFlotanteContenedor,
+  .drawer-backdrop.open ~ * #dockMenuFlotanteContenedor,
+  .drawer-backdrop.open ~ #dockMenuFlotanteContenedor,
+  .drawer-backdrop.open #dockMenuFlotanteContenedor {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
   .drawer-panel{
     width: 76%; max-width: 260px; height: 100%; background: #fff;
     display: flex; flex-direction: column; transform: translateX(-100%);
@@ -1886,10 +1897,14 @@ main.app-content {
           </p>
         </div>
 
-        <!-- ALERTA DINÁMICA DE CRUCE EN MODAL -->
-        <div id="nv_alerta_cruce_modal" class="hidden" style="margin-top:8px; background:#FEE2E2; border:1px solid #F87171; border-radius:8px; padding:8px; color:#991B1B; font-size:11.5px;">
-          ⚠️ <b>Atención:</b> La Van ya tiene asientos ocupados en este turno. Si excedes los 14 cupos, deberás coordinar movilidad de apoyo o vehículo de accionista.
+        <!-- ALERTA DINÁMICA DE CRUCE / BLOQUEO EN MODAL -->
+        <div id="nv_alerta_cruce_modal" class="hidden" style="margin-top:10px; border-radius:10px; padding:12px; font-size:12px; line-height:1.4;">
         </div>
+
+        <!-- BOTÓN EXCLUSIVO PARA CONTACTAR ADMINISTRACIÓN SI HAY CRUCE -->
+        <button type="button" id="btnContactarAdminMovilidad" class="chip-btn hidden" style="width:100%; margin-top:8px; justify-content:center; background:#25D366; color:#fff; border-color:#25D366; font-weight:700; padding:10px;" onclick="contactarAdministracionPorMovilidad()">
+          📲 Contactar a Administración (Gestionar Movilidad Adicional)
+        </button>
       </div>
 
       <div class="field">
@@ -1900,6 +1915,37 @@ main.app-content {
       <div class="modal-actions" style="margin-top:14px;">
         <button class="btn-secondary" data-close="modalNuevaVisita">Cancelar</button>
         <button class="btn-primary" id="btnGuardarNuevaVisita" onclick="guardarNuevaVisita()">Agendar Presentación</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- MODAL BLOQUEANTE: REPORTE OBLIGATORIO DE VISITA AL GRUPO DE VENTAS -->
+  <div class="modal-backdrop" id="modalReporteObligatorioWhatsApp" style="background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(16px); z-index:999999;">
+    <div class="modal-sheet" style="max-height:92vh; overflow-y:auto; border:2px solid #25D366; box-shadow:0 12px 40px rgba(37, 211, 102, 0.25);">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+        <span style="font-size:28px;">📲</span>
+        <div>
+          <h3 style="margin:0; font-size:16px; color:#142A4D;">Paso Obligatorio: Reporte de Visita</h3>
+          <p style="margin:2px 0 0; font-size:12px; color:#15803D; font-weight:700;">Grupo: VENTAS Y SEPARACIONES COSTA DORADA</p>
+        </div>
+      </div>
+
+      <div style="background:#DCFCE7; border:1px solid #86EFAC; border-radius:10px; padding:12px; margin-bottom:14px;">
+        <p style="font-size:12px; color:#166534; margin:0; line-height:1.45;">
+          🔒 <b>Confirmación Requerida:</b> Tu visita ya fue guardada en el sistema. Para confirmar definitivamente los asientos en la Van y <b>desbloquear el uso de la aplicación</b>, debes enviar este reporte al grupo oficial de ventas.
+        </p>
+      </div>
+
+      <div class="field">
+        <label style="font-weight:700; color:var(--navy);">Previsualización del Reporte Oficial:</label>
+        <textarea id="mro_texto_previsualizacion" style="width:100%; min-height:220px; font-size:11.5px; font-family:monospace; background:#F8FAFC; border:1.5px solid #CBD5E1; border-radius:10px; padding:10px; line-height:1.4;" readonly></textarea>
+      </div>
+
+      <div style="margin-top:16px;">
+        <button type="button" class="btn-primary" id="btnEnviarReporteObligatorio" style="width:100%; background:#25D366; border-color:#25D366; font-size:14.5px; font-weight:800; padding:14px; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 6px 20px rgba(37, 211, 102, 0.35);" onclick="enviarReporteObligatorioWhatsApp()">
+          <span>📲</span> Enviar Reporte a WhatsApp y Desbloquear App
+        </button>
       </div>
     </div>
   </div>
@@ -2851,47 +2897,57 @@ const ORGANIGRAMA_CARGOS = [
 ];
 
 const PERMISOS_CATALOGO = [
-  // COMERCIAL
+  // 💼 DEPARTAMENTO COMERCIAL (VENTAS & CIERRES)
   { key: 'ver_control',              label: 'Tablero de Control y Métricas',          dept: 'Comercial', default: true },
   { key: 'ver_kpi_monto',            label: 'Ver Montos en Soles (KPI Ventas)',       dept: 'Comercial', default: false },
   { key: 'ver_kpi_desglose',         label: 'Ver Desglose de KPIs por Asesor',        dept: 'Comercial', default: false },
   { key: 'ver_ranking_equipo',       label: 'Ver Ranking Diario del Equipo',          dept: 'Comercial', default: true },
+  { key: 'ver_proyeccion_ventas',    label: 'Ver Proyección de Ventas y Manzanas',    dept: 'Comercial', default: true },
   { key: 'ver_clientes',             label: 'Ver Cartera de Clientes',                dept: 'Comercial', default: true },
+  { key: 'crear_editar_clientes',    label: 'Registrar y Editar Clientes',            dept: 'Comercial', default: true },
   { key: 'ver_pipeline_kanban',      label: 'Ver Pipeline Kanban (8 Etapas)',         dept: 'Comercial', default: true },
   { key: 'asignar_archivar_masivo',  label: 'Acciones Masivas en Clientes',           dept: 'Comercial', default: false },
+  { key: 'eliminar_clientes',        label: 'Eliminar Prospectos de Cartera',         dept: 'Comercial', default: false },
   { key: 'ver_actividades',          label: 'Ver Actividades y Tareas del Día',       dept: 'Comercial', default: true },
+  { key: 'crear_actividades',        label: 'Registrar Nuevas Tareas y Acuerdos',     dept: 'Comercial', default: true },
   { key: 'ver_agenda',               label: 'Ver Agenda y Sincronización Google',     dept: 'Comercial', default: true },
-  { key: 'ver_control_visitas',      label: 'Ver Control de Presentaciones y Movilidad (14 Asientos)', dept: 'Comercial', default: true },
+  { key: 'crear_eventos_agenda',     label: 'Agendar Citas en Calendario',            dept: 'Comercial', default: true },
+  { key: 'ver_control_visitas',      label: 'Ver Control de Movilidad (Van 14)',      dept: 'Comercial', default: true },
+  { key: 'agendar_visitas_van',       label: 'Agendar Visitas a Proyecto en Van',      dept: 'Comercial', default: true },
   { key: 'ver_separaciones',         label: 'Ver Separaciones de Lotes',              dept: 'Comercial', default: true },
+  { key: 'crear_separaciones',       label: 'Registrar Nuevas Separaciones',          dept: 'Comercial', default: true },
+  { key: 'eliminar_separaciones',     label: 'Eliminar / Anular Separaciones',         dept: 'Comercial', default: false },
 
-  // MARKETING & PROSPECCIÓN
+  // 📣 DEPARTAMENTO MARKETING & PROSPECCIÓN
   { key: 'ver_planos',               label: 'Ver Planos Interactivos Costa Dorada',   dept: 'Marketing', default: true },
   { key: 'ver_cotizador',            label: 'Usar Cotizador Rápido de Lotes',         dept: 'Marketing', default: true },
-  { key: 'ver_comision_cotizador',   label: 'Ver Calculadora de Comisiones',          dept: 'Marketing', default: true },
+  { key: 'ver_comision_cotizador',   label: 'Ver Calculadora de Comisiones (6 Lotes)', dept: 'Marketing', default: true },
   { key: 'ver_portafolio',           label: 'Ver Portafolio Multimedia',              dept: 'Marketing', default: true },
   { key: 'gestionar_portafolio',     label: 'Subir Brochures, Fotos y Videos',        dept: 'Marketing', default: false },
   { key: 'ver_manualventas',         label: 'Ver Manual de Ventas & Speeches',        dept: 'Marketing', default: true },
   { key: 'gestionar_manualventas',   label: 'Crear Speeches y Respuestas a Objeciones', dept: 'Marketing', default: false },
-  { key: 'ver_majo_assistant',       label: 'Consultar con MAJO · Inteligencia Corporativa',      dept: 'Marketing', default: true },
+  { key: 'ver_majo_assistant',       label: 'Consultar con MAJO · Inteligencia Corp.', dept: 'Marketing', default: true },
   { key: 'gestionar_base_majo',      label: 'Subir Documentos a Conocimiento MAJO',   dept: 'Marketing', default: false },
 
-  // LEGAL & CONTRATACIÓN
+  // ⚖️ DEPARTAMENTO LEGAL & CONTRATACIÓN
   { key: 'ver_checklist_legal',      label: 'Ver Checklist Legal de Expedientes',     dept: 'Legal', default: true },
   { key: 'marcar_checklist_legal',   label: 'Validar Documentos Legales (Check)',     dept: 'Legal', default: false },
   { key: 'usar_generador_doc',       label: 'Generar Minutas y Contratos (IA)',       dept: 'Legal', default: true },
 
-  // ADMINISTRACIÓN & COBRANZAS
+  // 🗂️ DEPARTAMENTO ADMINISTRACIÓN & COBRANZAS
   { key: 'ver_cobranzas',            label: 'Ver Control de Cobranzas y Cuotas',      dept: 'Administración', default: false },
   { key: 'gestionar_cobranzas',      label: 'Registrar Cuotas y Pagos',               dept: 'Administración', default: false },
   { key: 'ver_rendimiento',          label: 'Ver Rendimiento por Área',               dept: 'Administración', default: true },
   { key: 'ver_solicitudes',          label: 'Ver Solicitudes y Requerimientos',       dept: 'Administración', default: true },
+  { key: 'crear_solicitudes',        label: 'Registrar Nuevas Solicitudes',           dept: 'Administración', default: true },
   { key: 'aprobar_solicitudes',      label: 'Aprobar/Rechazar Requerimientos',        dept: 'Administración', default: false },
   { key: 'ver_reporte_equipo',       label: 'Ver Reporte Diario del Equipo (9pm)',    dept: 'Administración', default: false },
   { key: 'reportes_pasados',         label: 'Emitir Reportes de Fechas Anteriores',   dept: 'Administración', default: false },
   { key: 'generar_informes',         label: 'Generar Informes Formales en PDF',       dept: 'Administración', default: false },
 
-  // GERENCIA & AJUSTES (EXCLUSIVO SUPERADMIN)
+  // ⚙️ GERENCIA & AJUSTES (EXCLUSIVO SUPERADMIN)
   { key: 'gestionar_equipo',         label: 'Gestión de Equipo y Permisos',           dept: 'Gerencia', default: false },
+  { key: 'eliminar_usuarios',        label: 'Eliminar Colaboradores del Sistema',     dept: 'Gerencia', default: false },
   { key: 'eliminar_registros',       label: 'Eliminar Registros del Sistema',         dept: 'Gerencia', default: false },
   { key: 'ver_ajustes',              label: 'Ver Módulo Ajustes y Sistema',           dept: 'Gerencia', default: false },
   { key: 'descargar_respaldos',      label: 'Descargar Respaldos JSON',               dept: 'Gerencia', default: false },
@@ -3048,9 +3104,33 @@ function marcarTodosPermisos(prefix, estado){
 
 function aplicarPresetPermisos(prefix, tipo){
   const sets = {
-    asesor: ['ver_control', 'ver_ranking_equipo', 'ver_clientes', 'ver_pipeline_kanban', 'ver_actividades', 'ver_agenda', 'ver_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'ver_manualventas', 'ver_majo_assistant', 'ver_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes'],
-    supervisor: ['ver_control', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_clientes', 'ver_pipeline_kanban', 'ver_actividades', 'ver_agenda', 'ver_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'ver_manualventas', 'ver_majo_assistant', 'ver_checklist_legal', 'marcar_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes', 'aprobar_solicitudes', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes'],
-    admin: ['ver_control', 'ver_kpi_monto', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_clientes', 'ver_pipeline_kanban', 'asignar_archivar_masivo', 'ver_actividades', 'ver_agenda', 'ver_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'gestionar_portafolio', 'ver_manualventas', 'gestionar_manualventas', 'ver_majo_assistant', 'gestionar_base_majo', 'ver_checklist_legal', 'marcar_checklist_legal', 'usar_generador_doc', 'ver_cobranzas', 'gestionar_cobranzas', 'ver_rendimiento', 'ver_solicitudes', 'aprobar_solicitudes', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes', 'ver_ajustes', 'descargar_respaldos']
+    asesor: [
+      'ver_control', 'ver_ranking_equipo', 'ver_proyeccion_ventas', 'ver_clientes', 'crear_editar_clientes',
+      'ver_pipeline_kanban', 'ver_actividades', 'crear_actividades', 'ver_agenda', 'crear_eventos_agenda',
+      'ver_control_visitas', 'agendar_visitas_van', 'ver_separaciones', 'crear_separaciones', 'ver_planos',
+      'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'ver_manualventas', 'ver_majo_assistant',
+      'ver_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes', 'crear_solicitudes'
+    ],
+    supervisor: [
+      'ver_control', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_proyeccion_ventas', 'ver_clientes',
+      'crear_editar_clientes', 'ver_pipeline_kanban', 'asignar_archivar_masivo', 'ver_actividades', 'crear_actividades',
+      'ver_agenda', 'crear_eventos_agenda', 'ver_control_visitas', 'agendar_visitas_van', 'ver_separaciones',
+      'crear_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio',
+      'gestionar_portafolio', 'ver_manualventas', 'gestionar_manualventas', 'ver_majo_assistant', 'gestionar_base_majo',
+      'ver_checklist_legal', 'marcar_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes',
+      'crear_solicitudes', 'aprobar_solicitudes', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes'
+    ],
+    admin: [
+      'ver_control', 'ver_kpi_monto', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_proyeccion_ventas',
+      'ver_clientes', 'crear_editar_clientes', 'ver_pipeline_kanban', 'asignar_archivar_masivo', 'eliminar_clientes',
+      'ver_actividades', 'crear_actividades', 'ver_agenda', 'crear_eventos_agenda', 'ver_control_visitas',
+      'agendar_visitas_van', 'ver_separaciones', 'crear_separaciones', 'eliminar_separaciones', 'ver_planos',
+      'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'gestionar_portafolio', 'ver_manualventas',
+      'gestionar_manualventas', 'ver_majo_assistant', 'gestionar_base_majo', 'ver_checklist_legal', 'marcar_checklist_legal',
+      'usar_generador_doc', 'ver_cobranzas', 'gestionar_cobranzas', 'ver_rendimiento', 'ver_solicitudes',
+      'crear_solicitudes', 'aprobar_solicitudes', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes',
+      'ver_ajustes', 'descargar_respaldos'
+    ]
   };
 
   const permitidos = new Set(sets[tipo] || []);
@@ -3058,7 +3138,7 @@ function aplicarPresetPermisos(prefix, tipo){
     const el = document.getElementById(`${prefix}_perm_${p.key}`);
     if (el && !el.disabled) el.checked = permitidos.has(p.key);
   });
-  toast(`Preset ${tipo.toUpperCase()} aplicado`);
+  toast(`Preset ${tipo.toUpperCase()} aplicado con éxito ✓`);
 }
 
 function recolectarPermisosDesdeUI(prefix, permisosPrevios = {}){
@@ -3387,11 +3467,24 @@ async function cargarPerfil(){
 
 /* ============ MENÚ LATERAL ============ */
 function abrirDrawer(){
-  document.getElementById('drawerBackdrop').classList.add('open');
+  document.getElementById('drawerBackdrop')?.classList.add('open');
+  document.body.classList.add('drawer-abierto');
+  const dock = document.getElementById('dockMenuFlotanteContenedor');
+  if (dock) {
+    dock.classList.add('hidden');
+    dock.style.setProperty('display', 'none', 'important');
+  }
+  cerrarDockHorizontal();
   actualizarDatosDrawer();
 }
 function cerrarDrawer(){
-  document.getElementById('drawerBackdrop').classList.remove('open');
+  document.getElementById('drawerBackdrop')?.classList.remove('open');
+  document.body.classList.remove('drawer-abierto');
+  const dock = document.getElementById('dockMenuFlotanteContenedor');
+  if (dock) {
+    dock.classList.remove('hidden');
+    dock.style.removeProperty('display');
+  }
 }
 
 function actualizarDatosDrawer(){
@@ -9270,202 +9363,192 @@ function calcularHoraRetorno(horaInicio){
   return `${String(finH).padStart(2, '0')}:${String(finM).padStart(2, '0')}`;
 }
 
+let visitaReportePendienteData = null;
+
 function verificarCruceMovilidadModal(){
   const tipo = document.getElementById('nv_tipo')?.value;
   const usaVan = tipo === 'visita_proyecto' || tipo === 'oficina_visita';
   const alerta = document.getElementById('nv_alerta_cruce_modal');
+  const btnAdmin = document.getElementById('btnContactarAdminMovilidad');
+  const btnGuardar = document.getElementById('btnGuardarNuevaVisita');
   const horaInicio = document.getElementById('nv_hora')?.value || '09:00';
   
   const elRet = document.getElementById('nv_hora_retorno_display');
   if (elRet) elRet.textContent = calcularHoraRetorno(horaInicio);
 
-  if (!usaVan || !alerta) {
+  if (!usaVan) {
     if (alerta) alerta.classList.add('hidden');
+    if (btnAdmin) btnAdmin.classList.add('hidden');
+    if (btnGuardar) {
+      btnGuardar.disabled = false;
+      btnGuardar.textContent = 'Agendar Presentación';
+    }
     return;
   }
 
   const fecha = document.getElementById('nv_fecha')?.value;
   const nuevosAsientos = parseInt(document.getElementById('nv_num_asientos')?.value) || 2;
 
-  // Buscar cruces en visitasPresentacionesCache
-  const ocupadosEnTurno = calcularAsientosOcupadosEnHorario(fecha, horaInicio);
-  const totalConNuevo = ocupadosEnTurno + nuevosAsientos;
+  // Analizar si hay cruce con otras visitas de Van en la misma fecha
+  const [hN, mN] = horaInicio.split(':').map(Number);
+  const minSalidaNuevo = hN * 60 + mN;
+  const minRetornoNuevo = minSalidaNuevo + 135;
 
-  if (totalConNuevo > 14) {
-    alerta.classList.remove('hidden');
-    alerta.innerHTML = `⚠️ <b>¡Capacidad Excedida!</b> En este horario ya hay <b>${ocupadosEnTurno} asientos reservados</b> de 14. Al sumar ${nuevosAsientos}, se totalizan <b>${totalConNuevo} personas</b>. Deberás coordinar movilidad de apoyo o vehículo de accionista.`;
-  } else if (ocupadosEnTurno > 0) {
-    alerta.classList.remove('hidden');
-    alerta.style.background = '#EFF6FF';
-    alerta.style.borderColor = '#93C5FD';
-    alerta.style.color = '#1E40AF';
-    alerta.innerHTML = `ℹ️ <b>Van compartida:</b> Hay ${ocupadosEnTurno} asientos reservados en este turno. Quedarán <b>${14 - totalConNuevo} asientos libres</b>.`;
-  } else {
-    alerta.classList.add('hidden');
-  }
-}
+  let hayCruceConOtraSalida = false;
+  let salidaConflicto = null;
+  let asientosOcupadosEnMismoHorario = 0;
+  let esMismoHorarioDeSalida = false;
 
-function calcularAsientosOcupadosEnHorario(fecha, horaNueva){
-  if (!fecha || !horaNueva) return 0;
-  const [hN, mN] = horaNueva.split(':').map(Number);
-  const minInicioNuevo = hN * 60 + mN;
-  const minFinNuevo = minInicioNuevo + 135;
-
-  let ocupados = 0;
-  visitasPresentacionesCache.forEach(v => {
+  (visitasPresentacionesCache || []).forEach(v => {
     if (v.fecha === fecha && (v.tipo === 'visita_proyecto' || v.tipo === 'oficina_visita') && v.estado !== 'cancelada') {
       const [hE, mE] = (v.hora || '09:00').split(':').map(Number);
-      const minInicioExistente = hE * 60 + mE;
-      const minFinExistente = minInicioExistente + 135;
+      const minSalidaExistente = hE * 60 + mE;
+      const minRetornoExistente = minSalidaExistente + 135;
 
-      // Hay solape si (inicio1 < fin2) && (inicio2 < fin1)
-      const haySolape = (minInicioNuevo < minFinExistente) && (minInicioExistente < minFinNuevo);
-      if (haySolape) {
-        ocupados += (parseInt(v.num_asientos) || 2);
+      const seSolapan = (minSalidaNuevo < minRetornoExistente) && (minSalidaExistente < minRetornoNuevo);
+      if (seSolapan) {
+        hayCruceConOtraSalida = true;
+        salidaConflicto = v;
+        // Si las horas de salida son prácticamente las mismas (diferencia <= 15 min), se consideran el mismo turno
+        if (Math.abs(minSalidaNuevo - minSalidaExistente) <= 15) {
+          esMismoHorarioDeSalida = true;
+          asientosOcupadosEnMismoHorario += (parseInt(v.num_asientos) || 2);
+        }
       }
     }
   });
 
-  return ocupados;
-}
-
-async function cargarVisitasPresentaciones(){
-  const filtroFecha = document.getElementById('vis_filtro_fecha')?.value || obtenerHoyLocal();
-  if (document.getElementById('vis_filtro_fecha') && !document.getElementById('vis_filtro_fecha').value) {
-    document.getElementById('vis_filtro_fecha').value = filtroFecha;
-  }
-
-  // Intentar cargar de Supabase, con fallback a localStorage
-  let data = null;
-  try {
-    const res = await sb.from('visitas_presentaciones').select('*').eq('fecha', filtroFecha).order('hora', { ascending: true });
-    if (!res.error && res.data) data = res.data;
-  } catch (e) { console.warn('Tabla visitas_presentaciones no presente, usando almacenamiento local:', e); }
-
-  if (!data) {
-    const local = localStorage.getItem('cd_visitas_' + filtroFecha);
-    data = local ? JSON.parse(local) : [];
-  }
-
-  visitasPresentacionesCache = data || [];
-
-  // Calcular métricas de la Van para esa fecha
-  let maxOcupadosEnCualquierTurno = 0;
-  visitasPresentacionesCache.forEach(v => {
-    if (v.tipo === 'visita_proyecto' || v.tipo === 'oficina_visita') {
-      const ocup = calcularAsientosOcupadosEnHorario(filtroFecha, v.hora || '09:00');
-      if (ocup > maxOcupadosEnCualquierTurno) maxOcupadosEnCualquierTurno = ocup;
+  if (!hayCruceConOtraSalida) {
+    // Sin ningún cruce: Van totalmente libre
+    if (alerta) {
+      alerta.classList.remove('hidden');
+      alerta.style.background = '#F0FDF4';
+      alerta.style.border = '1px solid #86EFAC';
+      alerta.style.color = '#166534';
+      alerta.innerHTML = `🟢 <b>Van Disponible:</b> No hay salidas previas que interfieran. Tendrás los 14 asientos a disposición para tu visita.`;
     }
-  });
-
-  const libres = Math.max(0, 14 - maxOcupadosEnCualquierTurno);
-  const pct = Math.min(100, Math.round((maxOcupadosEnCualquierTurno / 14) * 100));
-
-  const elOcup = document.getElementById('vis_num_ocupados');
-  if (elOcup) elOcup.textContent = maxOcupadosEnCualquierTurno;
-  const elLib = document.getElementById('vis_num_libres');
-  if (elLib) elLib.textContent = libres;
-  const elPct = document.getElementById('vis_porcentaje_ocupacion');
-  if (elPct) elPct.textContent = `${pct}% (${maxOcupadosEnCualquierTurno}/14 asientos)`;
-  const elBar = document.getElementById('vis_barra_progreso');
-  if (elBar) {
-    elBar.style.width = pct + '%';
-    elBar.style.background = pct > 100 ? '#EF4444' : pct >= 80 ? '#F59E0B' : 'linear-gradient(90deg, #3B82F6 0%, #10B981 100%)';
-  }
-
-  const badgeVan = document.getElementById('vis_badge_estado_van');
-  const alertaCruce = document.getElementById('vis_alerta_cruce');
-
-  if (maxOcupadosEnCualquierTurno > 14) {
-    if (badgeVan) { badgeVan.textContent = '🔴 Capacidad Excedida'; badgeVan.className = 'badge badge-vencida'; }
-    if (alertaCruce) {
-      alertaCruce.classList.remove('hidden');
-      alertaCruce.innerHTML = `⚠️ <b>¡CRUCE DE HORARIOS Y EXCESO DE CAPACIDAD!</b> Hay turnos con <b>${maxOcupadosEnCualquierTurno} asientos solicitados</b> superando el límite de 14. Se requiere coordinar Van adicional o movilidad de accionista.`;
+    if (btnAdmin) btnAdmin.classList.add('hidden');
+    if (btnGuardar) {
+      btnGuardar.disabled = false;
+      btnGuardar.textContent = 'Agendar Visita a Terreno';
     }
-  } else if (maxOcupadosEnCualquierTurno >= 10) {
-    if (badgeVan) { badgeVan.textContent = '🟡 Van Casi Llena'; badgeVan.className = 'badge badge-pendiente'; }
-    if (alertaCruce) alertaCruce.classList.add('hidden');
+  } else if (esMismoHorarioDeSalida) {
+    // Se está acoplando a una salida existente a la misma hora
+    const totalConNuevo = asientosOcupadosEnMismoHorario + nuevosAsientos;
+    if (totalConNuevo <= 14) {
+      // Caben en la misma salida
+      if (alerta) {
+        alerta.classList.remove('hidden');
+        alerta.style.background = '#EFF6FF';
+        alerta.style.border = '1px solid #93C5FD';
+        alerta.style.color = '#1E40AF';
+        alerta.innerHTML = `ℹ️ <b>Te estás acoplando al turno de las ${salidaConflicto.hora}</b> (Asesor: ${escapeHtml(salidaConflicto.asesor_nombre)}). Ocuparás ${nuevosAsientos} asientos. Quedarán <b>${14 - totalConNuevo} asientos libres</b> en la Van.`;
+      }
+      if (btnAdmin) btnAdmin.classList.add('hidden');
+      if (btnGuardar) {
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = 'Acoplarse y Agendar Visita';
+      }
+    } else {
+      // Sobrecupo en el mismo horario
+      if (alerta) {
+        alerta.classList.remove('hidden');
+        alerta.style.background = '#FEF2F2';
+        alerta.style.border = '1.5px solid #F87171';
+        alerta.style.color = '#991B1B';
+        alerta.innerHTML = `🚫 <b>NO ES POSIBLE AGENDAR (CAPACIDAD EXCEDIDA):</b> En la salida de las <b>${salidaConflicto.hora}</b> ya hay <b>${asientosOcupadosEnMismoHorario} asientos ocupados</b> de 14. Tus ${nuevosAsientos} asientos sobrepasan el límite (total: ${totalConNuevo}).`;
+      }
+      if (btnAdmin) btnAdmin.classList.remove('hidden');
+      if (btnGuardar) {
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = '🚫 Capacidad Excedida - Bloqueado';
+      }
+    }
   } else {
-    if (badgeVan) { badgeVan.textContent = '🟢 Van Disponible'; badgeVan.className = 'badge badge-completada'; }
-    if (alertaCruce) alertaCruce.classList.add('hidden');
-  }
+    // CRUCE DIRECTO DE HORARIO (la van está en ruta a La Yarada o en recorrido)
+    const retornoConflicto = calcularHoraRetorno(salidaConflicto.hora);
+    const libresEnConflicto = Math.max(0, 14 - (parseInt(salidaConflicto.num_asientos) || 2));
 
-  renderizarListaVisitas();
+    if (alerta) {
+      alerta.classList.remove('hidden');
+      alerta.style.background = '#FEF2F2';
+      alerta.style.border = '1.5px solid #F87171';
+      alerta.style.color = '#991B1B';
+      alerta.innerHTML = `
+        <p style="margin:0 0 6px; font-weight:800; font-size:12.5px;">🚫 NO ES POSIBLE AGENDAR EN ESTE HORARIO (VAN EN USO)</p>
+        <p style="margin:0 0 8px;">La Van de 14 asientos ya está en ruta para la salida de las <b>${salidaConflicto.hora}</b> hasta las <b>${retornoConflicto}</b> (Asesor: ${escapeHtml(salidaConflicto.asesor_nombre)}).</p>
+        <p style="margin:0; font-weight:700; color:#7F1D1D;">Opciones para resolver:</p>
+        <ul style="margin:4px 0 0; padding-left:18px;">
+          <li>Escoge un horario libre (antes de las ${salidaConflicto.hora} o después de las ${retornoConflicto}).</li>
+          ${libresEnConflicto >= nuevosAsientos ? `<li><b>Acóplate a este turno:</b> Cambia tu hora de partida exactamente a las <b>${salidaConflicto.hora}</b> (hay ${libresEnConflicto} asientos libres).</li>` : ''}
+          <li>O contacta a Administración abajo para solicitar una movilidad de apoyo / accionista.</li>
+        </ul>
+      `;
+    }
+    if (btnAdmin) btnAdmin.classList.remove('hidden');
+    if (btnGuardar) {
+      btnGuardar.disabled = true;
+      btnGuardar.textContent = '🚫 Horario Ocupado - No permitido';
+    }
+  }
 }
 
-function renderizarListaVisitas(){
-  const cont = document.getElementById('listaVisitasPresentaciones');
-  if (!cont) return;
+function contactarAdministracionPorMovilidad(){
+  const fecha = document.getElementById('nv_fecha')?.value || obtenerHoyLocal();
+  const hora = document.getElementById('nv_hora')?.value || '09:00';
+  const numAsientos = document.getElementById('nv_num_asientos')?.value || '3';
+  const clienteSel = document.getElementById('nv_cliente_sel');
+  const clienteNombre = clienteSel.options[clienteSel.selectedIndex]?.text || 'Cliente';
+  const asesorNombre = currentProfile?.nombre || 'Asesor Comercial';
 
-  let filtrados = visitasPresentacionesCache;
-  if (filtroTipoVisitasActual === 'proyecto') {
-    filtrados = filtrados.filter(v => v.tipo === 'visita_proyecto' || v.tipo === 'oficina_visita');
-  } else if (filtroTipoVisitasActual === 'oficina') {
-    filtrados = filtrados.filter(v => v.tipo === 'oficina');
-  } else if (filtroTipoVisitasActual === 'virtual') {
-    filtrados = filtrados.filter(v => v.tipo === 'virtual');
-  }
+  const mensaje = `🚐 *SOLICITUD URGENTE DE MOVILIDAD ADICIONAL / ACCIONISTA*\n` +
+    `*Constructora e Inmobiliaria Casa Dorada S.A.C.*\n\n` +
+    `Hola Administración, requiero coordinar una movilidad de apoyo para visita al proyecto Costa Dorada (La Yarada Los Palos):\n\n` +
+    `📅 *Fecha:* ${fmtFecha(fecha)}\n` +
+    `⏰ *Hora solicitada:* ${hora}\n` +
+    `👥 *Cliente:* ${clienteNombre}\n` +
+    `🪑 *Asientos requeridos:* ${numAsientos} personas\n` +
+    `🧑‍💼 *Asesor:* ${asesorNombre}\n\n` +
+    `⚠️ *Motivo:* La Van oficial de 14 asientos se encuentra ocupada / con cruce de horario en ese rango. Por favor confirmar disponibilidad de movilidad de apoyo o vehículo de accionista.`;
 
-  if (filtrados.length === 0) {
-    cont.innerHTML = emptyState('🚐', 'No hay presentaciones ni visitas programadas para esta fecha.');
-    return;
-  }
-
-  const tipoLabels = {
-    visita_proyecto: '🚗 Visita Directa a Terreno (La Yarada)',
-    oficina_visita: '🏢🚗 Oficina + Visita a Terreno',
-    oficina: '🏢 Presentación en Oficina Tacna',
-    virtual: '💻 Presentación Virtual (Meet/WhatsApp)'
-  };
-
-  cont.innerHTML = filtrados.map(v => {
-    const usaVan = v.tipo === 'visita_proyecto' || v.tipo === 'oficina_visita';
-    const retorno = calcularHoraRetorno(v.hora || '09:00');
-    return `
-      <div class="card" style="margin-bottom:10px; border-left:4px solid ${usaVan ? 'var(--gold)' : 'var(--navy)'};">
-        <div class="card-row">
-          <div>
-            <span style="font-size:10px; font-weight:800; color:${usaVan ? '#C89B3C' : '#142A4D'}; text-transform:uppercase;">
-              ${tipoLabels[v.tipo] || v.tipo}
-            </span>
-            <p class="card-title" style="font-size:14px; margin:2px 0 0;">${escapeHtml(v.cliente_nombre || 'Cliente')}</p>
-            <p class="card-sub">⏰ Salida: <b>${v.hora || '09:00'}</b> ${usaVan ? '· Retorno aprox: <b>' + retorno + '</b>' : ''}</p>
-            <p class="card-sub">🧑‍💼 Asesor: ${escapeHtml(v.asesor_nombre || 'Asesor Comercial')}</p>
-            ${usaVan ? `<p class="card-sub" style="font-weight:700; color:var(--navy);">🚐 Cupos en Van: ${v.num_asientos || 2} personas (${v.num_clientes || 1} cliente(s) + asesor)</p>` : ''}
-            ${v.observaciones ? `<p class="card-sub" style="font-style:italic;">📝 ${escapeHtml(v.observaciones)}</p>` : ''}
-          </div>
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-            <span class="badge ${usaVan ? 'badge-pendiente' : 'badge-completada'}">${usaVan ? 'Van Asignada' : 'Confirmada'}</span>
-            <button class="chip-btn" style="color:var(--danger); border-color:var(--danger); padding:2px 8px; font-size:11px;" onclick="eliminarVisitaPresentacion('${v.id}', '${v.fecha}')">🗑️</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
 function abrirModalNuevaVisita(){
   poblarSelectClientes('nv_cliente_sel');
-  document.getElementById('nv_asesor_nombre').value = currentProfile?.nombre || 'Jorge Luque';
-  document.getElementById('nv_fecha').value = document.getElementById('vis_filtro_fecha')?.value || obtenerHoyLocal();
-  document.getElementById('nv_hora').value = '09:00';
-  document.getElementById('nv_num_clientes').value = '2';
-  document.getElementById('nv_num_asientos').value = '3';
-  document.getElementById('nv_observaciones').value = '';
+  const elAsesor = document.getElementById('nv_asesor_nombre');
+  if (elAsesor) elAsesor.value = currentProfile?.nombre || 'Jorge Luque';
+  const elFecha = document.getElementById('nv_fecha');
+  if (elFecha) elFecha.value = document.getElementById('vis_filtro_fecha')?.value || obtenerHoyLocal();
+  const elHora = document.getElementById('nv_hora');
+  if (elHora) elHora.value = '09:00';
+  const elNumC = document.getElementById('nv_num_clientes');
+  if (elNumC) elNumC.value = '2';
+  const elNumA = document.getElementById('nv_num_asientos');
+  if (elNumA) elNumA.value = '3';
+  const elObs = document.getElementById('nv_observaciones');
+  if (elObs) elObs.value = '';
   alCambiarTipoVisitaModal();
   openModal('modalNuevaVisita');
 }
 
 async function guardarNuevaVisita(){
+
   const tipo = document.getElementById('nv_tipo').value;
   const clienteSel = document.getElementById('nv_cliente_sel');
-  const clienteNombre = clienteSel.options[clienteSel.selectedIndex]?.text || 'Cliente';
   const clienteId = clienteSel.value || null;
   const fecha = document.getElementById('nv_fecha').value;
   const hora = document.getElementById('nv_hora').value;
   const numClientes = parseInt(document.getElementById('nv_num_clientes').value) || 1;
   const numAsientos = parseInt(document.getElementById('nv_num_asientos').value) || (numClientes + 1);
   const observaciones = document.getElementById('nv_observaciones').value.trim();
+
+  // Obtener datos del cliente de la caché
+  const cliObj = (clientesCache || []).find(c => c.id === clienteId);
+  const clienteNombre = cliObj ? cliObj.nombre : (clienteSel.options[clienteSel.selectedIndex]?.text || 'Cliente');
+  const clienteCelular = cliObj ? (cliObj.celular || cliObj.telefono || '—') : '—';
+  const clienteDni = cliObj ? (cliObj.dni || '—') : '—';
+  const asesorNombre = currentProfile?.nombre || 'Jorge Luque';
 
   if (!fecha || !hora) {
     toast('Por favor indica fecha y hora');
@@ -9477,8 +9560,10 @@ async function guardarNuevaVisita(){
     tipo,
     cliente_id: clienteId,
     cliente_nombre: clienteNombre,
+    cliente_celular: clienteCelular,
+    cliente_dni: clienteDni,
     asesor_id: currentUser?.id,
-    asesor_nombre: currentProfile?.nombre || 'Asesor Comercial',
+    asesor_nombre: asesorNombre,
     fecha,
     hora,
     num_clientes: numClientes,
@@ -9488,14 +9573,13 @@ async function guardarNuevaVisita(){
     created_at: new Date().toISOString()
   };
 
-  // Intentar guardar en Supabase
+  // Guardar en Supabase y localmente
   try {
     await sb.from('visitas_presentaciones').insert(nuevaVisita);
   } catch (e) {
     console.warn('Fallback a guardado local para visita:', e);
   }
 
-  // Guardado en fallback local
   const key = 'cd_visitas_' + fecha;
   const listaLocal = JSON.parse(localStorage.getItem(key) || '[]');
   listaLocal.push(nuevaVisita);
@@ -9515,11 +9599,65 @@ async function guardarNuevaVisita(){
     });
   } catch (errAg) { console.warn('Error sincronizando con agenda:', errAg); }
 
-  toast('Presentación / Visita agendada con éxito ✓');
   closeModal('modalNuevaVisita');
-  
+
+  // Calcular asientos ocupados en el turno y libres
+  const ocupadosEnTurno = calcularAsientosOcupadosEnHorario(fecha, hora) + numAsientos;
+  const libresRestantes = Math.max(0, 14 - ocupadosEnTurno);
+
+  const tipoLabels = {
+    visita_proyecto: '🚗 Visita Directa a Proyecto (La Yarada Los Palos)',
+    oficina_visita: '🏢🚗 Presentación en Oficina + Visita a Proyecto',
+    oficina: '🏢 Presentación en Oficina Tacna',
+    virtual: '💻 Presentación Virtual (Meet/WhatsApp)'
+  };
+
+  // Construir texto oficial del reporte de visita
+  const mensajeReporte = `🚐 *REPORTE OFICIAL DE VISITA A PROYECTO*\n` +
+    `*Constructora & Inmobiliaria Casa Dorada S.A.C.*\n` +
+    `*Proyecto Costa Dorada Ciudad Smart · La Yarada Los Palos*\n\n` +
+    `📅 *Fecha:* ${fmtFecha(fecha)}\n` +
+    `⏰ *Hora de Partida:* ${hora} (Retorno estimado: ${calcularHoraRetorno(hora)})\n` +
+    `🎯 *Modalidad:* ${tipoLabels[tipo] || tipo}\n\n` +
+    `👤 *Asesor / Socio:* ${asesorNombre}\n` +
+    `🏢 *Empresa / Área:* Casa Dorada · Departamento Comercial\n` +
+    `👥 *Cliente:* ${clienteNombre}\n` +
+    `📱 *Celular:* ${clienteCelular}\n` +
+    `📄 *DNI / RUC:* ${clienteDni}\n\n` +
+    `🚐 *DETALLE DE MOVILIDAD (VAN 14 ASIENTOS):*\n` +
+    `🪑 *Asientos solicitados por el cliente:* ${numClientes}\n` +
+    `🪑 *Total asientos separados (cliente + asesor):* ${numAsientos}\n` +
+    `🟢 *Asientos que quedan DISPONIBLES en la Van:* ${libresRestantes} / 14\n\n` +
+    `📝 *Observaciones / Punto de partida:* ${observaciones || 'Oficina central / Punto de encuentro habitual'}\n\n` +
+    `_Registrado y verificado en Planner Corporativo Casa Dorada._`;
+
+  visitaReportePendienteData = {
+    mensajeReporte,
+    fecha
+  };
+
+  // BLOQUEO OBLIGATORIO DE LA APLICACIÓN HASTA ENVIAR A WHATSAPP
+  document.getElementById('mro_texto_previsualizacion').value = mensajeReporte;
+  openModal('modalReporteObligatorioWhatsApp');
+}
+
+function enviarReporteObligatorioWhatsApp(){
+  if (!visitaReportePendienteData) {
+    closeModal('modalReporteObligatorioWhatsApp');
+    return;
+  }
+
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(visitaReportePendienteData.mensajeReporte)}`;
+  window.open(url, '_blank');
+
+  toast('¡Reporte enviado al grupo de ventas! Aplicación desbloqueada ✓');
+  closeModal('modalReporteObligatorioWhatsApp');
+
+  const fechaVisita = visitaReportePendienteData.fecha;
+  visitaReportePendienteData = null;
+
   const elFiltro = document.getElementById('vis_filtro_fecha');
-  if (elFiltro) elFiltro.value = fecha;
+  if (elFiltro) elFiltro.value = fechaVisita;
   cargarVisitasPresentaciones();
   cargarPendientesInicio();
 }
@@ -9539,7 +9677,6 @@ async function eliminarVisitaPresentacion(id, fecha){
   cargarVisitasPresentaciones();
 }
 
-/* ============ REORGANIZACIÓN Y CONTROL DEL MENÚ DEPARTAMENTOS ============ */
 function toggleDeptoMenu(btn){
   const group = btn.closest('.dr-dept-group');
   if (!group) return;
@@ -9551,6 +9688,7 @@ function toggleDeptoMenu(btn){
 }
 
 function restaurarEstadoMenuDeptos(){
+
   document.querySelectorAll('.dr-dept-group').forEach(g => {
     const dept = g.dataset.dept;
     if (dept) {
@@ -9683,6 +9821,8 @@ window.abrirModalNuevaVisita = abrirModalNuevaVisita;
 window.toggleDockHorizontal = toggleDockHorizontal;
 window.navegarDesdeDockHorizontal = navegarDesdeDockHorizontal;
 window.irARegistrarSolicitudDesdeInicio = irARegistrarSolicitudDesdeInicio;
+window.contactarAdministracionPorMovilidad = contactarAdministracionPorMovilidad;
+window.enviarReporteObligatorioWhatsApp = enviarReporteObligatorioWhatsApp;
 window.abrirModalCotizador = abrirModalCotizador;
 window.abrirModalWhatsAppRapido = abrirModalWhatsAppRapido;
 window.abrirChecklistLegal = abrirChecklistLegal;
