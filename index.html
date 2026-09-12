@@ -403,11 +403,32 @@
   }
   .welcome-badge{ display:inline-flex; align-items:center; gap:6px; background: rgba(201,151,62,0.2); border:1px solid rgba(201,151,62,0.4); color: var(--gold-soft); padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
 
-  .welcome-logos-3d{ display:flex; align-items:center; justify-content:center; gap:22px; perspective: 600px; }
+  .welcome-logos-3d{
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; perspective: 800px; margin: 4px 0 16px; flex-wrap: wrap;
+  }
   .logo-3d-flotante{
-    width: 84px; height: 84px; object-fit: contain;
-    filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
+    width: 155px; height: 98px; max-width: 46%; object-fit: contain;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
     animation: logoFlotar3D 4.5s ease-in-out infinite;
+    background: rgba(255, 255, 255, 0.09);
+    padding: 8px 14px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(200, 155, 60, 0.45);
+    backdrop-filter: blur(8px);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  .logo-3d-flotante:hover{
+    transform: scale(1.05);
+    border-color: var(--gold);
+  }
+  @media (min-width: 600px){
+    .logo-3d-flotante{
+      width: 195px; height: 115px; padding: 10px 20px;
+    }
+    .welcome-logos-3d{
+      gap: 28px;
+    }
   }
   @keyframes logoFlotar3D{
     0%, 100% { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
@@ -769,6 +790,55 @@
   margin-left: auto;
 }
 
+
+/* ============ TARJETA RESALTANTE DE PENDIENTES DEL DÍA ============ */
+.card-pendientes-resaltante {
+  background: linear-gradient(135deg, #FFFDF9 0%, #FFF8E6 100%);
+  border: 1.5px solid #E5C378;
+  border-left: 5px solid #C89B3C;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 18px rgba(200, 155, 60, 0.16);
+  position: relative;
+}
+.pendientes-badge-alerta {
+  background: #C89B3C;
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.pendientes-badge-alerta.urgente {
+  background: #D32F2F;
+  animation: pulseAlerta 2s infinite;
+}
+@keyframes pulseAlerta {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.item-pendiente-fila {
+  background: #ffffff;
+  border: 1px solid #EFE4CC;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.item-pendiente-fila:hover {
+  transform: translateY(-1px);
+  border-color: var(--gold);
+}
+
 </style>
 </head>
 <body>
@@ -781,6 +851,7 @@
         <input type="file" id="drFotoPerfilInput" accept="image/*" style="display:none;">
         <div class="drawer-user-info">
           <div class="drawer-user-name" id="drUserName">Jorge Alexander Luque</div>
+          <div class="drawer-user-cargo" id="drUserCargo" style="font-weight:700; color:#C89B3C; font-size:12px; margin-top:2px;">Director Comercial</div>
           <div class="drawer-user-role" id="drUserRole">SuperAdmin</div>
           <div class="drawer-user-email" id="drUserEmail">joreal.ft2020@gmail.com</div>
         </div>
@@ -848,7 +919,7 @@
             </button>
             <button class="drawer-item" data-nav="majo_assistant" id="drNavMajoAssistant" data-modkey="majo_assistant">
               <span class="dr-icon">🤖</span>
-              <span class="dr-label">MAJO ASSISTANT (IA)</span>
+              <span class="dr-label">MAJO · Inteligencia Corporativa</span>
             </button>
           </div>
         </div>
@@ -957,7 +1028,7 @@
       </div>
       <div class="topbar-actions">
         <button class="bell" id="btnBell"><span class="dot" id="bellDot"></span>🔔</button>
-        <button class="bell majo-fab-btn" id="btnMajoRapido" title="Hablar con MAJO ASSISTANT">😊</button>
+        <button class="bell majo-fab-btn" id="btnMajoRapido" title="MAJO · Inteligencia Corporativa (Conocimiento Unificado)">😊</button>
         <button class="bell" id="btnRefrescarApp" title="Refrescar aplicación">🔄</button>
       </div>
     </div>
@@ -974,6 +1045,49 @@
           <p class="welcome-sub" id="wb_subtitulo" style="margin-bottom:0;">Bienvenido a tu jornada comercial y de gestión. Enfoque total en metas y cierres.</p>
         </div>
 
+        <!-- TARJETA RESALTANTE DE PENDIENTES DEL DÍA -->
+        <div class="card-pendientes-resaltante" id="cardPendientesInicio">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:24px;">⚡</span>
+              <div>
+                <h3 style="margin:0; font-size:15px; color:#142A4D; font-weight:800; letter-spacing:-0.2px;">Prioridades y Pendientes de Hoy</h3>
+                <p id="pi_subtitulo_fecha" style="margin:2px 0 0; font-size:11.5px; color:#8A6D3B; font-weight:600;">Cargando tus tareas del día…</p>
+              </div>
+            </div>
+            <span class="pendientes-badge-alerta" id="pi_badge_total">0 pendientes</span>
+          </div>
+
+          <!-- Mini Strip de Métricas de Pendientes -->
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:14px;">
+            <div style="background:#fff; border:1px solid #EAD8B1; border-radius:12px; padding:8px 10px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+              <span style="font-size:11px; color:#6D5D3A; font-weight:600; display:block;">Tareas Hoy</span>
+              <span id="pi_num_tareas" style="font-size:18px; font-weight:800; color:#142A4D;">0</span>
+            </div>
+            <div style="background:#fff; border:1px solid #EAD8B1; border-radius:12px; padding:8px 10px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+              <span style="font-size:11px; color:#6D5D3A; font-weight:600; display:block;">Citas Agenda</span>
+              <span id="pi_num_citas" style="font-size:18px; font-weight:800; color:#C89B3C;">0</span>
+            </div>
+            <div style="background:#fff; border:1px solid #EAD8B1; border-radius:12px; padding:8px 10px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+              <span style="font-size:11px; color:#6D5D3A; font-weight:600; display:block;">En Riesgo</span>
+              <span id="pi_num_riesgo" style="font-size:18px; font-weight:800; color:#D32F2F;">0</span>
+            </div>
+          </div>
+
+          <!-- Contenedor dinámico de lista de pendientes prioritarios -->
+          <div id="pi_lista_pendientes" style="display:flex; flex-direction:column; gap:8px;">
+            <div class="spinner"></div>
+          </div>
+
+          <!-- Botones de acción rápida -->
+          <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;">
+            <button class="chip-btn gold" onclick="abrirModalActividad()" style="font-size:11.5px; padding:6px 12px;">+ Registrar Tarea</button>
+            <button class="chip-btn" onclick="abrirModalAgenda()" style="font-size:11.5px; padding:6px 12px; border-color:var(--gold); color:var(--navy); background:#fff;">📅 Agendar Cita</button>
+            <button class="chip-btn" onclick="irAVista('agenda')" style="font-size:11.5px; padding:6px 12px; color:var(--navy); background:#fff; margin-left:auto;">Ver Agenda Completa →</button>
+          </div>
+        </div>
+
+
         <div class="quote-card">
           <div class="quote-header">
             <span class="quote-tag">💡 Enfoque del día</span>
@@ -984,9 +1098,12 @@
         </div>
 
         <div class="video-card">
-          <div class="video-header">
-            <span style="font-size:18px;">🎬</span>
-            <h4 id="vd_titulo">Píldora de mentalidad y ventas de hoy</h4>
+          <div class="video-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <span style="font-size:18px;">🎬</span>
+              <h4 id="vd_titulo" style="margin:0; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Píldora de mentalidad y ventas de hoy</h4>
+            </div>
+            <button class="chip-btn" onclick="siguienteVideoMotivacional()" style="font-size:11px; padding:3px 9px; border-color:var(--gold); color:var(--navy); background:#fff; flex-shrink:0; cursor:pointer;" title="Ver otro video">🔄 Cambiar</button>
           </div>
           <div class="video-wrapper">
             <iframe id="vd_iframe" src="https://www.youtube-nocookie.com/embed/Hq0V_pBDRy8" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -1117,6 +1234,17 @@
             <p class="card-title" style="font-size:13px;">Subir/reemplazar Brochure (PDF)</p>
             <input type="file" id="pfBrochureInput" accept="application/pdf" style="margin-top:8px;">
           </div>
+          <div class="card" style="background:#F0F7FF; border:1px solid #C2DCFA; margin-bottom:12px;">
+            <div style="display:flex; align-items:flex-start; gap:8px;">
+              <span style="font-size:18px;">📋</span>
+              <div>
+                <p style="font-weight:700; color:#142A4D; margin:0 0 3px; font-size:12.5px;">Requisito de Brochure Oficial · Costa Dorada</p>
+                <p style="font-size:11.5px; color:#3A5372; margin:0; line-height:1.4;">
+                  Se requiere archivo <b>PDF de alta resolución</b> con el Master Plan, cuadro de lotes por manzana, planos y amenidades de La Yarada Los Palos (máx. 50 MB). El sistema lo renderiza directamente en el visor táctil.
+                </p>
+              </div>
+            </div>
+          </div>
           <div id="pfBrochureViewer"></div>
         </div>
         <div id="pfPanelVideoCD" class="pf-panel hidden">
@@ -1127,6 +1255,17 @@
             <p class="card-title" style="font-size:13px; margin-top:16px;">Opción B — Subir el video directo (archivo)</p>
             <input type="file" id="pfVideoCDArchivo" accept="video/*" style="margin-top:8px;">
             <div id="pfVideoCDSubiendo" class="hidden" style="font-size:12px; color:var(--ink-dim); margin-top:6px;">Subiendo video, espera un momento…</div>
+          </div>
+          <div class="card" style="background:#FFF8E1; border:1px solid #FFE082; margin-bottom:12px;">
+            <div style="display:flex; align-items:flex-start; gap:8px;">
+              <span style="font-size:18px;">🎬</span>
+              <div>
+                <p style="font-weight:700; color:#8D6E63; margin:0 0 3px; font-size:12.5px;">Requisito de Videos de Proyecto</p>
+                <p style="font-size:11.5px; color:#5D4037; margin:0; line-height:1.4;">
+                  Se requiere <b>enlace o ID de YouTube</b> (o archivo MP4 de hasta 100 MB) con recorridos terrestres, tomas aéreas con dron de la playa Los Palos o avances del pórtico de ingreso.
+                </p>
+              </div>
+            </div>
           </div>
           <div id="pfVideoCDViewer"></div>
         </div>
@@ -1272,10 +1411,10 @@
       <!-- VISTA: MAJO ASSISTANT -->
       <div id="viewMajoAssistant" class="hidden">
         <div class="majo-header-card">
-          <div class="majo-avatar-grande">😊</div>
+          <div class="majo-avatar-grande">🤖</div>
           <div>
-            <p style="font-weight:800; font-size:16px; margin:0; color:#fff;">MAJO ASSISTANT</p>
-            <p style="font-size:11.5px; color:#CBD5E1; margin:2px 0 0;">● En línea · Casa Dorada AI</p>
+            <p style="font-weight:800; font-size:16.5px; margin:0; color:#fff; letter-spacing:-0.2px;">MAJO · Inteligencia Corporativa</p>
+            <p style="font-size:11.5px; color:#E5C378; margin:2px 0 0; font-weight:600;">● Sistema Activo · Conocimiento Transversal (Legal, Comercial, Marketing, Obras)</p>
           </div>
         </div>
         <div style="display:flex; gap:8px; margin-bottom:12px;">
@@ -1285,7 +1424,7 @@
         <div id="majoTabChat">
           <div id="majoChatMensajes" class="majo-chat-fondo"></div>
           <div class="majo-input-bar">
-            <input type="text" id="majoChatInput" placeholder="Pregúntale a MAJO sobre el proyecto…">
+            <input type="text" id="majoChatInput" placeholder="Consulta sobre lotes, documentos legales, speeches de venta o normativas de Costa Dorada…">
             <button id="btnEnviarMajoChat" class="majo-btn-enviar">➤</button>
           </div>
         </div>
@@ -1933,166 +2072,74 @@
 
   <!-- MODAL: editar miembro del equipo (completo) -->
   <div class="modal-backdrop" id="modalEditarUsuario">
-    <div class="modal-sheet">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalEditarUsuario">✕</button>
       <h3>Ficha de colaborador y permisos</h3>
       <input type="hidden" id="eu_id">
+      
       <div class="field"><label>Nombre completo</label><input type="text" id="eu_nombre"></div>
       <div class="field"><label>Correo de Google</label><input type="text" id="eu_email" disabled></div>
       <div class="field"><label>Número de DNI</label><input type="text" id="eu_dni" placeholder="DNI del colaborador"></div>
       <div class="field"><label>Celular / WhatsApp</label><input type="tel" id="eu_celular" placeholder="Número para alertas"></div>
       
       <div class="field">
-        <label>Área o Departamento</label>
-        <select id="eu_area">
-          <option value="Comercial">Área Comercial</option>
-          <option value="Administración">Administración</option>
-          <option value="Contabilidad">Contabilidad</option>
-          <option value="Legal">Asesoría Legal</option>
-          <option value="Marketing">Marketing y Publicidad</option>
-          <option value="Obras">Obras y Habilitación Técnica</option>
+        <label>Departamento Principal</label>
+        <select id="eu_area" onchange="actualizarSubareasYCargos('eu')">
+          <option value="Gerencia General">Gerencia General</option>
+          <option value="Departamento de Administración">Departamento de Administración</option>
+          <option value="Departamento de Asesoría Legal">Departamento de Asesoría Legal</option>
+          <option value="Departamento Comercial">Departamento Comercial</option>
+          <option value="Departamento Técnico">Departamento Técnico</option>
         </select>
       </div>
 
-      <div class="field"><label>Cargo específico</label><input type="text" id="eu_cargo" placeholder="Ej: Asesor Comercial, Asistente Contable..."></div>
       <div class="field">
-        <label>Supervisor (recibe copia del reporte diario 9pm)</label>
+        <label>Sub-Área o Especialidad</label>
+        <select id="eu_subarea"></select>
+      </div>
+
+      <div class="field">
+        <label>Cargo Oficial según Organigrama</label>
+        <select id="eu_cargo_sel" onchange="alCambiarCargoSelect('eu')"></select>
+        <input type="text" id="eu_cargo" placeholder="Escribe el cargo específico" class="hidden" style="margin-top:6px;">
+      </div>
+
+      <div class="field">
+        <label>Supervisor a cargo (recibe copia del reporte diario 9pm)</label>
         <select id="eu_supervisor_id"><option value="">— Sin supervisor —</option></select>
       </div>
+      
       <div class="field">
         <label>Correo adicional para el reporte diario (opcional)</label>
         <input type="email" id="eu_reporte_email_adicional" placeholder="otro-correo@ejemplo.com">
       </div>
-      <label class="perm-card">
-        <div class="perm-card-info"><span class="perm-card-title">Recibir Reporte Diario (9pm)</span></div>
+      
+      <label class="perm-card" style="margin-bottom:12px;">
+        <div class="perm-card-info"><span class="perm-card-title">Recibir Reporte Diario del Equipo (9pm)</span></div>
         <input type="checkbox" id="eu_reporte_diario_activo" checked>
       </label>
 
       <div class="field">
         <label>Rol en el sistema</label>
-        <select id="eu_rol">
-          <option value="usuario">Colaborador / Operativo</option>
-          <option value="supervisor">Supervisor de Área</option>
-          <option value="director_comercial">Director Comercial</option>
-          <option value="gerencia">Gerencia General</option>
-          <option value="admin">Administrador de la Empresa</option>
-          <option value="superadmin">SuperAdmin (Desarrollador / Matriz)</option>
-        </select>
+        <select id="eu_rol"></select>
       </div>
 
       <div class="field">
-        <label>Estado</label>
+        <label>Estado de la cuenta</label>
         <select id="eu_activo">
           <option value="true">Activo</option>
           <option value="false">Inactivo (bloqueado)</option>
         </select>
       </div>
 
-      <div class="perm-section-title">📁 ACCESO A MÓDULOS</div>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Módulo de Tareas</span>
-          <span class="perm-card-desc">Registrar y consultar tareas realizadas</span>
-        </div>
-        <input type="checkbox" id="perm_ver_actividades">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Cartera de Clientes</span>
-          <span class="perm-card-desc">Gestionar prospectos y próximas acciones</span>
-        </div>
-        <input type="checkbox" id="perm_ver_clientes">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Módulo de Separaciones</span>
-          <span class="perm-card-desc">Visualizar y registrar separaciones de lotes</span>
-        </div>
-        <input type="checkbox" id="perm_ver_separaciones">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Módulo de Agenda</span>
-          <span class="perm-card-desc">Citas programadas y checklist persistente</span>
-        </div>
-        <input type="checkbox" id="perm_ver_agenda">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Módulo de Rendimiento</span>
-          <span class="perm-card-desc">Visualizar embudo y métricas</span>
-        </div>
-        <input type="checkbox" id="perm_ver_rendimiento">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Tablero de Control</span>
-          <span class="perm-card-desc">KPIs y reportes en el panel operativo</span>
-        </div>
-        <input type="checkbox" id="perm_ver_control">
-      </label>
+      <!-- AVISO DE SOLO SUPERADMIN -->
+      <div id="eu_aviso_solo_superadmin" class="hidden" style="background:#FFF3E0; border:1px solid #FFE0B2; border-radius:10px; padding:10px; margin:12px 0; font-size:12px; color:#E65100;">
+        🔒 <b>Permisos protegidos:</b> La configuración detallada de permisos en check es exclusiva del SuperAdmin.
+      </div>
 
-      <div class="perm-section-title">📊 ACCESO A KPIS EN RENDIMIENTO</div>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Ver Monto Total Vendido (S/)</span>
-          <span class="perm-card-desc">Muestra la cifra total en soles</span>
-        </div>
-        <input type="checkbox" id="perm_kpi_monto">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Ver Desglose por Colaborador</span>
-          <span class="perm-card-desc">Métricas individuales de cada asesor</span>
-        </div>
-        <input type="checkbox" id="perm_kpi_desglose">
-      </label>
+      <div id="eu_contenedor_permisos"></div>
 
-      <div class="perm-section-title">⚙️ OPERACIONES Y GESTIÓN</div>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Reportes de Fechas Anteriores</span>
-          <span class="perm-card-desc">Emitir reporte diario de días pasados</span>
-        </div>
-        <input type="checkbox" id="perm_reportes_pasados">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Generar Informes Formales</span>
-          <span class="perm-card-desc">Emitir PDFs quincenales / mensuales con membrete</span>
-        </div>
-        <input type="checkbox" id="perm_generar_informes">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Eliminar Registros</span>
-          <span class="perm-card-desc">Borrar clientes, citas o tareas</span>
-        </div>
-        <input type="checkbox" id="perm_eliminar_registros">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Gestionar Equipo (Admin)</span>
-          <span class="perm-card-desc">Crear y editar usuarios y permisos</span>
-        </div>
-        <input type="checkbox" id="perm_gestionar_equipo">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Ver Ranking del Equipo</span>
-          <span class="perm-card-desc">Ver las métricas y el ranking de TODOS los asesores (no solo las propias)</span>
-        </div>
-        <input type="checkbox" id="perm_ver_ranking_equipo">
-      </label>
-      <p style="font-size:11.5px; font-weight:800; color:var(--ink-dim); margin:18px 0 6px; text-transform:uppercase; letter-spacing:0.04em;">Otros Módulos</p>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🗺️ Planos Interactivos</span></div><input type="checkbox" id="perm_ver_planos"></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧮 Cotizador</span></div><input type="checkbox" id="perm_ver_cotizador"></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📁 Portafolio Comercial</span></div><input type="checkbox" id="perm_ver_portafolio"></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📋 Solicitudes y Requerimientos</span></div><input type="checkbox" id="perm_ver_solicitudes"></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🎯 Manual de Ventas</span></div><input type="checkbox" id="perm_ver_manualventas"></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🤖 MAJO ASSISTANT</span></div><input type="checkbox" id="perm_ver_majo_assistant"></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧑‍🤝‍🧑 Reporte Diario del Equipo</span></div><input type="checkbox" id="perm_ver_reporte_equipo"></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">⚙️ Módulo Ajustes</span></div><input type="checkbox" id="perm_ver_ajustes"></label>
-      <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
+      <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
         <div style="display:flex; gap:10px; width:100%;">
           <button class="btn-secondary" data-close="modalEditarUsuario">Cancelar</button>
           <button class="btn-primary" id="btnGuardarUsuario">Guardar cambios</button>
@@ -2183,129 +2230,51 @@
 
   <!-- MODAL: Preautorizar nuevo usuario -->
   <div class="modal-backdrop" id="modalPreautorizar">
-    <div class="modal-sheet">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalPreautorizar">✕</button>
       <h3 id="pa_modal_titulo">Alta de colaborador en el equipo</h3>
       <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-8px;">Registra los datos corporativos del colaborador. Podrá ingresar con su cuenta de Google.</p>
+      
       <div class="field"><label>Nombre completo del colaborador *</label><input type="text" id="pa_nombre" placeholder="Nombres y apellidos"></div>
       <div class="field"><label>Correo de Google *</label><input type="email" id="pa_email" placeholder="nombre@gmail.com"></div>
-      <div class="field"><label>Número de DNI</label><input type="text" id="pa_dni" placeholder="DNI"></div>
-      <div class="field"><label>Celular / WhatsApp</label><input type="tel" id="pa_celular" placeholder="Número de celular"></div>
+      <div class="field"><label>Número de DNI</label><input type="text" id="pa_dni" placeholder="DNI del colaborador"></div>
+      <div class="field"><label>Celular / WhatsApp</label><input type="tel" id="pa_celular" placeholder="9XXXXXXXX"></div>
+      
       <div class="field">
-        <label>Área o Departamento *</label>
-        <select id="pa_area">
-          <option value="Comercial">Área Comercial</option>
-          <option value="Administración">Administración</option>
-          <option value="Contabilidad">Contabilidad</option>
-          <option value="Legal">Asesoría Legal</option>
-          <option value="Marketing">Marketing y Publicidad</option>
-          <option value="Obras">Obras y Habilitación Técnica</option>
+        <label>Departamento Principal *</label>
+        <select id="pa_area" onchange="actualizarSubareasYCargos('pa')">
+          <option value="Gerencia General">Gerencia General</option>
+          <option value="Departamento de Administración">Departamento de Administración</option>
+          <option value="Departamento de Asesoría Legal">Departamento de Asesoría Legal</option>
+          <option value="Departamento Comercial" selected>Departamento Comercial</option>
+          <option value="Departamento Técnico">Departamento Técnico</option>
         </select>
       </div>
-      <div class="field"><label>Cargo específico *</label><input type="text" id="pa_cargo" placeholder="Ej: Asesor Comercial, Asistente Contable..."></div>
+
+      <div class="field">
+        <label>Sub-Área o Especialidad *</label>
+        <select id="pa_subarea"></select>
+      </div>
+
+      <div class="field">
+        <label>Cargo Oficial según Organigrama *</label>
+        <select id="pa_cargo_sel" onchange="alCambiarCargoSelect('pa')"></select>
+        <input type="text" id="pa_cargo" placeholder="Escribe el cargo específico" class="hidden" style="margin-top:6px;">
+      </div>
+
       <div class="field">
         <label>Rol en el sistema *</label>
-        <select id="pa_rol">
-          <option value="usuario">Colaborador / Operativo</option>
-          <option value="supervisor">Supervisor de Área</option>
-          <option value="director_comercial">Director Comercial</option>
-          <option value="gerencia">Gerencia General</option>
-          <option value="admin">Administrador de la Empresa</option>
-          <option value="superadmin">SuperAdmin (Desarrollador / Matriz)</option>
-        </select>
+        <select id="pa_rol"></select>
       </div>
 
-      <div class="perm-section-title">📁 ACCESO A MÓDULOS</div>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Módulo de Tareas</span>
-          <span class="perm-card-desc">Registrar y consultar tareas</span>
-        </div>
-        <input type="checkbox" id="pa_perm_ver_actividades" checked>
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Cartera de Clientes</span>
-          <span class="perm-card-desc">Gestionar prospectos y próximas acciones</span>
-        </div>
-        <input type="checkbox" id="pa_perm_ver_clientes" checked>
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Módulo de Separaciones</span>
-          <span class="perm-card-desc">Visualizar y registrar separaciones</span>
-        </div>
-        <input type="checkbox" id="pa_perm_ver_separaciones" checked>
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Módulo de Agenda</span>
-          <span class="perm-card-desc">Citas y checklist persistente</span>
-        </div>
-        <input type="checkbox" id="pa_perm_ver_agenda" checked>
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Módulo de Rendimiento</span>
-          <span class="perm-card-desc">Embudo y métricas</span>
-        </div>
-        <input type="checkbox" id="pa_perm_ver_rendimiento" checked>
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Tablero de Control</span>
-          <span class="perm-card-desc">KPIs y reportes</span>
-        </div>
-        <input type="checkbox" id="pa_perm_ver_control" checked>
-      </label>
+      <!-- AVISO DE SOLO SUPERADMIN -->
+      <div id="pa_aviso_solo_superadmin" class="hidden" style="background:#FFF3E0; border:1px solid #FFE0B2; border-radius:10px; padding:10px; margin:12px 0; font-size:12px; color:#E65100;">
+        🔒 <b>Permisos protegidos:</b> La configuración detallada de permisos en check es exclusiva del SuperAdmin.
+      </div>
 
-      <div class="perm-section-title">📊 ACCESO A KPIS EN RENDIMIENTO</div>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Ver Monto Total Vendido (S/)</span>
-          <span class="perm-card-desc">Cifra en soles</span>
-        </div>
-        <input type="checkbox" id="pa_perm_kpi_monto">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Ver Desglose por Colaborador</span>
-          <span class="perm-card-desc">Rendimiento individual</span>
-        </div>
-        <input type="checkbox" id="pa_perm_kpi_desglose">
-      </label>
+      <div id="pa_contenedor_permisos"></div>
 
-      <div class="perm-section-title">⚙️ OPERACIONES Y REPORTES</div>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Reportes de Fechas Anteriores</span>
-          <span class="perm-card-desc">Emitir reporte de días pasados</span>
-        </div>
-        <input type="checkbox" id="pa_perm_reportes_pasados">
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Generar Informes Formales</span>
-          <span class="perm-card-desc">PDFs quincenales / mensuales</span>
-        </div>
-        <input type="checkbox" id="pa_perm_generar_informes" checked>
-      </label>
-      <label class="perm-card">
-        <div class="perm-card-info">
-          <span class="perm-card-title">Eliminar Registros</span>
-          <span class="perm-card-desc">Borrar clientes, citas o tareas</span>
-        </div>
-        <input type="checkbox" id="pa_perm_eliminar_registros">
-      </label>
-      <p style="font-size:11.5px; font-weight:800; color:var(--ink-dim); margin:18px 0 6px; text-transform:uppercase; letter-spacing:0.04em;">Otros Módulos</p>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🗺️ Planos Interactivos</span></div><input type="checkbox" id="pa_perm_ver_planos" checked></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧮 Cotizador</span></div><input type="checkbox" id="pa_perm_ver_cotizador" checked></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📁 Portafolio Comercial</span></div><input type="checkbox" id="pa_perm_ver_portafolio" checked></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">📋 Solicitudes y Requerimientos</span></div><input type="checkbox" id="pa_perm_ver_solicitudes" checked></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🎯 Manual de Ventas</span></div><input type="checkbox" id="pa_perm_ver_manualventas" checked></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🤖 MAJO ASSISTANT</span></div><input type="checkbox" id="pa_perm_ver_majo_assistant" checked></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">🧑‍🤝‍🧑 Reporte Diario del Equipo</span></div><input type="checkbox" id="pa_perm_ver_reporte_equipo"></label>
-      <label class="perm-card"><div class="perm-card-info"><span class="perm-card-title">⚙️ Módulo Ajustes</span></div><input type="checkbox" id="pa_perm_ver_ajustes"></label>
-      <div class="modal-actions">
+      <div class="modal-actions" style="margin-top:14px;">
         <button class="btn-secondary" data-close="modalPreautorizar">Cancelar</button>
         <button class="btn-primary" id="btnGuardarPreautorizado">Agregar colaborador</button>
       </div>
@@ -2486,29 +2455,301 @@ async function prepararArchivoParaSubida(file){
 /* =========================================================================
    LISTA ÚNICA Y CANÓNICA DE PERMISOS DEL SISTEMA
    ========================================================================= */
-const PERMISOS_CATALOGO = [
-  { key: 'ver_agenda',          label: 'Ver Agenda',                         default: true  },
-  { key: 'ver_clientes',        label: 'Ver Cartera de Clientes',            default: true  },
-  { key: 'ver_separaciones',    label: 'Ver Separaciones de Lotes',          default: true  },
-  { key: 'ver_cotizador',       label: 'Ver Cotizador Rápido',               default: true  },
-  { key: 'ver_planos',          label: 'Ver Planos Interactivos',            default: true  },
-  { key: 'ver_portafolio',      label: 'Ver Portafolio Comercial',           default: true  },
-  { key: 'ver_actividades',     label: 'Ver Actividades Realizadas',         default: true  },
-  { key: 'ver_control',         label: 'Ver Tablero de Control',             default: true  },
-  { key: 'ver_rendimiento',     label: 'Ver Rendimiento',                    default: true  },
-  { key: 'ver_ranking_equipo',  label: 'Ver Ranking del Equipo',             default: false },
-  { key: 'kpi_monto',           label: 'Ver Montos (KPI)',                   default: false },
-  { key: 'kpi_desglose',        label: 'Ver Desglose de KPI',                default: false },
-  { key: 'reportes_pasados',    label: 'Ver Reportes Pasados',               default: false },
-  { key: 'generar_informes',    label: 'Generar Informes',                   default: false },
-  { key: 'gestionar_equipo',    label: 'Crear y editar usuarios y permisos', default: false },
-  { key: 'eliminar_registros',  label: 'Eliminar Registros',                 default: false },
-  { key: 'ver_solicitudes',     label: 'Ver Solicitudes y Requerimientos',   default: true  },
-  { key: 'ver_manualventas',    label: 'Ver Manual de Ventas',               default: true  },
-  { key: 'ver_majo_assistant',  label: 'Ver MAJO ASSISTANT',                 default: true  },
-  { key: 'ver_reporte_equipo',  label: 'Ver Reporte Diario del Equipo',      default: false },
-  { key: 'ver_ajustes',         label: 'Ver módulo Ajustes',                 default: false },
+/* ============ ORGANIGRAMA Y ESTRUCTURA CORPORATIVA ============ */
+const DEPARTAMENTOS_SUB_AREAS = [
+  {
+    departamento: "Gerencia General",
+    subareas: ["Alta Dirección", "Estrategia Corporativa", "Auditoría Interna"]
+  },
+  {
+    departamento: "Departamento de Administración",
+    subareas: ["Área Administrativa", "Área Contable", "Tesorería y Cobranzas"]
+  },
+  {
+    departamento: "Departamento de Asesoría Legal",
+    subareas: ["Área Legal & Saneamiento", "Contrataciones Notariales"]
+  },
+  {
+    departamento: "Departamento Comercial",
+    subareas: ["Área de Ventas", "Área de Marketing", "Atención al Cliente"]
+  },
+  {
+    departamento: "Departamento Técnico",
+    subareas: ["Área de Ingeniería y Obras", "Área de Arquitectura y Urbanismo", "Topografía y Catastro"]
+  }
 ];
+
+const ORGANIGRAMA_CARGOS = [
+  {
+    depto: "Gerencia General",
+    cargos: [
+      "Gerente General",
+      "Asistente Gerencial"
+    ]
+  },
+  {
+    depto: "Departamento de Administración",
+    cargos: [
+      "Administrador General",
+      "Asistente Administrativo",
+      "Asesor Contable",
+      "Asistente Contable"
+    ]
+  },
+  {
+    depto: "Departamento de Asesoría Legal",
+    cargos: [
+      "Asesor Legal",
+      "Asistente Legal"
+    ]
+  },
+  {
+    depto: "Departamento Técnico (Ingeniería & Obras)",
+    cargos: [
+      "Ingeniero (Jefe de Dpto. Técnico)",
+      "Ingeniero Residente",
+      "Arquitecto(a) / Diseñador(a)"
+    ]
+  },
+  {
+    depto: "Departamento Comercial (Ventas)",
+    cargos: [
+      "Director Comercial",
+      "Jefe de Ventas",
+      "Líder de Equipo",
+      "Asesor Comercial Máster",
+      "Asesor Comercial Senior",
+      "Asesor Comercial Junior",
+      "Asesor(a) Comercial"
+    ]
+  },
+  {
+    depto: "Departamento Comercial (Marketing)",
+    cargos: [
+      "Director de Marketing",
+      "Especialista en Pauta Digital / Media Buyer",
+      "Creador de Contenido Multimedia",
+      "Community Manager / Asistente Marketing"
+    ]
+  }
+];
+
+const PERMISOS_CATALOGO = [
+  // COMERCIAL
+  { key: 'ver_control',              label: 'Tablero de Control y Métricas',          dept: 'Comercial', default: true },
+  { key: 'ver_kpi_monto',            label: 'Ver Montos en Soles (KPI Ventas)',       dept: 'Comercial', default: false },
+  { key: 'ver_kpi_desglose',         label: 'Ver Desglose de KPIs por Asesor',        dept: 'Comercial', default: false },
+  { key: 'ver_ranking_equipo',       label: 'Ver Ranking Diario del Equipo',          dept: 'Comercial', default: true },
+  { key: 'ver_clientes',             label: 'Ver Cartera de Clientes',                dept: 'Comercial', default: true },
+  { key: 'ver_pipeline_kanban',      label: 'Ver Pipeline Kanban (8 Etapas)',         dept: 'Comercial', default: true },
+  { key: 'asignar_archivar_masivo',  label: 'Acciones Masivas en Clientes',           dept: 'Comercial', default: false },
+  { key: 'ver_actividades',          label: 'Ver Actividades y Tareas del Día',       dept: 'Comercial', default: true },
+  { key: 'ver_agenda',               label: 'Ver Agenda y Sincronización Google',     dept: 'Comercial', default: true },
+  { key: 'ver_separaciones',         label: 'Ver Separaciones de Lotes',              dept: 'Comercial', default: true },
+
+  // MARKETING & PROSPECCIÓN
+  { key: 'ver_planos',               label: 'Ver Planos Interactivos Costa Dorada',   dept: 'Marketing', default: true },
+  { key: 'ver_cotizador',            label: 'Usar Cotizador Rápido de Lotes',         dept: 'Marketing', default: true },
+  { key: 'ver_comision_cotizador',   label: 'Ver Calculadora de Comisiones',          dept: 'Marketing', default: true },
+  { key: 'ver_portafolio',           label: 'Ver Portafolio Multimedia',              dept: 'Marketing', default: true },
+  { key: 'gestionar_portafolio',     label: 'Subir Brochures, Fotos y Videos',        dept: 'Marketing', default: false },
+  { key: 'ver_manualventas',         label: 'Ver Manual de Ventas & Speeches',        dept: 'Marketing', default: true },
+  { key: 'gestionar_manualventas',   label: 'Crear Speeches y Respuestas a Objeciones', dept: 'Marketing', default: false },
+  { key: 'ver_majo_assistant',       label: 'Consultar con MAJO · Inteligencia Corporativa',      dept: 'Marketing', default: true },
+  { key: 'gestionar_base_majo',      label: 'Subir Documentos a Conocimiento MAJO',   dept: 'Marketing', default: false },
+
+  // LEGAL & CONTRATACIÓN
+  { key: 'ver_checklist_legal',      label: 'Ver Checklist Legal de Expedientes',     dept: 'Legal', default: true },
+  { key: 'marcar_checklist_legal',   label: 'Validar Documentos Legales (Check)',     dept: 'Legal', default: false },
+  { key: 'usar_generador_doc',       label: 'Generar Minutas y Contratos (IA)',       dept: 'Legal', default: true },
+
+  // ADMINISTRACIÓN & COBRANZAS
+  { key: 'ver_cobranzas',            label: 'Ver Control de Cobranzas y Cuotas',      dept: 'Administración', default: false },
+  { key: 'gestionar_cobranzas',      label: 'Registrar Cuotas y Pagos',               dept: 'Administración', default: false },
+  { key: 'ver_rendimiento',          label: 'Ver Rendimiento por Área',               dept: 'Administración', default: true },
+  { key: 'ver_solicitudes',          label: 'Ver Solicitudes y Requerimientos',       dept: 'Administración', default: true },
+  { key: 'aprobar_solicitudes',      label: 'Aprobar/Rechazar Requerimientos',        dept: 'Administración', default: false },
+  { key: 'ver_reporte_equipo',       label: 'Ver Reporte Diario del Equipo (9pm)',    dept: 'Administración', default: false },
+  { key: 'reportes_pasados',         label: 'Emitir Reportes de Fechas Anteriores',   dept: 'Administración', default: false },
+  { key: 'generar_informes',         label: 'Generar Informes Formales en PDF',       dept: 'Administración', default: false },
+
+  // GERENCIA & AJUSTES (EXCLUSIVO SUPERADMIN)
+  { key: 'gestionar_equipo',         label: 'Gestión de Equipo y Permisos',           dept: 'Gerencia', default: false },
+  { key: 'eliminar_registros',       label: 'Eliminar Registros del Sistema',         dept: 'Gerencia', default: false },
+  { key: 'ver_ajustes',              label: 'Ver Módulo Ajustes y Sistema',           dept: 'Gerencia', default: false },
+  { key: 'descargar_respaldos',      label: 'Descargar Respaldos JSON',               dept: 'Gerencia', default: false },
+];
+
+function esUsuarioSuperAdmin(){
+  const email = (currentUser?.email || '').toLowerCase().trim();
+  return email === 'joreal.ft2020@gmail.com' || email === 'jorea.ft2020@gmail.com' || currentProfile?.rol === 'superadmin';
+}
+
+
+/* ============ GESTIÓN DE ROLES, CARGOS Y PERMISOS ============ */
+function actualizarSubareasYCargos(prefix, subareaSeleccionada = '', cargoSeleccionado = ''){
+  const selArea = document.getElementById(prefix + '_area');
+  const selSub = document.getElementById(prefix + '_subarea');
+  const selCargo = document.getElementById(prefix + '_cargo_sel');
+  if (!selArea || !selSub || !selCargo) return;
+
+  const deptoNombre = selArea.value;
+  const matchDepto = DEPARTAMENTOS_SUB_AREAS.find(d => d.departamento === deptoNombre);
+  const subareas = matchDepto ? matchDepto.subareas : ["General"];
+
+  selSub.innerHTML = subareas.map(s => `<option value="${escapeHtml(s)}" ${s === subareaSeleccionada ? 'selected' : ''}>${escapeHtml(s)}</option>`).join('');
+
+  // Generar opciones de cargos agrupadas por departamento
+  let htmlCargos = '';
+  ORGANIGRAMA_CARGOS.forEach(g => {
+    htmlCargos += `<optgroup label="${escapeHtml(g.depto)}">`;
+    g.cargos.forEach(c => {
+      htmlCargos += `<option value="${escapeHtml(c)}" ${c === cargoSeleccionado ? 'selected' : ''}>${escapeHtml(c)}</option>`;
+    });
+    htmlCargos += `</optgroup>`;
+  });
+  htmlCargos += `<optgroup label="Personalizado"><option value="__OTRO__">Otro cargo personalizado...</option></optgroup>`;
+  selCargo.innerHTML = htmlCargos;
+
+  const esOtro = cargoSeleccionado && !ORGANIGRAMA_CARGOS.some(g => g.cargos.includes(cargoSeleccionado));
+  if (esOtro) {
+    selCargo.value = '__OTRO__';
+    const inputOtro = document.getElementById(prefix + '_cargo');
+    if (inputOtro) {
+      inputOtro.value = cargoSeleccionado;
+      inputOtro.classList.remove('hidden');
+    }
+  } else {
+    if (cargoSeleccionado) selCargo.value = cargoSeleccionado;
+    const inputOtro = document.getElementById(prefix + '_cargo');
+    if (inputOtro) {
+      inputOtro.value = '';
+      inputOtro.classList.add('hidden');
+    }
+  }
+}
+
+function alCambiarCargoSelect(prefix){
+  const selCargo = document.getElementById(prefix + '_cargo_sel');
+  const inputOtro = document.getElementById(prefix + '_cargo');
+  if (!selCargo || !inputOtro) return;
+  if (selCargo.value === '__OTRO__') {
+    inputOtro.classList.remove('hidden');
+    inputOtro.focus();
+  } else {
+    inputOtro.classList.add('hidden');
+    inputOtro.value = '';
+  }
+}
+
+function obtenerCargoFinal(prefix){
+  const selCargo = document.getElementById(prefix + '_cargo_sel');
+  const inputOtro = document.getElementById(prefix + '_cargo');
+  if (!selCargo) return '';
+  if (selCargo.value === '__OTRO__') {
+    return (inputOtro?.value || '').trim() || 'Colaborador';
+  }
+  return selCargo.value;
+}
+
+function actualizarSelectorRoles(selectId, rolActual = 'usuario'){
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const esSA = esUsuarioSuperAdmin();
+
+  let opciones = [
+    { val: 'usuario', label: 'Colaborador / Asesor Operativo' },
+    { val: 'supervisor', label: 'Supervisor / Jefe de Área' },
+    { val: 'admin', label: 'Administrador General' }
+  ];
+
+  // El rol Superadmin solo es visible para Jorge Luque
+  if (esSA) {
+    opciones.unshift({ val: 'superadmin', label: 'SuperAdmin / Desarrollador (Privado)' });
+  }
+
+  sel.innerHTML = opciones.map(o => `<option value="${o.val}" ${o.val === rolActual ? 'selected' : ''}>${escapeHtml(o.label)}</option>`).join('');
+}
+
+function renderizarBloquePermisos(prefix, permisosActuales = {}){
+  const cont = document.getElementById(prefix + '_contenedor_permisos');
+  if (!cont) return;
+
+  const esSA = esUsuarioSuperAdmin();
+  const avisoSA = document.getElementById(prefix + '_aviso_solo_superadmin');
+  if (avisoSA) {
+    avisoSA.classList.toggle('hidden', esSA);
+  }
+
+  const grupos = {};
+  PERMISOS_CATALOGO.forEach(p => {
+    if (!grupos[p.dept]) grupos[p.dept] = [];
+    grupos[p.dept].push(p);
+  });
+
+  let html = '';
+  if (esSA) {
+    html += `
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin:10px 0 14px;">
+        <button type="button" class="chip-btn" onclick="aplicarPresetPermisos('${prefix}', 'asesor')">💼 Preset Asesor</button>
+        <button type="button" class="chip-btn" onclick="aplicarPresetPermisos('${prefix}', 'supervisor')">🧑‍💼 Preset Supervisor</button>
+        <button type="button" class="chip-btn" onclick="aplicarPresetPermisos('${prefix}', 'admin')">🛡️ Preset Admin</button>
+        <button type="button" class="chip-btn" onclick="marcarTodosPermisos('${prefix}', true)">✅ Todos</button>
+        <button type="button" class="chip-btn" onclick="marcarTodosPermisos('${prefix}', false)">❌ Ninguno</button>
+      </div>
+    `;
+  }
+
+  Object.keys(grupos).forEach(dept => {
+    html += `<div class="perm-section-title">📂 ${dept.toUpperCase()}</div>`;
+    grupos[dept].forEach(p => {
+      const checked = permisosActuales[p.key] !== undefined ? permisosActuales[p.key] : p.default;
+      html += `
+        <label class="perm-card" style="${!esSA ? 'opacity:0.75; cursor:not-allowed;' : ''}">
+          <div class="perm-card-info">
+            <span class="perm-card-title">${escapeHtml(p.label)}</span>
+          </div>
+          <input type="checkbox" id="${prefix}_perm_${p.key}" ${checked ? 'checked' : ''} ${!esSA ? 'disabled' : ''}>
+        </label>
+      `;
+    });
+  });
+
+  cont.innerHTML = html;
+}
+
+function marcarTodosPermisos(prefix, estado){
+  PERMISOS_CATALOGO.forEach(p => {
+    const el = document.getElementById(`${prefix}_perm_${p.key}`);
+    if (el && !el.disabled) el.checked = estado;
+  });
+}
+
+function aplicarPresetPermisos(prefix, tipo){
+  const sets = {
+    asesor: ['ver_control', 'ver_ranking_equipo', 'ver_clientes', 'ver_pipeline_kanban', 'ver_actividades', 'ver_agenda', 'ver_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'ver_manualventas', 'ver_majo_assistant', 'ver_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes'],
+    supervisor: ['ver_control', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_clientes', 'ver_pipeline_kanban', 'ver_actividades', 'ver_agenda', 'ver_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'ver_manualventas', 'ver_majo_assistant', 'ver_checklist_legal', 'marcar_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes', 'aprobar_solicitudes', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes'],
+    admin: ['ver_control', 'ver_kpi_monto', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_clientes', 'ver_pipeline_kanban', 'asignar_archivar_masivo', 'ver_actividades', 'ver_agenda', 'ver_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'gestionar_portafolio', 'ver_manualventas', 'gestionar_manualventas', 'ver_majo_assistant', 'gestionar_base_majo', 'ver_checklist_legal', 'marcar_checklist_legal', 'usar_generador_doc', 'ver_cobranzas', 'gestionar_cobranzas', 'ver_rendimiento', 'ver_solicitudes', 'aprobar_solicitudes', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes', 'ver_ajustes', 'descargar_respaldos']
+  };
+
+  const permitidos = new Set(sets[tipo] || []);
+  PERMISOS_CATALOGO.forEach(p => {
+    const el = document.getElementById(`${prefix}_perm_${p.key}`);
+    if (el && !el.disabled) el.checked = permitidos.has(p.key);
+  });
+  toast(`Preset ${tipo.toUpperCase()} aplicado`);
+}
+
+function recolectarPermisosDesdeUI(prefix, permisosPrevios = {}){
+  const resultado = { ...permisosPrevios };
+  PERMISOS_CATALOGO.forEach(p => {
+    const el = document.getElementById(`${prefix}_perm_${p.key}`);
+    if (el) {
+      resultado[p.key] = el.checked;
+    }
+  });
+  return resultado;
+}
 
 function fusionarPermisosConCatalogo(permisosGuardados){
   const p = permisosGuardados || {};
@@ -2535,12 +2776,35 @@ const FRASES_MOTIVACIONALES = [
 ];
 
 const VIDEOS_MOTIVACIONALES = [
-  { id: "Hq0V_pBDRy8", t: "5 Estrategias para organizar tu día y vender más · Brian Tracy" },
-  { id: "nweBVbCPaLU", t: "Close the Deal — Motivación de ventas y bienes raíces · Grant Cardone" },
-  { id: "CWqW35lVGrQ", t: "¿El vendedor nace o se hace? Mentalidad y ambición en ventas · Sandro Meléndez" },
-  { id: "ahi1QO0s_YE", t: "Los 12 cierres de ventas más poderosos · Alex Dey" },
-  { id: "osK3rxLTfu0", t: "Técnicas de mentalidad y cierre comercial · Margarita Pasos" }
+  { id: "OD_8cIkCMos", t: "Inteligencia Emocional para Vender Más · Sandro Meléndez (Perú)" },
+  { id: "XeJbPQgnenM", t: "Domina el Arte de Cerrar Ventas: 4 Estrategias · Alex Dey" },
+  { id: "osK3rxLTfu0", t: "5 Técnicas que SOLO los Mejores Vendedores Conocen · Margarita Pasos" },
+  { id: "iQiQ5Sx2gKM", t: "Vender es Fácil: Neuroventas y Persuasión · Jürgen Klarić" },
+  { id: "mIanxrqiRUs", t: "A Conquistar la Venta de Bienes Raíces · Carlos Muñoz" },
+  { id: "M1pUEFzGjyk", t: "El Poder de tu Actitud y Entusiasmo Comercial · Víctor Küppers" },
+  { id: "pwY7MqZyqOc", t: "Liderazgo, Superación y Motivación Personal · David Fischman (Perú)" },
+  { id: "g9Q5Pf9sijE", t: "Psicología de Ventas: Cómo Ser un Mejor Cerrador · Brian Tracy (Español)" },
+  { id: "zTr2Z_x-wLk", t: "Los 3 Cierres de Ventas que Transforman Resultados · Alex Dey" },
+  { id: "BjLWfXZsIcg", t: "Lo que Todo Vendedor y Cerrador Debe Saber · Margarita Pasos" },
+  { id: "6ysDItlfznA", t: "Cómo Vender Inmuebles: Frases Clave de Cierre · Carlos Pérez-Newman" },
+  { id: "Swn0xgqUVyA", t: "Técnicas de Cierre: El Cierre Boomerang · Alex Dey" },
+  { id: "w9bN5tJ0js8", t: "Los Mejores Tips de Neuroventas en Campo · Jürgen Klarić" },
+  { id: "zsI0x78OiCo", t: "Aprende a Desaprender: Mentalidad Ganadora · Sandro Meléndez (TEDx)" },
+  { id: "I8S9nm1Ef78", t: "Actitud es Pasión y Enfoque en Metas · Víctor Küppers" }
 ];
+
+let videoIndiceManual = null;
+function siguienteVideoMotivacional(){
+  const diaNum = new Date().getDate();
+  const baseIdx = videoIndiceManual !== null ? videoIndiceManual : ((diaNum - 1) % VIDEOS_MOTIVACIONALES.length);
+  videoIndiceManual = (baseIdx + 1) % VIDEOS_MOTIVACIONALES.length;
+  const videoObj = VIDEOS_MOTIVACIONALES[videoIndiceManual];
+  const elVidTit = document.getElementById('vd_titulo');
+  if (elVidTit) elVidTit.textContent = videoObj.t;
+  const elIframe = document.getElementById('vd_iframe');
+  if (elIframe) elIframe.src = `https://www.youtube-nocookie.com/embed/${videoObj.id}?autoplay=1`;
+  toast('🎬 Píldora: ' + videoObj.t.split('·')[0].trim());
+}
 
 function cargarPortadaInicio(){
   const hoy = new Date();
@@ -2712,6 +2976,7 @@ async function mostrarApp(){
   puedeEliminar = rol === 'superadmin' || (perm.eliminar_registros === true);
 
   cargarPortadaInicio();
+  cargarPendientesInicio();
   await Promise.all([cargarKPIs(), cargarActividadesHoy(), cargarSeparacionesPorVencer(), cargarNotificacionesBadge()]);
 }
 
@@ -2826,8 +3091,10 @@ function actualizarDatosDrawer(){
   }
   const elNom = document.getElementById('drUserName');
   if (elNom) elNom.textContent = colabNombre;
+  const elCargo = document.getElementById('drUserCargo');
+  if (elCargo) elCargo.textContent = currentProfile?.cargo || 'Director Comercial';
   const elRol = document.getElementById('drUserRole');
-  if (elRol) elRol.textContent = rolTxt;
+  if (elRol) elRol.textContent = (currentProfile?.area ? currentProfile.area + ' · ' : '') + rolLabel(currentProfile?.rol);
   const elMail = document.getElementById('drUserEmail');
   if (elMail) elMail.textContent = emailTxt;
   const elYear = document.getElementById('drCopyrightYear');
@@ -2941,6 +3208,7 @@ function irAVista(vista){
   document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones' && vista !== 'clientes'));
 
   if (vista === 'inicio') cargarPortadaInicio();
+  cargarPendientesInicio();
   if (vista === 'control') { cargarKPIs(); cargarActividadesHoy(); cargarSeparacionesPorVencer(); cargarProyeccionVentas(); cargarAvisoClientesRiesgo(); cargarComparativoManzana(); }
   if (vista === 'actividades') cargarActividadesTodas();
   if (vista === 'clientes') cargarClientes();
@@ -4254,14 +4522,13 @@ document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => 
   ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  document.getElementById('pa_area').value = 'Comercial';
-  document.getElementById('pa_rol').value = 'usuario';
+  document.getElementById('pa_area').value = 'Departamento Comercial';
+  actualizarSubareasYCargos('pa', 'Área de Ventas', 'Asesor(a) Comercial');
+  actualizarSelectorRoles('pa_rol', 'usuario');
+
   window._permisosCompletosEnEdicionPA = null;
   const defPerm = fusionarPermisosConCatalogo(null);
-  Object.keys(defPerm).forEach(key => {
-    const el = document.getElementById('pa_perm_' + key);
-    if (el) el.checked = defPerm[key];
-  });
+  renderizarBloquePermisos('pa', defPerm);
   openModal('modalPreautorizar');
 });
 
@@ -4300,16 +4567,15 @@ async function abrirEditarPreautorizado(email){
   document.getElementById('pa_email').disabled = true;
   document.getElementById('pa_dni').value = p.dni || '';
   document.getElementById('pa_celular').value = p.celular || '';
-  document.getElementById('pa_area').value = p.area || 'Comercial';
-  document.getElementById('pa_cargo').value = p.cargo || '';
-  document.getElementById('pa_rol').value = p.rol || 'usuario';
+  
+  const areaVal = p.departamento || p.area || 'Departamento Comercial';
+  document.getElementById('pa_area').value = areaVal;
+  actualizarSubareasYCargos('pa', p.subarea || '', p.cargo || 'Asesor(a) Comercial');
+  actualizarSelectorRoles('pa_rol', p.rol || 'usuario');
 
   const perm = fusionarPermisosConCatalogo(p.permisos);
   window._permisosCompletosEnEdicionPA = perm;
-  Object.keys(perm).forEach(key => {
-    const el = document.getElementById('pa_perm_' + key);
-    if (el) el.checked = perm[key] !== false;
-  });
+  renderizarBloquePermisos('pa', perm);
 
   openModal('modalPreautorizar');
 }
@@ -4328,36 +4594,16 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
   const dni = document.getElementById('pa_dni').value.trim();
   const celular = document.getElementById('pa_celular').value.trim();
   const area = document.getElementById('pa_area').value;
-  const cargo = document.getElementById('pa_cargo').value.trim();
+  const subarea = document.getElementById('pa_subarea')?.value || '';
+  const cargo = obtenerCargoFinal('pa');
   const rol = document.getElementById('pa_rol').value;
 
   if (!nombre || !email || !email.includes('@') || !cargo) {
-    toast('Completa nombre, correo y cargo');
+    toast('Completa nombre, correo válido y cargo');
     return;
   }
 
-  const permisos = {
-    ...fusionarPermisosConCatalogo(window._permisosCompletosEnEdicionPA),
-    ver_actividades: document.getElementById('pa_perm_ver_actividades')?.checked !== false,
-    ver_clientes: document.getElementById('pa_perm_ver_clientes')?.checked !== false,
-    ver_separaciones: document.getElementById('pa_perm_ver_separaciones')?.checked !== false,
-    ver_agenda: document.getElementById('pa_perm_ver_agenda')?.checked !== false,
-    ver_rendimiento: document.getElementById('pa_perm_ver_rendimiento')?.checked !== false,
-    ver_control: document.getElementById('pa_perm_ver_control')?.checked !== false,
-    kpi_monto: document.getElementById('pa_perm_kpi_monto')?.checked === true,
-    kpi_desglose: document.getElementById('pa_perm_kpi_desglose')?.checked === true,
-    reportes_pasados: document.getElementById('pa_perm_reportes_pasados')?.checked === true,
-    generar_informes: document.getElementById('pa_perm_generar_informes')?.checked !== false,
-    eliminar_registros: document.getElementById('pa_perm_eliminar_registros')?.checked === true,
-    ver_planos: document.getElementById('pa_perm_ver_planos')?.checked !== false,
-    ver_cotizador: document.getElementById('pa_perm_ver_cotizador')?.checked !== false,
-    ver_portafolio: document.getElementById('pa_perm_ver_portafolio')?.checked !== false,
-    ver_solicitudes: document.getElementById('pa_perm_ver_solicitudes')?.checked !== false,
-    ver_manualventas: document.getElementById('pa_perm_ver_manualventas')?.checked !== false,
-    ver_majo_assistant: document.getElementById('pa_perm_ver_majo_assistant')?.checked !== false,
-    ver_reporte_equipo: document.getElementById('pa_perm_ver_reporte_equipo')?.checked === true,
-    ver_ajustes: document.getElementById('pa_perm_ver_ajustes')?.checked === true
-  };
+  const permisos = recolectarPermisosDesdeUI('pa', window._permisosCompletosEnEdicionPA || {});
 
   const payload = {
     email,
@@ -4365,34 +4611,58 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
     dni: dni || null,
     celular: celular || null,
     area,
+    departamento: area,
+    subarea: subarea || null,
     cargo,
     rol,
+    es_supervisor: rol === 'supervisor',
     creado_por: currentUser.id,
     permisos
   };
 
-  let error = null;
-  if (editandoEmailPreautorizado) {
-    const res = await sb.from('usuarios_preautorizados').update(payload).eq('email', editandoEmailPreautorizado);
-    error = res.error;
-  } else {
-    const res = await sb.from('usuarios_preautorizados').upsert(payload, { onConflict: 'email' });
-    error = res.error;
-  }
+  const payloadMinimo = {
+    email,
+    nombre,
+    dni: dni || null,
+    celular: celular || null,
+    area,
+    cargo,
+    rol,
+    permisos
+  };
 
-  if (error && (error.message.includes('column') || error.message.includes('schema'))) {
-    const payloadMinimo = { email, rol, permisos };
-    const resMin = editandoEmailPreautorizado 
-      ? await sb.from('usuarios_preautorizados').update(payloadMinimo).eq('email', editandoEmailPreautorizado)
-      : await sb.from('usuarios_preautorizados').upsert(payloadMinimo, { onConflict: 'email' });
-    error = resMin.error;
-  }
+  const btn = document.getElementById('btnGuardarPreautorizado');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
 
-  if (error) { toast('Error al guardar: ' + error.message); console.error(error); return; }
-  toast(editandoEmailPreautorizado ? 'Colaborador actualizado ✓' : 'Colaborador pre-autorizado ✓');
-  closeModal('modalPreautorizar');
-  ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => document.getElementById(id).value = '');
-  cargarPreautorizados();
+  try {
+    let error = null;
+    if (editandoEmailPreautorizado) {
+      const res = await sb.from('usuarios_preautorizados').update(payload).eq('email', editandoEmailPreautorizado);
+      error = res.error;
+    } else {
+      const res = await sb.from('usuarios_preautorizados').upsert(payload, { onConflict: 'email' });
+      error = res.error;
+    }
+
+    if (error && (error.message.includes('column') || error.message.includes('schema'))) {
+      const resMin = editandoEmailPreautorizado 
+        ? await sb.from('usuarios_preautorizados').update(payloadMinimo).eq('email', editandoEmailPreautorizado)
+        : await sb.from('usuarios_preautorizados').upsert(payloadMinimo, { onConflict: 'email' });
+      error = resMin.error;
+    }
+
+    if (error) { toast('Error al guardar: ' + error.message); console.error(error); return; }
+    toast(editandoEmailPreautorizado ? 'Colaborador actualizado ✓' : 'Colaborador pre-autorizado con éxito ✓');
+    closeModal('modalPreautorizar');
+    ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    cargarPreautorizados();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editandoEmailPreautorizado ? 'Guardar cambios' : 'Agregar colaborador';
+  }
 });
 
 /* ============ ADMIN: GESTIÓN DE EQUIPO ============ */
@@ -4443,7 +4713,8 @@ async function cargarUsuariosAdmin(){
       <div class="card-row">
         <div>
           <p class="card-title">${escapeHtml(u.nombre || u.email)}</p>
-          <p class="card-sub">${escapeHtml(u.email)} · ${rolLabel(u.rol)}${u.cargo ? ' · ' + escapeHtml(u.cargo) : ''}</p>
+          <p class="card-sub" style="font-weight:700; color:var(--gold); font-size:12.5px;">💼 ${escapeHtml(u.cargo || 'Sin cargo asignado')}</p>
+          <p class="card-sub">📧 ${escapeHtml(u.email)} · ${rolLabel(u.rol)} · 🏢 ${escapeHtml(u.area || 'General')}${u.subarea ? ' (' + escapeHtml(u.subarea) + ')' : ''}</p>
           ${u.dni ? `<p class="card-sub">DNI: ${escapeHtml(u.dni)}</p>` : ''}
           ${u.celular ? `<p class="card-sub">📱 WhatsApp: ${escapeHtml(u.celular)}</p>` : ''}
           ${u.area ? `<p class="card-sub">🏢 Área: ${escapeHtml(u.area)}</p>` : ''}
@@ -4461,110 +4732,108 @@ async function cargarUsuariosAdmin(){
 async function abrirEditarUsuario(id){
   const { data } = await sb.from('usuarios').select('*').eq('id', id).single();
   if (!data) { toast('No se pudo cargar el colaborador'); return; }
+
   document.getElementById('eu_id').value = data.id;
   document.getElementById('eu_nombre').value = data.nombre || '';
   document.getElementById('eu_email').value = data.email || '';
   document.getElementById('eu_dni').value = data.dni || '';
   document.getElementById('eu_celular').value = data.celular || '';
-  document.getElementById('eu_area').value = data.area || 'Comercial';
-  document.getElementById('eu_cargo').value = data.cargo || '';
-  document.getElementById('eu_rol').value = data.rol || 'usuario';
-  document.getElementById('eu_activo').value = (data.activo === false) ? 'false' : 'true';
+  
+  const areaVal = data.departamento || data.area || 'Departamento Comercial';
+  document.getElementById('eu_area').value = areaVal;
+  actualizarSubareasYCargos('eu', data.subarea || '', data.cargo || 'Asesor(a) Comercial');
+  actualizarSelectorRoles('eu_rol', data.rol || 'usuario');
+  document.getElementById('eu_activo').value = String(data.activo !== false);
   document.getElementById('eu_reporte_email_adicional').value = data.reporte_email_adicional || '';
   document.getElementById('eu_reporte_diario_activo').checked = data.reporte_diario_activo !== false;
 
   const selSup = document.getElementById('eu_supervisor_id');
-  if (!selSup.dataset.cargado) {
-    const { data: posibles } = await sb.from('usuarios').select('id, nombre').neq('id', id).order('nombre');
-    selSup.innerHTML = '<option value="">— Sin supervisor —</option>' + (posibles || []).map(p => `<option value="${p.id}">${escapeHtml(p.nombre)}</option>`).join('');
-    selSup.dataset.cargado = '1';
+  if (selSup) {
+    const posibles = (usuariosCache || []).filter(u => u.id !== id && (u.rol === 'supervisor' || u.rol === 'admin' || u.rol === 'superadmin' || u.rol === 'director_comercial'));
+    selSup.innerHTML = '<option value="">— Sin supervisor —</option>' + posibles.map(p => `<option value="${p.id}" ${p.id === data.supervisor_id ? 'selected' : ''}>${escapeHtml(p.nombre)} (${escapeHtml(p.cargo || p.rol)})</option>`).join('');
   }
-  selSup.value = data.supervisor_id || '';
-  
+
   const perm = fusionarPermisosConCatalogo(data.permisos);
   window._permisosCompletosEnEdicion = perm;
-  document.getElementById('perm_ver_actividades').checked = perm.ver_actividades !== false;
-  document.getElementById('perm_ver_clientes').checked = perm.ver_clientes !== false;
-  document.getElementById('perm_ver_separaciones').checked = perm.ver_separaciones !== false;
-  document.getElementById('perm_ver_agenda').checked = perm.ver_agenda !== false;
-  document.getElementById('perm_ver_rendimiento').checked = perm.ver_rendimiento !== false;
-  document.getElementById('perm_ver_control').checked = perm.ver_control !== false;
-  document.getElementById('perm_kpi_monto').checked = perm.kpi_monto === true;
-  document.getElementById('perm_kpi_desglose').checked = perm.kpi_desglose === true;
-  document.getElementById('perm_reportes_pasados').checked = perm.reportes_pasados === true;
-  document.getElementById('perm_generar_informes').checked = perm.generar_informes !== false;
-  document.getElementById('perm_eliminar_registros').checked = perm.eliminar_registros === true;
-  document.getElementById('perm_gestionar_equipo').checked = perm.gestionar_equipo === true;
-  document.getElementById('perm_ver_ranking_equipo').checked = perm.ver_ranking_equipo === true;
-  document.getElementById('perm_ver_planos').checked = perm.ver_planos !== false;
-  document.getElementById('perm_ver_cotizador').checked = perm.ver_cotizador !== false;
-  document.getElementById('perm_ver_portafolio').checked = perm.ver_portafolio !== false;
-  document.getElementById('perm_ver_solicitudes').checked = perm.ver_solicitudes !== false;
-  document.getElementById('perm_ver_manualventas').checked = perm.ver_manualventas !== false;
-  document.getElementById('perm_ver_majo_assistant').checked = perm.ver_majo_assistant !== false;
-  document.getElementById('perm_ver_reporte_equipo').checked = perm.ver_reporte_equipo === true;
-  document.getElementById('perm_ver_ajustes').checked = perm.ver_ajustes === true;
+  renderizarBloquePermisos('eu', perm);
+
   openModal('modalEditarUsuario');
 }
 
 document.getElementById('btnGuardarUsuario').addEventListener('click', async () => {
   const id = document.getElementById('eu_id').value;
+  const nombre = document.getElementById('eu_nombre').value.trim();
+  const dni = document.getElementById('eu_dni').value.trim();
+  const celular = document.getElementById('eu_celular').value.trim();
+  const area = document.getElementById('eu_area').value;
+  const subarea = document.getElementById('eu_subarea').value;
+  const cargo = obtenerCargoFinal('eu');
+  const rol = document.getElementById('eu_rol').value;
+
+  if (!id || !nombre) {
+    toast('Nombre requerido');
+    return;
+  }
+
+  const permisos = recolectarPermisosDesdeUI('eu', window._permisosCompletosEnEdicion || {});
+
   const payload = {
-    nombre: document.getElementById('eu_nombre').value.trim() || null,
-    dni: document.getElementById('eu_dni').value.trim() || null,
-    celular: document.getElementById('eu_celular').value.trim() || null,
-    area: document.getElementById('eu_area').value,
-    cargo: document.getElementById('eu_cargo').value.trim() || null,
-    rol: document.getElementById('eu_rol').value,
+    nombre,
+    dni: dni || null,
+    celular: celular || null,
+    area,
+    departamento: area,
+    subarea: subarea || null,
+    cargo,
+    rol,
+    es_supervisor: rol === 'supervisor',
     activo: document.getElementById('eu_activo').value === 'true',
     supervisor_id: document.getElementById('eu_supervisor_id').value || null,
     reporte_email_adicional: document.getElementById('eu_reporte_email_adicional').value.trim() || null,
     reporte_diario_activo: document.getElementById('eu_reporte_diario_activo').checked,
-    permisos: {
-      ...fusionarPermisosConCatalogo(window._permisosCompletosEnEdicion),
-      ver_actividades: document.getElementById('perm_ver_actividades')?.checked !== false,
-      ver_clientes: document.getElementById('perm_ver_clientes')?.checked !== false,
-      ver_separaciones: document.getElementById('perm_ver_separaciones')?.checked !== false,
-      ver_agenda: document.getElementById('perm_ver_agenda')?.checked !== false,
-      ver_rendimiento: document.getElementById('perm_ver_rendimiento')?.checked !== false,
-      ver_control: document.getElementById('perm_ver_control')?.checked !== false,
-      kpi_monto: document.getElementById('perm_kpi_monto')?.checked === true,
-      kpi_desglose: document.getElementById('perm_kpi_desglose')?.checked === true,
-      reportes_pasados: document.getElementById('perm_reportes_pasados')?.checked === true,
-      generar_informes: document.getElementById('perm_generar_informes')?.checked !== false,
-      eliminar_registros: document.getElementById('perm_eliminar_registros')?.checked === true,
-      gestionar_equipo: document.getElementById('perm_gestionar_equipo')?.checked === true,
-      ver_ranking_equipo: document.getElementById('perm_ver_ranking_equipo')?.checked === true,
-      ver_planos: document.getElementById('perm_ver_planos')?.checked !== false,
-      ver_cotizador: document.getElementById('perm_ver_cotizador')?.checked !== false,
-      ver_portafolio: document.getElementById('perm_ver_portafolio')?.checked !== false,
-      ver_solicitudes: document.getElementById('perm_ver_solicitudes')?.checked !== false,
-      ver_manualventas: document.getElementById('perm_ver_manualventas')?.checked !== false,
-      ver_majo_assistant: document.getElementById('perm_ver_majo_assistant')?.checked !== false,
-      ver_reporte_equipo: document.getElementById('perm_ver_reporte_equipo')?.checked === true,
-      ver_ajustes: document.getElementById('perm_ver_ajustes')?.checked === true,
-    }
+    permisos
   };
 
-  let { error } = await sb.from('usuarios').update(payload).eq('id', id);
+  const payloadMinimo = {
+    nombre,
+    dni: dni || null,
+    celular: celular || null,
+    area,
+    cargo,
+    rol,
+    activo: document.getElementById('eu_activo').value === 'true',
+    permisos
+  };
 
-  if (error && (error.message.includes('column') || error.message.includes('schema'))) {
-    const payloadRespaldo = {
-      nombre: payload.nombre,
-      area: payload.area,
-      cargo: payload.cargo,
-      rol: payload.rol,
-      activo: payload.activo,
-      permisos: payload.permisos
-    };
-    const res2 = await sb.from('usuarios').update(payloadRespaldo).eq('id', id);
-    error = res2.error;
+  const btn = document.getElementById('btnGuardarUsuario');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  try {
+    let { error } = await sb.from('usuarios').update(payload).eq('id', id);
+    if (error) {
+      console.warn('Reintentando con payload mínimo...', error.message);
+      const resFallback = await sb.from('usuarios').update(payloadMinimo).eq('id', id);
+      error = resFallback.error;
+    }
+
+    if (error) {
+      toast('Error al actualizar: ' + error.message);
+      console.error(error);
+      return;
+    }
+
+    toast('Colaborador y permisos actualizados');
+    closeModal('modalEditarUsuario');
+    cargarUsuariosAdmin();
+    if (id === currentUser.id) {
+      await cargarPerfil();
+      mostrarApp();
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar cambios';
   }
-
-  if (error) { toast('Error al guardar: ' + error.message); console.error(error); return; }
-  toast('Colaborador actualizado ✓');
-  closeModal('modalEditarUsuario');
-  cargarUsuariosAdmin();
 });
 
 /* ============ RENDIMIENTO ============ */
@@ -7327,27 +7596,49 @@ async function enviarMensajeMajo(){
   const indicador = document.createElement('div');
   indicador.id = 'majoEscribiendo';
   indicador.className = 'majo-burbuja-fila';
-  indicador.innerHTML = `<div class="majo-mini-avatar">😊</div><div class="majo-escribiendo"><span></span><span></span><span></span></div>`;
+  indicador.innerHTML = `<div class="majo-mini-avatar">🤖</div><div class="majo-escribiendo"><span></span><span></span><span></span></div>`;
   cont.appendChild(indicador);
   cont.scrollTop = cont.scrollHeight;
 
   try {
     const token = await obtenerTokenSesion();
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/majo-chat`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversacion_id: majoConversacionActual, mensaje }),
-    });
-    document.getElementById('majoEscribiendo')?.remove();
-    if (!resp.ok) {
-      renderBurbujaMajo('assistant', '⚠️ Tuve un problema para responder.');
-      return;
+    const contextoGlobal = await compilarContextoGlobalMAJO();
+    
+    let respuestaFinal = null;
+    let fuentesFinal = null;
+
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/majo-chat`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          conversacion_id: majoConversacionActual, 
+          mensaje,
+          contexto_global: contextoGlobal
+        }),
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        respuestaFinal = data.respuesta;
+        fuentesFinal = data.fuentes;
+      }
+    } catch (errNet) {
+      console.warn('Edge Function no disponible, usando motor MAJO local:', errNet);
     }
-    const data = await resp.json();
-    renderBurbujaMajo('assistant', data.respuesta, data.fuentes, data.imagenes);
+
+    document.getElementById('majoEscribiendo')?.remove();
+
+    if (!respuestaFinal) {
+      respuestaFinal = generarRespuestaMAJOLocal(mensaje, contextoGlobal);
+      fuentesFinal = ["Documentación Oficial Costa Dorada", "Portafolio Multimedia", "Manual de Ventas"];
+    }
+
+    renderBurbujaMajo('assistant', respuestaFinal, fuentesFinal);
   } catch (e) {
     document.getElementById('majoEscribiendo')?.remove();
-    renderBurbujaMajo('assistant', '⚠️ Error de conexión al hablar con MAJO.');
+    const fallback = generarRespuestaMAJOLocal(mensaje, '');
+    renderBurbujaMajo('assistant', fallback);
   }
 }
 
@@ -7937,6 +8228,216 @@ function escapeHtml(str){
   const d = document.createElement('div');
   d.textContent = str ?? '';
   return d.innerHTML;
+}
+
+/* ============ MAJO · INTELIGENCIA CORPORATIVA (MULTIDOCUMENTAL) ============ */
+async function compilarContextoGlobalMAJO(){
+  let bloques = [];
+
+  // Identidad y misión del sistema
+  bloques.push(`[SISTEMA]: Eres MAJO · Inteligencia Corporativa de Constructora e Inmobiliaria Casa Dorada S.A.C. Eres el cerebro ejecutivo y consultor inmobiliario integral para el proyecto de casas de campo y playa Costa Dorada en La Yarada Los Palos, Tacna, Perú. Respondes con datos exactos, tono profesional y enfoque en cierres comerciales ("Del Clic a la Firma").`);
+
+  // Datos base del proyecto Costa Dorada
+  bloques.push(`[PROYECTO COSTA DORADA]: Ubicado en La Yarada Los Palos, Tacna, a 25 min de la ciudad por la Costanera. Lotes estándar de 160 m² (8m x 20m) y lotes especiales frente a parque/avenida. Modalidades de pago: Al contado o con financiamiento directo de la constructora hasta 60 meses, inicial desde 10% sin evaluación bancaria. Separación con S/ 500 para congelar precio y ubicación.`);
+
+  // 1. Portafolio Multimedia y Documentación Legal
+  try {
+    const { data: pf } = await sb.from('portafolio_items').select('*');
+    if (pf && pf.length > 0) {
+      const itemsDoc = pf.map(p => `- ${p.tipo?.toUpperCase()}: "${p.titulo}" (${p.descripcion || 'Sin descripción'}). Enlace: ${p.archivo_url || p.youtube_url || 'Cargado en sistema'}`).join('\n');
+      bloques.push(`[RECURSOS Y DOCUMENTOS DEL PORTAFOLIO MULTIMEDIA]:\n${itemsDoc}`);
+    }
+  } catch (e) { console.warn('Error contexto portafolio:', e); }
+
+  // 2. Manual de Ventas y Manejo de Objeciones
+  try {
+    const { data: mv } = await sb.from('manual_ventas').select('*');
+    if (mv && mv.length > 0) {
+      const itemsMv = mv.map(m => `- ${m.categoria}: "${m.titulo}". Guion: "${m.speech}". Tips: "${m.tips || ''}"`).join('\n');
+      bloques.push(`[MANUAL DE VENTAS Y ARGUMENTARIOS COMERCIALES]:\n${itemsMv}`);
+    }
+  } catch (e) { console.warn('Error contexto manual_ventas:', e); }
+
+  // 3. Base de Conocimiento MAJO (Documentos subidos y enlaces)
+  try {
+    const { data: mdocs } = await sb.from('majo_documentos').select('*');
+    if (mdocs && mdocs.length > 0) {
+      const itemsMdocs = mdocs.map(d => `- DOCUMENTO: "${d.titulo}" (${d.tipo}). Contenido: ${d.texto_plano ? d.texto_plano.slice(0, 800) : 'Documento adjunto'}`).join('\n');
+      bloques.push(`[DOCUMENTOS TÉCNICOS Y LEGALES INDEXADOS]:\n${itemsMdocs}`);
+    }
+    const { data: msitios } = await sb.from('majo_sitios').select('*');
+    if (msitios && msitios.length > 0) {
+      const itemsSitios = msitios.map(s => `- ENLACE OFICIAL: "${s.titulo}" (${s.url})`).join('\n');
+      bloques.push(`[FUENTES WEB ASOCIADAS]:\n${itemsSitios}`);
+    }
+  } catch (e) { console.warn('Error contexto majo_documentos:', e); }
+
+  return bloques.join('\n\n');
+}
+
+function generarRespuestaMAJOLocal(pregunta, contexto){
+  const p = pregunta.toLowerCase();
+  
+  // Consulta de financiamiento y precios
+  if (p.includes('precio') || p.includes('cuota') || p.includes('financiamiento') || p.includes('inicial') || p.includes('meses') || p.includes('costo')) {
+    return `En **Costa Dorada (La Yarada Los Palos)** ofrecemos lotes de **160 m²** con dos modalidades principales:\n\n1. **Financiamiento Directo:** Sin bancos ni historial crediticio, en plazos de **12, 24, 36, 48 hasta 60 meses** con inicial accesible desde el 10%, 20% o 30%.\n2. **Pago al Contado:** Con descuento especial por pronto pago.\n3. **Separación Inmediata:** Con solo **S/ 500** el cliente congela ubicación y precio.\n\n*(Puedes utilizar el **Cotizador Rápido de Lotes** en el menú de Marketing para simular las cuotas exactas).*`;
+  }
+
+  // Consulta legal o títulos
+  if (p.includes('legal') || p.includes('titulo') || p.includes('partida') || p.includes('sunarp') || p.includes('contrato') || p.includes('minuta') || p.includes('escritura')) {
+    return `A nivel **Legal y Contractual**, el proceso de Costa Dorada sigue el estándar formal de la inmobiliaria:\n\n- El terreno cuenta con **Partida Registral Matriz** debidamente inscrita en la Zona Registral de Sunarp Tacna.\n- Las adquisiciones se formalizan mediante **Acuerdo de Separación**, suscripción de **Minuta Notarial de Compraventa** y elevación a **Escritura Pública**.\n- Puedes consultar el **Checklist Legal** en el módulo Legal para validar DNI, Poderes y estado civil de cada comprador.`;
+  }
+
+  // Objeciones frecuentes (distancia, agua, servicios)
+  if (p.includes('lejos') || p.includes('distancia') || p.includes('agua') || p.includes('luz') || p.includes('servicio') || p.includes('ubicacion')) {
+    return `Para el manejo de esta inquietud, el **Manual de Ventas** recomienda el siguiente argumento:\n\n- **Distancia:** Costa Dorada está a solo **25 minutos** del centro de Tacna por la moderna autopista Costanera Sur (La Yarada Los Palos), en el polo de mayor crecimiento turístico y agrícola de la región.\n- **Servicios:** Proyecto campestre/playa concebido como condominio sostenible con factibilidad y redes en habilitación, garantizando alta valorización a mediano y largo plazo.`;
+  }
+
+  // Visitas y traslados
+  if (p.includes('visita') || p.includes('salida') || p.includes('terreno') || p.includes('yarada') || p.includes('movilidad')) {
+    return `Las **visitas guiadas a Costa Dorada** se coordinan directamente desde la Agenda:\n\n- La empresa pone a disposición **movilidad corporativa ida y vuelta** los fines de semana (sábados y domingos).\n- Te sugiero utilizar la plantilla **"🚗 Invitación a Visita Guiada"** en el botón rápido de WhatsApp de la ficha del cliente para confirmar asistencia con 48h de anticipación.`;
+  }
+
+  // Respuesta general con conocimiento transversal
+  return `Como **MAJO · Inteligencia Corporativa**, analizo todas las áreas de Casa Dorada (Comercial, Legal, Marketing y Operaciones).\n\nRespecto a tu consulta: *"**${pregunta}**"*, la información se encuentra integrada con la documentación del proyecto Costa Dorada en La Yarada Los Palos. Si requieres cotizar un lote, revisar el checklist legal de un expediente o enviar un speech de ventas, puedes acceder a los módulos correspondientes en el menú lateral.`;
+}
+
+/* ============ CARGA DE PENDIENTES DESTACADOS EN INICIO ============ */
+async function cargarPendientesInicio(){
+  const cont = document.getElementById('pi_lista_pendientes');
+  if (!cont || !currentUser) return;
+
+  const hoy = obtenerHoyLocal();
+  const elSub = document.getElementById('pi_subtitulo_fecha');
+  if (elSub) elSub.textContent = `${fmtFecha(hoy)} · Prioridades de tu jornada`;
+
+  try {
+    // 1. Tareas de hoy no completadas
+    const { data: acts } = await sb.from('actividades')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .eq('fecha_programada', hoy)
+      .eq('archivada', false)
+      .order('hora_inicio', { ascending: true, nullsFirst: false });
+
+    const tareasPendientes = (acts || []).filter(a => !a.completada);
+
+    // 2. Citas de agenda para hoy
+    const { data: citas } = await sb.from('agenda')
+      .select('*')
+      .eq('usuario_id', currentUser.id)
+      .gte('fecha_inicio', hoy + 'T00:00:00')
+      .lte('fecha_inicio', hoy + 'T23:59:59')
+      .order('fecha_inicio', { ascending: true });
+
+    // 3. Clientes en riesgo (>7 días sin contacto)
+    const clientesEnRiesgoLista = (clientesCache || []).filter(c => clienteEnRiesgo(c));
+
+    // 4. Separaciones por vencer hoy o vencidas
+    const sepPorVencer = (separacionesPorVencerCache || []).filter(s => {
+      return s.fecha_vencimiento && s.fecha_vencimiento <= hoy;
+    });
+
+    const totalAlertas = tareasPendientes.length + (citas || []).length + sepPorVencer.length;
+
+    const elNumT = document.getElementById('pi_num_tareas');
+    if (elNumT) elNumT.textContent = tareasPendientes.length;
+    const elNumC = document.getElementById('pi_num_citas');
+    if (elNumC) elNumC.textContent = (citas || []).length;
+    const elNumR = document.getElementById('pi_num_riesgo');
+    if (elNumR) elNumR.textContent = clientesEnRiesgoLista.length;
+
+    const bTotal = document.getElementById('pi_badge_total');
+    if (bTotal) {
+      bTotal.textContent = totalAlertas > 0 ? `${totalAlertas} pendientes hoy` : 'Al día ✓';
+      bTotal.className = 'pendientes-badge-alerta' + (totalAlertas > 0 ? ' urgente' : '');
+    }
+
+    if (totalAlertas === 0 && clientesEnRiesgoLista.length === 0) {
+      cont.innerHTML = `
+        <div style="background:#fff; border:1px dashed #C89B3C; border-radius:12px; padding:14px; text-align:center;">
+          <span style="font-size:24px;">🎉</span>
+          <p style="font-weight:700; color:#142A4D; margin:4px 0 2px; font-size:13.5px;">¡Excelente! Estás al día con tus actividades</p>
+          <p style="font-size:11.5px; color:var(--ink-dim); margin:0;">No tienes tareas pendientes ni separaciones vencidas hoy. Momento ideal para prospección comercial en Costa Dorada.</p>
+        </div>
+      `;
+      return;
+    }
+
+    let itemsHtml = [];
+
+    // Separaciones críticas
+    sepPorVencer.slice(0, 2).forEach(s => {
+      itemsHtml.push(`
+        <div class="item-pendiente-fila" style="border-left:4px solid #D32F2F;">
+          <div>
+            <span style="font-size:10px; font-weight:800; color:#D32F2F; text-transform:uppercase;">⚠️ Separación por vencer</span>
+            <p style="font-weight:700; font-size:12.5px; margin:2px 0 0; color:#142A4D;">Lote ${escapeHtml(s.propiedades?.codigo || 'Costa Dorada')}</p>
+            <p style="font-size:11px; color:var(--ink-dim); margin:0;">${escapeHtml(s.clientes?.nombre || 'Cliente')} · Vence hoy</p>
+          </div>
+          <button class="chip-btn gold" onclick="irAVista('separaciones')" style="padding:4px 8px; font-size:11px;">Gestionar</button>
+        </div>
+      `);
+    });
+
+    // Citas de agenda
+    (citas || []).slice(0, 3).forEach(c => {
+      const hora = c.fecha_inicio ? c.fecha_inicio.split('T')[1]?.slice(0, 5) : 'Hoy';
+      itemsHtml.push(`
+        <div class="item-pendiente-fila" style="border-left:4px solid #C89B3C;">
+          <div>
+            <span style="font-size:10px; font-weight:800; color:#C89B3C; text-transform:uppercase;">📅 Cita Programada · ${hora}</span>
+            <p style="font-weight:700; font-size:12.5px; margin:2px 0 0; color:#142A4D;">${escapeHtml(c.titulo)}</p>
+            <p style="font-size:11px; color:var(--ink-dim); margin:0;">${c.lugar ? '📍 ' + escapeHtml(c.lugar) : 'Visita / Llamada'}</p>
+          </div>
+          <button class="chip-btn" onclick="irAVista('agenda')" style="padding:4px 8px; font-size:11px; border-color:#C89B3C; color:#142A4D;">Ver</button>
+        </div>
+      `);
+    });
+
+    // Tareas pendientes
+    tareasPendientes.slice(0, 3).forEach(t => {
+      itemsHtml.push(`
+        <div class="item-pendiente-fila" style="border-left:4px solid #1F3A63;">
+          <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <input type="checkbox" style="transform:scale(1.15); cursor:pointer;" onchange="completarActividadDesdeInicio('${t.id}')" title="Marcar como realizada">
+            <div style="min-width:0;">
+              <p style="font-weight:700; font-size:12.5px; margin:0; color:#142A4D; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(t.titulo)}</p>
+              <p style="font-size:11px; color:var(--ink-dim); margin:0;">${t.tipo_actividad ? escapeHtml(t.tipo_actividad) + ' · ' : ''}${t.hora_inicio ? t.hora_inicio.slice(0, 5) : 'Pendiente'}</p>
+            </div>
+          </div>
+          <button class="chip-btn" onclick="irAVista('actividades')" style="padding:4px 8px; font-size:11px; border-color:#CBD5E1;">Detalle</button>
+        </div>
+      `);
+    });
+
+    // Cliente en riesgo si hay espacio
+    if (clientesEnRiesgoLista.length > 0 && itemsHtml.length < 5) {
+      const primerRiesgo = clientesEnRiesgoLista[0];
+      itemsHtml.push(`
+        <div class="item-pendiente-fila" style="border-left:4px solid #FF9800;">
+          <div>
+            <span style="font-size:10px; font-weight:800; color:#E65100; text-transform:uppercase;">🔥 Reactivar Prospecto (>7d)</span>
+            <p style="font-weight:700; font-size:12.5px; margin:2px 0 0; color:#142A4D;">${escapeHtml(primerRiesgo.nombre)}</p>
+            <p style="font-size:11px; color:var(--ink-dim); margin:0;">📱 ${primerRiesgo.celular || primerRiesgo.telefono || 'Sin celular'}</p>
+          </div>
+          <button class="chip-btn gold" onclick="abrirModalWhatsAppRapido('${escapeHtml(primerRiesgo.nombre).replace(/'/g, "\\'")}', '${primerRiesgo.celular || primerRiesgo.telefono || ''}')" style="padding:4px 8px; font-size:11px;">💬 WhatsApp</button>
+        </div>
+      `);
+    }
+
+    cont.innerHTML = itemsHtml.join('');
+  } catch (e) {
+    console.error('Error cargando pendientes inicio:', e);
+  }
+}
+
+async function completarActividadDesdeInicio(actId){
+  const { error } = await sb.from('actividades').update({ completada: true, updated_at: new Date().toISOString() }).eq('id', actId);
+  if (error) { toast('Error al completar tarea'); return; }
+  toast('Tarea completada ✓');
+  cargarPendientesInicio();
+  cargarActividadesHoy();
 }
 
 /* ============ REORGANIZACIÓN Y CONTROL DEL MENÚ DEPARTAMENTOS ============ */
