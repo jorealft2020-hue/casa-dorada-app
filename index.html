@@ -1572,6 +1572,15 @@
   </div>
 
   <!-- MODAL: nuevo cliente / prospecto -->
+  <div class="modal-backdrop" id="modalChecklistLegal">
+    <div class="modal-sheet">
+      <button class="modal-x-close" data-close="modalChecklistLegal">✕</button>
+      <h3 id="chk_titulo">Checklist Legal</h3>
+      <p id="chk_progreso" style="font-size:12.5px; color:var(--ink-dim); margin:-10px 0 14px;"></p>
+      <div id="chk_contenido"></div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="modalHistorialCliente">
     <div class="modal-sheet">
       <button class="modal-x-close" data-close="modalHistorialCliente">✕</button>
@@ -4787,6 +4796,7 @@ async function cargarClientes(){
         </div>
         <div class="card-actions" style="margin-top:8px;">
           <button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">🕒 Historial</button>
+          <button class="chip-btn" style="color:#2C5691; border-color:#2C5691;" onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">📋 Legal</button>
           ${wspUrl ? `<a class="chip-btn gold" href="${wspUrl}" target="_blank" style="text-decoration:none;">💬 WhatsApp</a>` : ''}
           ${c.celular ? `<a class="chip-btn" href="tel:${c.celular}" style="text-decoration:none;">📞 Llamar</a>` : ''}
           ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarCliente('${c.id}')">🗑️</button>` : ''}
@@ -4849,7 +4859,8 @@ function renderPipelineClientes(){
                 <select onchange="moverClientePipeline('${c.id}', this.value)" style="width:100%; font-size:11px; padding:5px; border-radius:6px; border:1px solid #E5DFCF; margin-bottom:6px;">
                   ${ETAPAS_PIPELINE.map(e2 => `<option value="${e2}" ${e2 === etapa ? 'selected' : ''}>➜ ${e2}</option>`).join('')}
                 </select>
-                <button onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')" style="width:100%; font-size:10.5px; padding:4px; border-radius:6px; border:1px solid #7C6BAF; background:none; color:#7C6BAF; cursor:pointer;">🕒 Historial</button>
+                <button onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')" style="width:100%; font-size:10.5px; padding:4px; border-radius:6px; border:1px solid #7C6BAF; background:none; color:#7C6BAF; cursor:pointer; margin-bottom:4px;">🕒 Historial</button>
+                <button onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')" style="width:100%; font-size:10.5px; padding:4px; border-radius:6px; border:1px solid #2C5691; background:none; color:#2C5691; cursor:pointer;">📋 Legal</button>
               </div>`;
             }).join('')}
           </div>
@@ -4908,6 +4919,51 @@ async function abrirHistorialCliente(clienteId, nombreCliente){
     </div>
   `;
 }
+
+/* ============ CHECKLIST LEGAL POR CLIENTE ============
+   Documentos estándar para el cierre de una venta inmobiliaria en Perú.
+   Se guarda como jsonb en clientes.checklist_legal — cada casilla se
+   auto-guarda al instante, sin necesidad de un botón "Guardar" aparte. */
+const DOCUMENTOS_LEGALES = [
+  { key: 'dni', label: 'DNI vigente del titular' },
+  { key: 'dni_conyuge', label: 'DNI del cónyuge (si es casado/a)' },
+  { key: 'ficha_ruc', label: 'Ficha RUC (si compra como empresa)' },
+  { key: 'poder', label: 'Poder / representación legal (si aplica)' },
+  { key: 'partida_registral', label: 'Partida registral / título previo (si es transferencia)' },
+];
+
+let checklistClienteActualId = null;
+
+async function abrirChecklistLegal(clienteId, nombreCliente){
+  checklistClienteActualId = clienteId;
+  document.getElementById('chk_titulo').textContent = `Checklist Legal · ${nombreCliente}`;
+  openModal('modalChecklistLegal');
+
+  const { data: c } = await sb.from('clientes').select('checklist_legal').eq('id', clienteId).single();
+  const checklist = c?.checklist_legal || {};
+  renderChecklistLegal(checklist);
+}
+
+function renderChecklistLegal(checklist){
+  const completos = DOCUMENTOS_LEGALES.filter(d => checklist[d.key] === true).length;
+  document.getElementById('chk_progreso').textContent = `${completos} de ${DOCUMENTOS_LEGALES.length} documentos completos`;
+
+  document.getElementById('chk_contenido').innerHTML = DOCUMENTOS_LEGALES.map(d => `
+    <label class="perm-card" style="margin-bottom:8px;">
+      <div class="perm-card-info"><span class="perm-card-title">${checklist[d.key] ? '✅' : '⬜'} ${d.label}</span></div>
+      <input type="checkbox" ${checklist[d.key] ? 'checked' : ''} onchange="marcarDocumentoLegal('${d.key}', this.checked)">
+    </label>
+  `).join('');
+}
+
+async function marcarDocumentoLegal(key, valor){
+  const { data: c } = await sb.from('clientes').select('checklist_legal').eq('id', checklistClienteActualId).single();
+  const checklistActualizado = { ...(c?.checklist_legal || {}), [key]: valor };
+  const { error } = await sb.from('clientes').update({ checklist_legal: checklistActualizado }).eq('id', checklistClienteActualId);
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  renderChecklistLegal(checklistActualizado);
+}
+
 
 async function eliminarCliente(id){
   if (!confirm('¿Eliminar este cliente?')) return;
