@@ -918,6 +918,9 @@
       <div id="viewControl" class="hidden">
         <div class="kpi-strip" id="kpiStrip"></div>
 
+        <div class="section-title">📈 Proyección de Ventas — este mes</div>
+        <div id="cardProyeccionVentas" class="card"></div>
+
         <div class="section-title">Actividades realizadas hoy <button class="see-all" data-nav="actividades">Ver todo</button></div>
         <button class="chip-btn gold" id="btnDescargarReporte" style="margin-bottom:12px; width:100%; padding:11px; font-size:13px; font-weight:700;">📄 Descargar reporte diario</button>
         <button class="chip-btn" id="btnAbrirInformeFormal" style="margin-bottom:12px; width:100%; padding:11px; font-size:13px; border-color:#1A2332; color:#1A2332; font-weight:700;">🗂️ Descargar informe formal (quincenal/mensual)</button>
@@ -2861,7 +2864,7 @@ function irAVista(vista){
   document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones' && vista !== 'clientes'));
 
   if (vista === 'inicio') cargarPortadaInicio();
-  if (vista === 'control') { cargarKPIs(); cargarActividadesHoy(); cargarSeparacionesPorVencer(); }
+  if (vista === 'control') { cargarKPIs(); cargarActividadesHoy(); cargarSeparacionesPorVencer(); cargarProyeccionVentas(); }
   if (vista === 'actividades') cargarActividadesTodas();
   if (vista === 'clientes') cargarClientes();
   if (vista === 'separaciones') cargarSeparacionesTodas();
@@ -2908,7 +2911,73 @@ async function cargarKPIs(){
     </div>`).join('');
 }
 
-/* ============ ACTIVIDADES (TAREAS REALIZADAS - ORDEN DESCENDENTE) ============ */
+/* ============ PROYECCIÓN DE VENTAS ============
+   Dos componentes, cada uno etiquetado con honestidad para no confundir
+   "casi seguro" con "estimado":
+   1) Cierres del mes: separaciones ACTIVAS cuyo vencimiento cae este mes
+      (dinero real, ya comprometido por el cliente).
+   2) Pipeline ponderado: clientes en etapas avanzadas, multiplicados por
+      una probabilidad de cierre según su etapa y el valor promedio real
+      de lote (sacado del propio historial de separaciones). */
+const PROBABILIDAD_POR_ETAPA = {
+  'Cita agendada': 0.15,
+  'Visita realizada': 0.30,
+  'Evaluación crediticia': 0.55,
+};
+
+async function cargarProyeccionVentas(){
+  const cont = document.getElementById('cardProyeccionVentas');
+  if (!cont) return;
+  cont.innerHTML = `<div class="spinner"></div>`;
+
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+
+  const hoy = new Date();
+  const inicioMes = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-01`;
+  const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).toISOString().slice(0, 10);
+
+  let qSep = sb.from('separaciones').select('valor_total').eq('estado', 'activa').gte('fecha_vencimiento', inicioMes).lte('fecha_vencimiento', finMes);
+  if (!esSuperAdminODirector) qSep = qSep.eq('vendedor_id', currentUser.id);
+
+  let qSepHist = sb.from('separaciones').select('valor_total').not('valor_total', 'is', null);
+  if (!esSuperAdminODirector) qSepHist = qSepHist.eq('vendedor_id', currentUser.id);
+
+  let qClientes = sb.from('clientes').select('estado_prospecto').in('estado_prospecto', Object.keys(PROBABILIDAD_POR_ETAPA));
+  if (!esSuperAdminODirector) qClientes = qClientes.eq('vendedor_id', currentUser.id);
+
+  const [{ data: cierresMes }, { data: historico }, { data: pipelineClientes }] = await Promise.all([qSep, qSepHist, qClientes]);
+
+  const montoCierresMes = (cierresMes || []).reduce((sum, s) => sum + Number(s.valor_total || 0), 0);
+  const valorPromedioLote = historico && historico.length > 0
+    ? historico.reduce((sum, s) => sum + Number(s.valor_total || 0), 0) / historico.length
+    : 0;
+
+  const conteoPorEtapa = {};
+  (pipelineClientes || []).forEach(c => { conteoPorEtapa[c.estado_prospecto] = (conteoPorEtapa[c.estado_prospecto] || 0) + 1; });
+  const montoPipelinePonderado = Object.entries(conteoPorEtapa).reduce((sum, [etapa, n]) =>
+    sum + (n * valorPromedioLote * PROBABILIDAD_POR_ETAPA[etapa]), 0);
+
+  const fmtSoles = (n) => 'S/ ' + Math.round(n).toLocaleString('es-PE');
+
+  cont.innerHTML = `
+    <div style="display:flex; gap:10px; margin-bottom:12px;">
+      <div style="flex:1; background:#DCEEE0; border-radius:12px; padding:12px; text-align:center;">
+        <div style="font-size:17px; font-weight:800; color:var(--ok);">${fmtSoles(montoCierresMes)}</div>
+        <div style="font-size:10.5px; color:var(--ink-dim); margin-top:2px;">Cierres casi seguros<br>(separaciones activas del mes)</div>
+      </div>
+      <div style="flex:1; background:#F7F4EC; border-radius:12px; padding:12px; text-align:center;">
+        <div style="font-size:17px; font-weight:800; color:var(--gold);">${fmtSoles(montoPipelinePonderado)}</div>
+        <div style="font-size:10.5px; color:var(--ink-dim); margin-top:2px;">Pipeline estimado<br>(ponderado por etapa)</div>
+      </div>
+    </div>
+    <p style="font-size:11px; color:var(--ink-dim); margin:0; line-height:1.5;">
+      ⚠️ El pipeline estimado es una proyección basada en el valor promedio histórico de lote (${fmtSoles(valorPromedioLote)}) y probabilidades típicas por etapa — no es un monto garantizado, es una guía de planificación.
+    </p>
+  `;
+}
+
+
 async function cargarActividadesHoy(){
   const hoy = obtenerHoyLocal();
   // Orden descendente: las nuevas arriba
