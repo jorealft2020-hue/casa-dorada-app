@@ -7,9 +7,6 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1A2332">
 <link rel="apple-touch-icon" href="icono-apple-touch.png">
-<!-- Soporte iOS: sin estos meta tags, Safari abre la app instalada CON la barra de
-     direcciones visible aunque el manifest.json diga "standalone" (eso solo lo
-     respeta Android/Chrome). Con esto, en iPhone también queda a pantalla completa. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Casa Dorada">
@@ -41,9 +38,6 @@
   }
   #app{ max-width: 480px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; background: var(--cream); position:relative; z-index:1; }
 
-  /* Marca de agua estética del logo Costa Dorada, presente detrás de todas las
-     pantallas de la app (contenida dentro del marco de la app, muy sutil,
-     no interfiere con los toques ni con la legibilidad de las tarjetas). */
   #app::before{
     content:'';
     position: absolute; inset:0;
@@ -53,13 +47,8 @@
     opacity: 0.05; pointer-events:none; z-index:0;
   }
 
-/* Ocultar barra inferior redundante (se usa el menú lateral) */
   .bottomnav{ display: none !important; }
 
-  /* ===== VISTA COMPUTADORA / LAPTOP / TABLET: PÁGINA PROFESIONAL, ANCHA, TIPO INMOBILIARIA CORPORATIVA =====
-     Antes el punto de cambio era 900px, lo que dejaba a la mayoría de tablets
-     (usualmente 768-880px de ancho) atrapadas en la vista móvil angosta con
-     enormes márgenes vacíos a los lados. Se baja a 680px para cubrirlas. */
   @media (min-width: 680px){
     html, body{
       background: #F7F5EF !important;
@@ -73,7 +62,6 @@
       border: none !important;
       min-height: 100vh;
     }
-    /* Barra superior a todo el ancho, contenido centrado adentro (como una web corporativa real) */
     .topbar{
       padding: 22px 5vw 16px !important;
       max-width: 1400px; margin: 0 auto; width: 100%;
@@ -83,18 +71,15 @@
       padding: 8px 5vw 80px !important;
       max-width: 1400px; margin: 0 auto; width: 100%;
     }
-    /* Tira de KPIs como cuadrícula ejecutiva, aprovechando el ancho */
     .kpi-strip{
       display: grid !important;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
       overflow: visible !important;
     }
     .kpi-card{ min-width: 0 !important; }
-    /* El drawer se abre igual que en móvil (deslizante), solo un poco más ancho en pantallas grandes */
     .drawer-panel{
       max-width: 300px !important;
     }
-    /* Modales centrados en pantalla en escritorio */
     .modal-backdrop{
       align-items: center !important;
       justify-content: center !important;
@@ -105,7 +90,6 @@
       max-height: 86vh !important;
       box-shadow: 0 24px 60px rgba(26,35,50,0.28) !important;
     }
-    /* La pantalla de login rompe el ancho limitado del contenedor y ocupa toda la pantalla */
     .login-screen{
       width: 100vw !important;
       margin-left: calc(50% - 50vw) !important;
@@ -131,7 +115,6 @@
     }
   }
 
-  /* ===== LOGIN ===== */
   .login-screen{
     flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
     padding: 32px 28px; text-align:center; color: var(--cream); position:relative; overflow:hidden;
@@ -152,15 +135,11 @@
   .btn-google{ display:flex; align-items:center; gap:12px; background: var(--cream); color: var(--navy); border:none; border-radius: 12px; padding: 14px 24px; font-size: 15px; font-weight:600; cursor:pointer; width:100%; max-width: 320px; justify-content:center; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
   .btn-google:active{ transform: scale(0.98); }
 
-  /* ===== HEADER ===== */
   .topbar{ display:flex; align-items:center; justify-content:space-between; padding: 18px 20px 14px; background: var(--cream); position:sticky; top:0; z-index:10; }
   .topbar .greet{ font-size: 20px; font-weight: 700; letter-spacing:-0.02em; }
   .topbar .role{ font-size: 12.5px; color: var(--ink-dim); margin-top:2px; }
   .topbar-actions{ display:flex; gap:8px; align-items:center; }
 
-  /* Botón flotante de acceso rápido a MAJO ASSISTANT: más grande que los demás
-     íconos de la barra, con un pulso suave continuo (crece y vuelve a su
-     tamaño) para que llame la atención de forma amigable, no intrusiva. */
   .majo-fab-btn{
     font-size: 22px !important;
     width: 42px; height: 42px;
@@ -175,7 +154,6 @@
     50% { transform: scale(1.14); }
   }
 
-  /* ---- MAJO ASSISTANT: interfaz de chat moderna ---- */
   .majo-header-card{
     background: linear-gradient(135deg, var(--navy) 0%, #2A3B5C 60%, #3D2E5C 100%);
     border-radius: 18px; padding: 16px 18px; margin-bottom: 14px;
@@ -270,7 +248,6 @@
 
   main{ flex:1; overflow-y:auto; padding: 4px 20px 100px; }
 
-  /* ===== KPI STRIP ===== */
   .kpi-strip{ display:flex; gap:12px; overflow-x:auto; padding: 8px 2px 18px; scrollbar-width:none; }
   .kpi-strip::-webkit-scrollbar{ display:none; }
   .kpi-card{
@@ -289,12 +266,10 @@
   .kpi-card.kpi-gold .num{ color: var(--gold-soft); }
   .kpi-card .lbl{ font-size: 11.5px; color: #A9B4C4; margin-top:8px; font-weight:600; letter-spacing:0.01em; }
 
-  /* ===== SECTION ===== */
   .section-title{ font-size: 15px; font-weight:700; margin: 22px 0 12px; display:flex; justify-content:space-between; align-items:center; position:relative; padding-left:12px; }
   .section-title::before{ content:''; position:absolute; left:0; top:2px; bottom:2px; width:4px; border-radius:3px; background: linear-gradient(180deg, var(--gold) 0%, var(--navy) 100%); }
   .section-title .see-all{ font-size: 13px; font-weight:600; color: var(--gold); background:none; border:none; cursor:pointer; }
 
-  /* ===== CARDS (con profundidad sutil tipo "3D" y animación de entrada) ===== */
   @keyframes tarjetaAparecer{
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
@@ -334,18 +309,15 @@
   .empty .big{ font-size: 34px; margin-bottom:10px; }
   .empty p{ font-size: 13.5px; line-height:1.5; margin: 4px 0 0; }
 
-  /* ===== FAB ===== */
   .fab{ position:fixed; bottom: 92px; right: calc(50% - 240px + 20px); width:56px; height:56px; border-radius:50%; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%); color:#fff; border:none; font-size:26px; box-shadow: 0 10px 24px rgba(201,151,62,0.5); cursor:pointer; z-index:20; transition: transform 0.15s ease; }
   .fab:active{ transform: scale(0.92); }
   @media (max-width: 480px){ .fab{ right: 20px; } }
 
-  /* ===== BOTTOM NAV ===== */
   .bottomnav{ position: sticky; bottom:0; left:0; right:0; background: rgba(247,244,238,0.95); backdrop-filter: blur(8px); border-top: 1px solid #E5DFCF; display:flex; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); max-width:480px; margin:0 auto; width:100%; }
   .navbtn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; padding:8px 4px; color: var(--ink-dim); font-size: 10.5px; font-weight:600; cursor:pointer; transition: color 0.15s ease, transform 0.15s ease; }
   .navbtn.active{ color: var(--navy); transform: translateY(-1px); }
   .navbtn .ic{ font-size: 20px; }
 
-  /* ===== MODAL ===== */
   .modal-backdrop{ position:fixed; inset:0; background: rgba(26,35,50,0.6); backdrop-filter: blur(2px); z-index:50; display:none; align-items:flex-end; justify-content:center; }
   .modal-backdrop.open{ display:flex; }
   @keyframes modalSubir{ from { transform: translateY(24px); opacity: 0.4; } to { transform: translateY(0); opacity: 1; } }
@@ -385,7 +357,6 @@
   .btn-secondary{ flex:1; background:#fff; color: var(--ink-dim); border:1.5px solid #E5DFCF; padding:13px; border-radius:12px; font-size:14.5px; font-weight:600; cursor:pointer; transition: transform 0.12s ease; }
   .btn-secondary:active{ transform: scale(0.98); }
 
-  /* ===== ACORDEÓN / SECCIONES DESPLEGABLES ===== */
   .accordion-sec{ border: 1.5px solid #E5DFCF; border-radius: 12px; margin-bottom: 12px; overflow: hidden; background: #fff; }
   .accordion-hdr{ background: #F7F4EE; padding: 12px 14px; font-size: 13.5px; font-weight: 700; color: var(--navy); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
   .accordion-hdr .arrow{ font-size: 12px; transition: transform 0.2s; }
@@ -393,7 +364,6 @@
   .accordion-bdy{ padding: 14px; }
   .accordion-sec.collapsed .accordion-bdy{ display: none; }
 
-  /* ===== TABS DE ÁREAS (RENDIMIENTO) ===== */
   .area-tabs{ display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:12px; scrollbar-width:none; }
   .area-tab{ background:#EDE8DC; color:var(--navy); border:none; padding:7px 14px; border-radius:100px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
   .area-tab.active{ background:var(--navy); color:#fff; }
@@ -405,10 +375,8 @@
   .spinner{ width:22px; height:22px; border:3px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto; }
   @keyframes spin{ to{ transform: rotate(360deg); } }
 
-  /* Arreglo estricto para checkboxes */
   .field input[type="checkbox"]{ width: auto !important; height: auto !important; margin: 0; }
 
-  /* ===== DISEÑO PROFESIONAL DE PERMISOS ===== */
   .perm-section-title{ font-size: 11.5px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 8px; border-bottom: 1px solid #EDE8DC; padding-bottom: 4px; }
   .perm-card{
     display: flex; align-items: center; justify-content: space-between;
@@ -424,7 +392,6 @@
     accent-color: var(--gold); flex-shrink: 0; cursor: pointer; margin: 0 !important;
   }
 
-  /* ===== PORTADA BIENVENIDA (INICIO) ===== */
   .welcome-card{
     background: linear-gradient(135deg, var(--navy) 0%, #223048 100%);
     border-radius: 18px; padding: 22px 20px; color: #fff; margin-bottom: 14px;
@@ -452,7 +419,6 @@
   .welcome-sub{ font-size: 13px; color: #CBD5E1; margin: 0 0 14px; line-height: 1.45; }
   .btn-ir-control{ background: linear-gradient(135deg, var(--gold) 0%, #D4A74F 100%); color: #fff; border:none; border-radius: 10px; padding: 12px 16px; font-size: 13.5px; font-weight: 700; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 14px rgba(201,151,62,0.4); }
 
-  /* Frase Inspiracional del Día */
   .quote-card{
     background: #fff; border: 1.5px solid #EAE5D8; border-left: 5px solid var(--gold);
     border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);
@@ -463,7 +429,6 @@
   .quote-body{ font-size: 14px; font-style: italic; color: var(--navy); line-height: 1.5; margin: 0 0 8px; }
   .quote-author{ font-size: 12px; font-weight: 700; color: var(--ink-dim); text-align: right; margin: 0; }
 
-  /* Video Motivacional */
   .video-card{
     background: #fff; border: 1px solid #EAE5D8; border-radius: var(--radius);
     padding: 14px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);
@@ -476,7 +441,6 @@
   }
   .video-wrapper iframe{ position: absolute; top:0; left:0; width:100%; height:100%; border:0; }
 
-  /* ===== TARJETA: BALANCE DE GESTIÓN / RECOMENDACIÓN DEL DÍA ===== */
   .daily-analysis-card{
     background: #fff; border: 1px solid #EAE5D8; border-radius: var(--radius);
     padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);
@@ -486,19 +450,7 @@
     color: var(--navy); margin: 0 0 10px;
   }
   .da-section-title:not(:first-child){ margin-top: 18px; }
-  .da-stats-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .da-stat-box{
-    background: var(--navy); color: var(--cream); border-radius: 12px; padding: 14px 12px; text-align:center;
-  }
-  .da-stat-num{ font-size: 22px; font-weight: 800; color: var(--gold-soft); line-height:1; }
-  .da-stat-lbl{ font-size: 11px; color: #A9B4C4; margin-top: 6px; font-weight:600; }
-  .da-plan-box{
-    background: #FBF6EC; border: 1px solid #E8D9B5; border-radius: 12px; padding: 12px 14px;
-    font-size: 13px; color: var(--ink); line-height: 1.5;
-  }
 
-
-  /* ===== ESTILOS CALENDARIO (ESTILO GOOGLE CALENDAR) ===== */
   .calendar-view-selector{
     background: #EDE8DC; padding: 4px; border-radius: 12px; display: flex; gap: 4px; margin-bottom: 12px;
   }
@@ -568,8 +520,6 @@
   .cal-week-num{ font-size: 15px; font-weight: 800; }
   .cal-week-dot{ width: 4px; height: 4px; border-radius: 50%; background: var(--gold); margin: 3px auto 0; }
 
-
-  /* ===== MENÚ LATERAL (DRAWER) ===== */
   .menu-btn{
     width: 38px; height: 38px; border-radius: 10px; background: var(--cream-dim);
     border: none; display: flex; align-items: center; justify-content: center;
@@ -647,13 +597,11 @@
   .drawer-footer{ border-top: 1px solid #EDE8DC; padding: 10px; }
   .drawer-item.logout{ color: var(--danger); }
 
-  /* Indicador numérico en la campanita */
   .bell .dot{
     position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; border-radius: 100px;
     background: var(--danger); color: #fff; font-size: 10px; font-weight: 800; display: none;
     align-items: center; justify-content: center; padding: 0 4px; border: 2px solid #fff;
   }
-  /* La campana "vibra" mientras haya actividades pendientes por resolver */
   @keyframes bellShake {
     0%, 100% { transform: rotate(0deg); }
     10% { transform: rotate(14deg); }
@@ -665,8 +613,6 @@
   }
   .bell-shake{ animation: bellShake 2.2s ease-in-out infinite; animation-delay: 1s; transform-origin: 50% 20%; }
 
-
-  /* ===== MÓDULO PLANOS INTERACTIVOS ===== */
   .planos-toolbar{
     display: flex; gap: 8px; align-items: center; justify-content: space-between;
     margin-bottom: 10px; flex-wrap: wrap;
@@ -683,7 +629,6 @@
   }
   .planos-actions-top{ display: flex; gap: 6px; align-items: center; }
 
-  /* ===== PORTAFOLIO COMERCIAL ===== */
   .pf-book{
     position: relative; max-width: 480px; margin: 0 auto; perspective: 1800px; user-select: none;
   }
@@ -745,58 +690,58 @@
             <span>💼 COMERCIAL</span><span class="dr-dept-arrow">▾</span>
           </button>
           <div class="dr-dept-items">
-        <button class="drawer-item" data-nav="control" id="drNavControl" data-modkey="control">
-          <span class="dr-icon">📊</span>
-          <span class="dr-label">Tablero de Control</span>
-        </button>
-        <button class="drawer-item" data-nav="actividades" id="drNavTareas" data-modkey="actividades">
-          <span class="dr-icon">✓</span>
-          <span class="dr-label">Actividades Realizadas</span>
-        </button>
-        <button class="drawer-item" data-nav="agenda" id="drNavAgenda" data-modkey="agenda">
-          <span class="dr-icon">📅</span>
-          <span class="dr-label">Agenda y Calendario</span>
-        </button>
-        <button class="drawer-item" data-nav="clientes" id="drNavClientes" data-modkey="clientes">
-          <span class="dr-icon">👤</span>
-          <span class="dr-label">Cartera de Clientes</span>
-        </button>
-        <button class="drawer-item" id="drNavCotizador" data-modkey="cotizador" onclick="abrirModalCotizador(); cerrarDrawer();">
-          <span class="dr-icon">🧮</span>
-          <span class="dr-label">Cotizador Rápido de Lotes</span>
-        </button>
-        <button class="drawer-item" data-nav="planos" id="drNavPlanos" data-modkey="planos">
-          <span class="dr-icon">🗺️</span>
-          <span class="dr-label">Planos Interactivos</span>
-        </button>
-        <button class="drawer-item" data-nav="portafolio" id="drNavPortafolio" data-modkey="portafolio">
-          <span class="dr-icon">📁</span>
-          <span class="dr-label">Portafolio Comercial</span>
-        </button>
-        <button class="drawer-item" data-nav="manualventas" id="drNavManualVentas" data-modkey="manualventas">
-          <span class="dr-icon">🎯</span>
-          <span class="dr-label">Manual de Ventas</span>
-        </button>
-        <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones" data-modkey="separaciones">
-          <span class="dr-icon">🏷️</span>
-          <span class="dr-label">Separaciones de Lotes</span>
-        </button>
-        <button class="drawer-item" data-nav="rendimiento" id="drNavRendimiento" data-modkey="rendimiento">
-          <span class="dr-icon">📈</span>
-          <span class="dr-label">Rendimiento por Área</span>
-        </button>
-        <button class="drawer-item" data-nav="solicitudes" id="drNavSolicitudes" data-modkey="solicitudes">
-          <span class="dr-icon">📋</span>
-          <span class="dr-label">Solicitudes y Requerimientos</span>
-        </button>
-        <button class="drawer-item hidden" data-nav="reporte_equipo" id="drNavReporteEquipo" data-modkey="reporte_equipo">
-          <span class="dr-icon">🧑‍🤝‍🧑</span>
-          <span class="dr-label">Reporte Diario del Equipo</span>
-        </button>
-        <button class="drawer-item" data-nav="majo_assistant" id="drNavMajoAssistant" data-modkey="majo_assistant">
-          <span class="dr-icon">🤖</span>
-          <span class="dr-label">MAJO ASSISTANT</span>
-        </button>
+            <button class="drawer-item" data-nav="control" id="drNavControl" data-modkey="control">
+              <span class="dr-icon">📊</span>
+              <span class="dr-label">Tablero de Control</span>
+            </button>
+            <button class="drawer-item" data-nav="actividades" id="drNavTareas" data-modkey="actividades">
+              <span class="dr-icon">✓</span>
+              <span class="dr-label">Actividades Realizadas</span>
+            </button>
+            <button class="drawer-item" data-nav="agenda" id="drNavAgenda" data-modkey="agenda">
+              <span class="dr-icon">📅</span>
+              <span class="dr-label">Agenda y Calendario</span>
+            </button>
+            <button class="drawer-item" data-nav="clientes" id="drNavClientes" data-modkey="clientes">
+              <span class="dr-icon">👤</span>
+              <span class="dr-label">Cartera de Clientes</span>
+            </button>
+            <button class="drawer-item" id="drNavCotizador" data-modkey="cotizador" onclick="abrirModalCotizador(); cerrarDrawer();">
+              <span class="dr-icon">🧮</span>
+              <span class="dr-label">Cotizador Rápido de Lotes</span>
+            </button>
+            <button class="drawer-item" data-nav="planos" id="drNavPlanos" data-modkey="planos">
+              <span class="dr-icon">🗺️</span>
+              <span class="dr-label">Planos Interactivos</span>
+            </button>
+            <button class="drawer-item" data-nav="portafolio" id="drNavPortafolio" data-modkey="portafolio">
+              <span class="dr-icon">📁</span>
+              <span class="dr-label">Portafolio Comercial</span>
+            </button>
+            <button class="drawer-item" data-nav="manualventas" id="drNavManualVentas" data-modkey="manualventas">
+              <span class="dr-icon">🎯</span>
+              <span class="dr-label">Manual de Ventas</span>
+            </button>
+            <button class="drawer-item" data-nav="separaciones" id="drNavSeparaciones" data-modkey="separaciones">
+              <span class="dr-icon">🏷️</span>
+              <span class="dr-label">Separaciones de Lotes</span>
+            </button>
+            <button class="drawer-item" data-nav="rendimiento" id="drNavRendimiento" data-modkey="rendimiento">
+              <span class="dr-icon">📈</span>
+              <span class="dr-label">Rendimiento por Área</span>
+            </button>
+            <button class="drawer-item" data-nav="solicitudes" id="drNavSolicitudes" data-modkey="solicitudes">
+              <span class="dr-icon">📋</span>
+              <span class="dr-label">Solicitudes y Requerimientos</span>
+            </button>
+            <button class="drawer-item hidden" data-nav="reporte_equipo" id="drNavReporteEquipo" data-modkey="reporte_equipo">
+              <span class="dr-icon">🧑‍🤝‍🧑</span>
+              <span class="dr-label">Reporte Diario del Equipo</span>
+            </button>
+            <button class="drawer-item" data-nav="majo_assistant" id="drNavMajoAssistant" data-modkey="majo_assistant">
+              <span class="dr-icon">🤖</span>
+              <span class="dr-label">MAJO ASSISTANT</span>
+            </button>
           </div>
         </div>
 
@@ -816,18 +761,18 @@
         <div class="dr-dept-group hidden" data-dept="ajustes" id="drDeptAjustes">
           <button class="dr-dept-toggle" onclick="this.parentElement.classList.toggle('cerrado')"><span>⚙️ AJUSTES</span><span class="dr-dept-arrow">▾</span></button>
           <div class="dr-dept-items">
-        <button class="drawer-item hidden" data-nav="admin" id="drNavAdmin">
-          <span class="dr-icon">🧑‍💼</span>
-          <span class="dr-label">Gestión de Equipo</span>
-        </button>
-        <button class="drawer-item hidden" data-nav="sistema" id="drNavSistema">
-          <span class="dr-icon">🛠️</span>
-          <span class="dr-label">Configuración del Sistema</span>
-        </button>
-        <button class="drawer-item" id="drBtnConfigRapida">
-          <span class="dr-icon">🔄</span>
-          <span class="dr-label">Configuración Rápida / Sincronización</span>
-        </button>
+            <button class="drawer-item hidden" data-nav="admin" id="drNavAdmin">
+              <span class="dr-icon">🧑‍💼</span>
+              <span class="dr-label">Gestión de Equipo</span>
+            </button>
+            <button class="drawer-item hidden" data-nav="sistema" id="drNavSistema">
+              <span class="dr-icon">🛠️</span>
+              <span class="dr-label">Configuración del Sistema</span>
+            </button>
+            <button class="drawer-item" id="drBtnConfigRapida">
+              <span class="dr-icon">🔄</span>
+              <span class="dr-label">Configuración Rápida / Sincronización</span>
+            </button>
           </div>
         </div>
       </div>
@@ -840,7 +785,6 @@
       </div>
     </div>
   </div>
-
 
   <!-- LOGIN -->
   <div class="login-screen" id="loginScreen">
@@ -875,7 +819,7 @@
     </div>
 
     <main>
-      <!-- VISTA: Inicio (PORTADA DE BIENVENIDA, FRASE, VIDEO Y PLAN DEL DÍA) -->
+      <!-- VISTA: Inicio -->
       <div id="viewInicio">
         <div class="welcome-card">
           <div class="welcome-logos-3d">
@@ -905,8 +849,7 @@
           </div>
         </div>
 
-
-        <!-- RANKING DEL EQUIPO (solo Admin/SuperAdmin o quien tenga el permiso) -->
+        <!-- RANKING DEL EQUIPO -->
         <div class="daily-analysis-card hidden" id="cardRankingEquipo">
           <div class="da-section-title"><span>🏆</span> Ranking del Equipo — Hoy</div>
           <p style="font-size:11.5px; color:var(--ink-dim); margin:-6px 0 12px;">Metas diarias: 30 leads prospección · 10 referidos · 70 llamadas · 2 citas mín. · Meta semanal: 5 clientes filtrados al domingo.</p>
@@ -914,7 +857,7 @@
         </div>
       </div>
 
-      <!-- VISTA: Control (TABLERO OPERATIVO: KPIS, REPORTES Y SEPARACIONES) -->
+      <!-- VISTA: Control -->
       <div id="viewControl" class="hidden">
         <div class="kpi-strip" id="kpiStrip"></div>
 
@@ -980,7 +923,6 @@
       <!-- VISTA: Planos Interactivos -->
       <div id="viewPlanos" class="hidden">
         <div class="section-title" style="margin-top:0;">Planos Interactivos · Costa Dorada</div>
-        
         <div class="planos-toolbar">
           <div class="planos-tabs">
             <button class="plano-tab-btn active" data-plano="sire" onclick="cambiarPlanoActivo('sire')">📍 Lotes y Disponibilidad</button>
@@ -991,12 +933,10 @@
             <button class="chip-btn gold" id="btnPlanoExterno" onclick="abrirPlanoExterno()" title="Abrir en pantalla completa">↗️ Pantalla completa</button>
           </div>
         </div>
-
         <div class="plano-fallback-banner" id="planoFallback">
           <span>Si el visor no responde por políticas del sitio, puedes abrirlo directamente:</span>
           <button class="chip-btn gold" onclick="abrirPlanoExterno()">Abrir</button>
         </div>
-
         <div class="plano-frame-container">
           <iframe id="iframePlano" class="plano-iframe" src="https://usesire.com/ver_plano_publico.php?plano_id=206&ref=416&wb=0" allowfullscreen allow="geolocation; microphone; camera; accelerometer; gyroscope"></iframe>
         </div>
@@ -1005,15 +945,12 @@
       <!-- VISTA: Portafolio Comercial -->
       <div id="viewPortafolio" class="hidden">
         <div class="section-title" style="margin-top:0;">Portafolio Comercial</div>
-
         <div class="planos-tabs" style="margin-bottom:14px; flex-wrap:wrap;">
           <button class="plano-tab-btn active" data-pf="brochure" onclick="cambiarPestanaPortafolio('brochure')">📖 Brochure</button>
           <button class="plano-tab-btn" data-pf="video_costa_dorada" onclick="cambiarPestanaPortafolio('video_costa_dorada')">🎬 Video Costa Dorada</button>
           <button class="plano-tab-btn" data-pf="testimonio" onclick="cambiarPestanaPortafolio('testimonio')">🗣️ Testimonios</button>
           <button class="plano-tab-btn" data-pf="documento" onclick="cambiarPestanaPortafolio('documento')">📄 Documentación</button>
         </div>
-
-        <!-- BROCHURE (tipo libro con deslice de hojas) -->
         <div id="pfPanelBrochure" class="pf-panel">
           <div id="pfBrochureSuperAdmin" class="card hidden" style="margin-bottom:14px;">
             <p class="card-title" style="font-size:13px;">Subir/reemplazar Brochure (PDF)</p>
@@ -1021,8 +958,6 @@
           </div>
           <div id="pfBrochureViewer"></div>
         </div>
-
-        <!-- VIDEO COSTA DORADA -->
         <div id="pfPanelVideoCD" class="pf-panel hidden">
           <div id="pfVideoCDSuperAdmin" class="card hidden" style="margin-bottom:14px;">
             <p class="card-title" style="font-size:13px;">Opción A — Link de YouTube</p>
@@ -1034,8 +969,6 @@
           </div>
           <div id="pfVideoCDViewer"></div>
         </div>
-
-        <!-- VIDEOS TESTIMONIO -->
         <div id="pfPanelTestimonios" class="pf-panel hidden">
           <div id="pfTestimoniosSuperAdmin" class="card hidden" style="margin-bottom:14px;">
             <p class="card-title" style="font-size:13px;">Título del testimonio</p>
@@ -1050,8 +983,6 @@
           </div>
           <div id="pfTestimoniosViewer"></div>
         </div>
-
-        <!-- DOCUMENTACIÓN -->
         <div id="pfPanelDocumentos" class="pf-panel hidden">
           <div id="pfDocumentosLista"></div>
         </div>
@@ -1066,25 +997,21 @@
             <button class="chip-btn gold" id="btnAbrirNuevaSeparacion" style="font-weight:700;">+ Nueva separación</button>
           </div>
         </div>
-
         <div class="area-tabs" style="margin-bottom:12px;">
           <button class="area-tab active" id="tabBtnSeps" onclick="cambiarPestanaSeparaciones('separaciones')">🏷️ Separaciones Activas</button>
           <button class="area-tab" id="tabBtnCobranzas" onclick="cambiarPestanaSeparaciones('cobranzas')">💳 Control de Cobranzas y Cuotas</button>
         </div>
-
         <div id="secTabSeparaciones">
           <div id="listaSeparacionesTodas"></div>
         </div>
-
         <div id="secTabCobranzas" class="hidden">
           <p style="font-size:12.5px; color:var(--ink-dim); margin: 0 0 10px;">Seguimiento de letras y cobranzas de clientes con financiamiento directo activo:</p>
           <div id="listaCobranzasCuotas"></div>
         </div>
       </div>
 
-      <!-- VISTA: Agenda (CALENDARIO COMPLETO + CHECKLIST PERSISTENTE) -->
+      <!-- VISTA: Agenda -->
       <div id="viewAgenda" class="hidden">
-        <!-- Selector de Vistas: Día | Semana | Mes | Checklist -->
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h3 style="margin:0; font-size:16px;">Agenda y Calendario</h3>
           <button class="chip-btn gold" id="btnAbrirNuevaAgenda" style="font-weight:700;">+ Nueva cita</button>
@@ -1095,8 +1022,6 @@
           <button class="cal-view-btn active" data-cal-view="mes">Mes</button>
           <button class="cal-view-btn" data-cal-view="checklist">Checklist</button>
         </div>
-
-        <!-- Barra de Navegación de Fecha -->
         <div class="cal-nav-bar" id="calNavBar">
           <div class="cal-nav-title" id="calNavTitle">Septiembre 2026</div>
           <div class="cal-nav-controls">
@@ -1105,30 +1030,21 @@
             <button class="cal-nav-arrow" id="btnCalNext">▶</button>
           </div>
         </div>
-
-        <!-- CONTENEDOR VISTA MES (Grilla como Google Calendar) -->
         <div id="calContainerMes" class="cal-container">
           <div class="cal-weekdays-header">
             <div>lun</div><div>mar</div><div>mié</div><div>jue</div><div>vie</div><div>sáb</div><div>dom</div>
           </div>
           <div class="cal-month-grid" id="calMonthGrid"></div>
-          <!-- Detalle de eventos del día seleccionado -->
           <div class="section-title" id="calSelectedDayHeader" style="margin-top:14px; font-size:14px;">Eventos del día seleccionado</div>
           <div id="calSelectedDayEvents"></div>
         </div>
-
-        <!-- CONTENEDOR VISTA SEMANA -->
         <div id="calContainerSemana" class="cal-container hidden">
           <div class="cal-week-strip" id="calWeekStrip"></div>
           <div id="calWeekEventsList"></div>
         </div>
-
-        <!-- CONTENEDOR VISTA DÍA -->
         <div id="calContainerDia" class="cal-container hidden">
           <div id="calDiaEventsList"></div>
         </div>
-
-        <!-- CONTENEDOR CHECKLIST PERSISTENTE -->
         <div id="calContainerChecklist" class="cal-container hidden">
           <div class="section-title" style="margin-top:0;">Checklist de actividades
             <span style="font-size:11px; font-weight:600; color:var(--gold);">(Permanecen activas hasta resolver)</span>
@@ -1142,7 +1058,6 @@
         <div class="section-title">Rendimiento por área
           <button class="see-all" id="btnAbrirRendimiento">+ Registrar día</button>
         </div>
-        <!-- Pestañas de áreas para rendimiento -->
         <div class="area-tabs">
           <button class="area-tab active" data-area="comercial">Área Comercial</button>
           <button class="area-tab" data-area="administrativa">Administración</button>
@@ -1154,8 +1069,6 @@
         <div id="listaRendimiento"></div>
       </div>
 
-      <!-- VISTA: Notificaciones -->
-      <!-- VISTA: Solicitudes y Requerimientos -->
       <!-- VISTA: Manual de Ventas -->
       <div id="viewManualVentas" class="hidden">
         <div class="section-title" style="margin-top:0;">Manual de Ventas</div>
@@ -1169,6 +1082,7 @@
         <div id="listaManualVentas"></div>
       </div>
 
+      <!-- VISTA: Solicitudes y Requerimientos -->
       <div id="viewSolicitudes" class="hidden">
         <div class="section-title" style="margin-top:0;">Solicitudes y Requerimientos</div>
         <button class="btn-primary" style="width:100%; margin-bottom:14px;" onclick="abrirModalNuevaSolicitud(); openModal('modalNuevaSolicitud');">➕ Nueva Solicitud</button>
@@ -1181,6 +1095,7 @@
         <div id="listaSolicitudes"></div>
       </div>
 
+      <!-- VISTA: Reporte Diario del Equipo -->
       <div id="viewReporteEquipo" class="hidden">
         <div class="section-title" style="margin-top:0;">Reporte Diario del Equipo</div>
         <div class="card" style="margin-bottom:14px; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
@@ -1193,6 +1108,7 @@
         <div id="reporteEquipoContenido"></div>
       </div>
 
+      <!-- VISTA: MAJO ASSISTANT -->
       <div id="viewMajoAssistant" class="hidden">
         <div class="majo-header-card">
           <div class="majo-avatar-grande">😊</div>
@@ -1205,7 +1121,6 @@
           <button class="plano-tab-btn active" data-majotab="chat" onclick="cambiarTabMajo('chat')">💬 Chat</button>
           <button class="plano-tab-btn hidden" id="tabMajoBaseConocimiento" data-majotab="base" onclick="cambiarTabMajo('base')">📚 Base de Conocimiento</button>
         </div>
-
         <div id="majoTabChat">
           <div id="majoChatMensajes" class="majo-chat-fondo"></div>
           <div class="majo-input-bar">
@@ -1213,7 +1128,6 @@
             <button id="btnEnviarMajoChat" class="majo-btn-enviar">➤</button>
           </div>
         </div>
-
         <div id="majoTabBase" class="hidden">
           <div class="card" style="margin-bottom:14px;">
             <p class="card-title" style="margin-bottom:10px;">Subir documento o video a la base de conocimiento</p>
@@ -1223,7 +1137,6 @@
             <button class="btn-primary" id="btnSubirDocMajo" style="width:100%;">Subir y procesar</button>
           </div>
           <div id="majoListaDocumentos"></div>
-
           <div class="card" style="margin-top:14px;">
             <p class="card-title" style="margin-bottom:10px;">Sitios oficiales autorizados para investigar</p>
             <p class="card-sub" style="margin-bottom:10px;">MAJO solo puede buscar información en estos dominios, nunca en internet libre.</p>
@@ -1237,17 +1150,16 @@
         </div>
       </div>
 
+      <!-- VISTA: Notificaciones -->
       <div id="viewNotificaciones" class="hidden">
         <div class="section-title">Notificaciones</div>
         <select id="notifAsesorSelector" class="hidden" style="width:100%; padding:10px; border:1.5px solid #E5DFCF; border-radius:10px; margin-bottom:12px; font-size:13px;"></select>
         <div id="listaNotificaciones"></div>
       </div>
 
-      <!-- VISTA: Admin (solo administradores / directores) -->
+      <!-- VISTA: Admin -->
       <div id="viewAdmin" class="hidden">
         <div class="section-title">Gestión de equipo y permisos</div>
-
-        <!-- TARJETA: ENLACES DE INSTALACIÓN Y ACCESO (SOLO SUPERADMIN / DESARROLLADOR) -->
         <div class="card" id="cardEnlacesTecnicos" style="margin-bottom: 16px; border-left: 5px solid var(--gold); box-shadow: 0 4px 14px rgba(0,0,0,0.05);">
           <div class="card-row">
             <div>
@@ -1272,7 +1184,7 @@
         <div id="listaUsuariosAdmin"></div>
       </div>
 
-      <!-- VISTA: Configuración del Sistema (solo SuperAdmin) -->
+      <!-- VISTA: Configuración del Sistema -->
       <div id="viewSistema" class="hidden">
         <div class="section-title">Configuración del Sistema</div>
         <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-6px;">Accesos técnicos exclusivos del desarrollador / matriz. No visible para Admin.</p>
@@ -1374,7 +1286,6 @@
       <button class="navbtn hidden" data-nav="admin" id="navAdmin"><span class="ic">⚙️</span>Admin</button>
     </nav>
   </div>
-
   <!-- MODAL: fecha para reporte diario -->
   <div class="modal-backdrop" id="modalFechaReporte">
     <div class="modal-sheet">
@@ -1441,18 +1352,15 @@
     </div>
   </div>
 
-  <!-- MODAL: resolver actividad de agenda (resultado / motivo) -->
+  <!-- MODAL: resolver actividad de agenda -->
   <div class="modal-backdrop" id="modalResolverAgenda">
     <div class="modal-sheet">
       <h3 id="mra_titulo">Completar actividad</h3>
       <input type="hidden" id="mra_id">
       <input type="hidden" id="mra_estado">
-
-      <!-- Campo Resultado si es Realizada -->
       <div class="field" id="mra_bloque_resultado">
         <label>Resultado de la actividad realizada</label>
         <textarea id="mra_resultado" placeholder="Describe acuerdos, compromisos o avances logrados..."></textarea>
-
         <div style="display:flex; gap:10px; margin-top:10px;">
           <div class="field" style="flex:1; margin:0;">
             <label>Hora inicio</label>
@@ -1463,21 +1371,16 @@
             <input type="time" id="mra_hora_fin">
           </div>
         </div>
-
         <div class="field" style="margin-top:10px;">
           <label>📷 Evidencia (foto)</label>
           <input type="file" id="mra_evidencia_input" accept="image/*" capture="environment">
           <div id="mra_evidencia_preview" style="margin-top:8px;"></div>
         </div>
       </div>
-
-      <!-- Campo Motivo si es Reprogramada o Cancelada -->
       <div class="field hidden" id="mra_bloque_motivo">
         <label id="mra_motivo_label">Motivo</label>
         <textarea id="mra_motivo" placeholder="Describe la razón detallada..."></textarea>
       </div>
-
-      <!-- Nueva fecha y hora si es Reprogramada -->
       <div id="mra_bloque_reprogramar" class="hidden">
         <div class="field">
           <label>Nueva fecha</label>
@@ -1488,7 +1391,6 @@
           <input type="time" id="mra_nueva_hora">
         </div>
       </div>
-
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalResolverAgenda">Cancelar</button>
         <button class="btn-primary" id="btnGuardarResolucionAgenda">Guardar</button>
@@ -1496,12 +1398,10 @@
     </div>
   </div>
 
-  <!-- MODAL: nueva separación (con acordeón desplegable) -->
+  <!-- MODAL: nueva separación -->
   <div class="modal-backdrop" id="modalSeparacion">
     <div class="modal-sheet">
       <h3>Nueva separación</h3>
-
-      <!-- Acordeón Sección 1: Datos del Cliente -->
       <div class="accordion-sec" id="secCli">
         <div class="accordion-hdr" onclick="toggleAccordion('secCli')">
           <span>👤 1. DATOS DEL CLIENTE Y CÓNYUGE</span>
@@ -1513,7 +1413,6 @@
           <div class="field"><label>Celular</label><input type="text" id="sp_cliente_celular"></div>
           <div class="field"><label>Dirección</label><input type="text" id="sp_cliente_direccion"></div>
           <div class="field"><label>Correo</label><input type="email" id="sp_cliente_correo"></div>
-
           <div class="field" style="display:flex; align-items:center; gap:8px;">
             <input type="checkbox" id="sp_tiene_conyuge" style="width:auto;">
             <label style="margin:0;">Tiene cónyuge / copropietario</label>
@@ -1526,8 +1425,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Acordeón Sección 2: Lote y Cotización -->
       <div class="accordion-sec" id="secLote">
         <div class="accordion-hdr" onclick="toggleAccordion('secLote')">
           <span>📐 2. LOTE Y COTIZACIÓN</span>
@@ -1542,8 +1439,6 @@
           <div class="field"><label>Valor total (S/)</label><input type="number" step="0.01" id="sp_valor_total"></div>
         </div>
       </div>
-
-      <!-- Acordeón Sección 3: Separación y Pago -->
       <div class="accordion-sec" id="secPago">
         <div class="accordion-hdr" onclick="toggleAccordion('secPago')">
           <span>💰 3. SEPARACIÓN Y CONDICIONES DE PAGO</span>
@@ -1555,7 +1450,6 @@
           <div class="field"><label>Voucher / comprobante (imagen)</label><input type="file" id="sp_voucher" accept="image/*"></div>
           <div class="field"><label>Entidad bancaria</label><input type="text" id="sp_medio_pago" placeholder="Ej: BCP, Interbank, BBVA..."></div>
           <div class="field"><label>N° de operación</label><input type="text" id="sp_n_operacion"></div>
-
           <div class="field">
             <label>Condición</label>
             <select id="sp_condicion">
@@ -1563,7 +1457,6 @@
               <option value="financiado">Financiado</option>
             </select>
           </div>
-
           <div id="sp_bloque_financiado" class="hidden">
             <div class="field"><label>Valor de inicial (S/)</label><input type="number" step="0.01" id="sp_valor_inicial"></div>
             <div class="field"><label>Saldo (S/)</label><input type="number" step="0.01" id="sp_saldo" readonly style="background:#EFEBDF;"></div>
@@ -1581,11 +1474,9 @@
             <div class="field hidden" id="sp_meses_otro_wrap"><label>N° de meses</label><input type="number" id="sp_meses_otro"></div>
             <div class="field"><label>Inversión mensual (S/)</label><input type="number" step="0.01" id="sp_inversion_mensual" readonly style="background:#EFEBDF;"></div>
           </div>
-
           <div class="field"><label>Fecha de vencimiento de la separación</label><input type="date" id="sp_fecha_vencimiento"></div>
         </div>
       </div>
-
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalSeparacion">Cancelar</button>
         <button class="btn-primary" id="btnGuardarSeparacion">Guardar separación</button>
@@ -1593,7 +1484,7 @@
     </div>
   </div>
 
-  <!-- MODAL: nuevo cliente / prospecto -->
+  <!-- MODAL: Generar Minuta / Documento -->
   <div class="modal-backdrop" id="modalGenerarDocumento">
     <div class="modal-sheet">
       <button class="modal-x-close" data-close="modalGenerarDocumento">✕</button>
@@ -1615,6 +1506,7 @@
     </div>
   </div>
 
+  <!-- MODAL: Checklist Legal -->
   <div class="modal-backdrop" id="modalChecklistLegal">
     <div class="modal-sheet">
       <button class="modal-x-close" data-close="modalChecklistLegal">✕</button>
@@ -1624,6 +1516,7 @@
     </div>
   </div>
 
+  <!-- MODAL: Historial Cliente -->
   <div class="modal-backdrop" id="modalHistorialCliente">
     <div class="modal-sheet">
       <button class="modal-x-close" data-close="modalHistorialCliente">✕</button>
@@ -1632,6 +1525,7 @@
     </div>
   </div>
 
+  <!-- MODAL: nuevo cliente / prospecto -->
   <div class="modal-backdrop" id="modalCliente">
     <div class="modal-sheet">
       <h3>Registrar nuevo cliente / prospecto</h3>
@@ -1639,7 +1533,6 @@
       <div class="field"><label>Celular / WhatsApp *</label><input type="tel" id="cl_celular" placeholder="Ej: 952123456"></div>
       <div class="field"><label>DNI (opcional)</label><input type="text" id="cl_dni" placeholder="Número de DNI"></div>
       <div class="field"><label>Correo electrónico (opcional)</label><input type="email" id="cl_correo" placeholder="correo@ejemplo.com"></div>
-      
       <div class="field">
         <label>Origen / Prospección (De dónde proviene) *</label>
         <select id="cl_origen">
@@ -1656,10 +1549,8 @@
           <option value="Otro">Otro</option>
         </select>
       </div>
-
       <div class="field"><label>Fecha de contacto / prospección</label><input type="date" id="cl_fecha_contacto"></div>
       <div class="field"><label>Hora de contacto</label><input type="time" id="cl_hora_contacto"></div>
-
       <div class="field">
         <label>Estado del prospecto</label>
         <select id="cl_estado">
@@ -1673,13 +1564,11 @@
           <option value="No interesado">No interesado</option>
         </select>
       </div>
-
       <div class="field"><label>Próxima acción a realizar *</label><input type="text" id="cl_proxima_accion" placeholder="Ej: Llamar mañana 10am para coordinar visita guiada"></div>
       <div style="display:flex; gap:10px;">
         <div class="field" style="flex:1;"><label>Fecha próxima acción</label><input type="date" id="cl_proxima_fecha"></div>
         <div class="field" style="flex:1;"><label>Hora próxima acción</label><input type="time" id="cl_proxima_hora"></div>
       </div>
-
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modalCliente">Cancelar</button>
         <button class="btn-primary" id="btnGuardarCliente">Guardar cliente</button>
@@ -1687,7 +1576,6 @@
     </div>
   </div>
 
-  <!-- MODAL: registro diario de rendimiento comercial -->
   <!-- MODAL: Cotizador rápido -->
   <div class="modal-backdrop" id="modalCotizador">
     <div class="modal-sheet">
@@ -1742,11 +1630,11 @@
     </div>
   </div>
 
+  <!-- MODAL: Rendimiento -->
   <div class="modal-backdrop" id="modalRendimiento">
     <div class="modal-sheet">
       <h3>Registro diario de leads</h3>
       <div class="field"><label>Fecha</label><input type="date" id="rd_fecha"></div>
-
       <p style="font-size:12.5px; font-weight:700; color:var(--ink-dim); margin:10px 0 6px;">LEADS ASIGNADOS POR CANAL</p>
       <div class="field"><label>Facebook</label><input type="number" min="0" id="rd_leads_facebook" value="0"></div>
       <div class="field"><label>TikTok</label><input type="number" min="0" id="rd_leads_tiktok" value="0"></div>
@@ -1855,7 +1743,6 @@
         </select>
       </div>
 
-            <!-- PERMISOS ESTRUCTURADOS EN TARJETAS ELEGANTES -->
       <div class="perm-section-title">📁 ACCESO A MÓDULOS</div>
       <label class="perm-card">
         <div class="perm-card-info">
@@ -1973,11 +1860,7 @@
     </div>
   </div>
 
-  <!-- MODAL: preautorizar nuevo usuario (completo) -->
-  <!-- MODAL: Configuración rápida (⚙️ junto al nombre) -->
-  <!-- MODAL: Nueva Solicitud/Requerimiento -->
-  <!-- MODAL: Nuevo/Editar Speech (Manual de Ventas) -->
-  <!-- MODAL: Visor de Documentos (zoom tactil + descargar + WhatsApp) -->
+  <!-- MODAL: Visor de Documentos -->
   <div class="modal-backdrop" id="modalVisorDocumento">
     <div class="modal-sheet" style="max-width:100%; height:92vh; max-height:92vh; display:flex; flex-direction:column; padding:16px 12px;">
       <h3 id="visdoc_titulo" style="margin-bottom:8px;">Documento</h3>
@@ -1989,6 +1872,7 @@
     </div>
   </div>
 
+  <!-- MODAL: Nuevo Speech -->
   <div class="modal-backdrop" id="modalNuevoSpeech">
     <div class="modal-sheet">
       <h3 id="mv_titulo_modal">Nuevo Speech</h3>
@@ -2009,6 +1893,7 @@
     </div>
   </div>
 
+  <!-- MODAL: Nueva Solicitud -->
   <div class="modal-backdrop" id="modalNuevaSolicitud">
     <div class="modal-sheet">
       <h3>Nueva Solicitud</h3>
@@ -2039,6 +1924,7 @@
     </div>
   </div>
 
+  <!-- MODAL: Configuración Rápida -->
   <div class="modal-backdrop" id="modalConfigRapida">
     <div class="modal-sheet">
       <h3>Configuración Rápida</h3>
@@ -2051,16 +1937,15 @@
     </div>
   </div>
 
+  <!-- MODAL: Preautorizar nuevo usuario -->
   <div class="modal-backdrop" id="modalPreautorizar">
     <div class="modal-sheet">
       <h3 id="pa_modal_titulo">Alta de colaborador en el equipo</h3>
       <p style="font-size:12.5px; color:var(--ink-dim); margin-top:-8px;">Registra los datos corporativos del colaborador. Podrá ingresar con su cuenta de Google.</p>
-      
       <div class="field"><label>Nombre completo del colaborador *</label><input type="text" id="pa_nombre" placeholder="Nombres y apellidos"></div>
       <div class="field"><label>Correo de Google *</label><input type="email" id="pa_email" placeholder="nombre@gmail.com"></div>
       <div class="field"><label>Número de DNI</label><input type="text" id="pa_dni" placeholder="DNI"></div>
       <div class="field"><label>Celular / WhatsApp</label><input type="tel" id="pa_celular" placeholder="Número de celular"></div>
-
       <div class="field">
         <label>Área o Departamento *</label>
         <select id="pa_area">
@@ -2072,9 +1957,7 @@
           <option value="Obras">Obras y Habilitación Técnica</option>
         </select>
       </div>
-
       <div class="field"><label>Cargo específico *</label><input type="text" id="pa_cargo" placeholder="Ej: Asesor Comercial, Asistente Contable..."></div>
-
       <div class="field">
         <label>Rol en el sistema *</label>
         <select id="pa_rol">
@@ -2087,7 +1970,6 @@
         </select>
       </div>
 
-            <!-- PERMISOS LIMPIOS EN ALTA -->
       <div class="perm-section-title">📁 ACCESO A MÓDULOS</div>
       <label class="perm-card">
         <div class="perm-card-info">
@@ -2188,7 +2070,6 @@
 
   <div class="toast" id="toast"></div>
 </div>
-
 <script>
 /* ============ CONFIGURACIÓN SUPABASE ============ */
 const SUPABASE_URL = 'https://nboikojylmkujdxinztj.supabase.co';
@@ -2200,22 +2081,15 @@ let currentProfile = null;
 
 /* =========================================================================
    COMPRESIÓN AUTOMÁTICA DE ARCHIVOS ANTES DE SUBIR
-   -------------------------------------------------------------------------
-   Si un archivo (imagen, PDF o video) supera el límite razonable, en vez de
-   fallar la subida en silencio o con un error críptico, se intenta comprimir
-   automáticamente y se avisa al usuario. Usa las librerías que la app YA
-   carga (pdf.js y jsPDF) para no sumar peso extra a la aplicación.
    ========================================================================= */
 const LIMITES_ARCHIVO = {
   imagen: 1.5 * 1024 * 1024,   // 1.5 MB
-  pdf: 8 * 1024 * 1024,        // 8 MB (por encima de esto, pdf.js sufre en móviles)
+  pdf: 8 * 1024 * 1024,        // 8 MB
   video: 25 * 1024 * 1024,     // 25 MB
 };
 
 function formatoMB(bytes){ return (bytes / (1024 * 1024)).toFixed(1) + ' MB'; }
 
-/** Comprime una imagen redibujándola en un canvas a menor resolución/calidad.
- *  Reintenta bajando la calidad hasta cumplir el límite o llegar a un piso razonable. */
 async function comprimirImagenSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.imagen){
   if (!file.type.startsWith('image/') || file.size <= maxBytes) return file;
   toast(`Comprimiendo imagen (${formatoMB(file.size)})…`);
@@ -2238,7 +2112,7 @@ async function comprimirImagenSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.ima
       calidad -= 0.12;
       blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', calidad));
     }
-    if (!blob) return file; // si algo falla, se sube el original en vez de bloquear al usuario
+    if (!blob) return file;
 
     const nombreFinal = file.name.replace(/\.[^.]+$/, '') + '.jpg';
     const archivoComprimido = new File([blob], nombreFinal, { type: 'image/jpeg' });
@@ -2250,10 +2124,6 @@ async function comprimirImagenSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.ima
   }
 }
 
-/** Comprime un PDF re-renderizando cada página como imagen (vía pdf.js) y
- *  reconstruyendo un PDF nuevo (vía jsPDF) con esas imágenes en menor calidad.
- *  Es especialmente efectivo en PDFs escaneados o con fotos pesadas (el caso
- *  típico que hacía fallar la previsualización en el Portafolio Comercial). */
 async function comprimirPDFSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.pdf){
   if (file.type !== 'application/pdf' || file.size <= maxBytes) return file;
   toast(`Comprimiendo PDF (${formatoMB(file.size)}), esto puede tardar un momento…`);
@@ -2268,7 +2138,7 @@ async function comprimirPDFSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.pdf){
 
     for (let n = 1; n <= pdfDoc.numPages; n++) {
       const page = await pdfDoc.getPage(n);
-      const viewport = page.getViewport({ scale: 1.15 }); // resolución reducida a propósito
+      const viewport = page.getViewport({ scale: 1.15 });
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width; canvas.height = viewport.height;
       await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
@@ -2298,12 +2168,6 @@ async function comprimirPDFSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.pdf){
   }
 }
 
-/** Comprime un video usando únicamente APIs nativas del navegador (sin librerías
- *  externas): reproduce el video en memoria, redibuja cada cuadro a menor
- *  resolución en un canvas, y regraba con MediaRecorder a menor bitrate.
- *  Es "mejor esfuerzo": funciona bien en Chrome/Android; si el navegador no
- *  soporta la técnica (ej. algunas versiones de Safari/iOS), se avisa con
- *  claridad en vez de fallar en silencio. */
 async function comprimirVideoSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.video){
   if (!file.type.startsWith('video/') || file.size <= maxBytes) return file;
 
@@ -2367,8 +2231,6 @@ async function comprimirVideoSiEsNecesario(file, maxBytes = LIMITES_ARCHIVO.vide
   }
 }
 
-/** Punto único de entrada: recibe cualquier archivo antes de subirlo a
- *  Supabase Storage y aplica la compresión que corresponda según su tipo. */
 async function prepararArchivoParaSubida(file){
   if (!file) return file;
   if (file.type.startsWith('image/')) return comprimirImagenSiEsNecesario(file);
@@ -2379,14 +2241,6 @@ async function prepararArchivoParaSubida(file){
 
 /* =========================================================================
    LISTA ÚNICA Y CANÓNICA DE PERMISOS DEL SISTEMA
-   -------------------------------------------------------------------------
-   Regla de oro: cuando se agregue un módulo, submódulo o acción nueva que
-   requiera control de acceso, AGREGAR SU CLAVE AQUÍ (con su valor por
-   defecto y una etiqueta legible). Todo lo demás (checkboxes de los
-   formularios de usuario, y el "relleno" automático de usuarios ya
-   existentes que no tenían esa clave) se genera a partir de esta lista,
-   así que nunca más queda un permiso "huérfano" que solo vive hardcodeado
-   en un checkbox suelto.
    ========================================================================= */
 const PERMISOS_CATALOGO = [
   { key: 'ver_agenda',          label: 'Ver Agenda',                         default: true  },
@@ -2412,11 +2266,6 @@ const PERMISOS_CATALOGO = [
   { key: 'ver_ajustes',         label: 'Ver módulo Ajustes',                 default: false },
 ];
 
-/** Completa cualquier permiso faltante de un usuario con su valor por
- *  defecto del catálogo. Úsese SIEMPRE al leer currentProfile.permisos
- *  o el permisos de cualquier usuario, así como al abrir los formularios
- *  de edición, para que un permiso agregado después de crear al usuario
- *  no quede indefinido (undefined) en vez de tener un valor explícito. */
 function fusionarPermisosConCatalogo(permisosGuardados){
   const p = permisosGuardados || {};
   const resultado = {};
@@ -2429,7 +2278,6 @@ let currentView = 'inicio';
 let puedeEliminar = false;
 
 /* ============ UTILIDADES ============ */
-/* ============ CATÁLOGO MOTIVACIONAL Y DE VENTAS ============ */
 const FRASES_MOTIVACIONALES = [
   { f: "La disciplina es el puente entre las metas y los logros extraordinarios.", a: "Jim Rohn" },
   { f: "El éxito en las ventas inmobiliarias radica en el número de relaciones de valor que construyes cada día.", a: "Brian Tracy" },
@@ -2481,46 +2329,6 @@ function cargarPortadaInicio(){
   if (elVidTit) elVidTit.textContent = videoObj.t;
   const elIframe = document.getElementById('vd_iframe');
   if (elIframe) elIframe.src = `https://www.youtube-nocookie.com/embed/${videoObj.id}`;
-
-  // Nota: la tarjeta "resumen de ayer" se retiró a pedido explícito (ya se había
-  // quitado antes); se deja de llamar esta función para no hacer consultas
-  // a la base de datos que ya no se muestran en ningún lado.
-}
-
-async function cargarAnalisisAyerYHoy(){
-  const ayer = new Date();
-  ayer.setDate(ayer.getDate() - 1);
-  const anio = ayer.getFullYear();
-  const mes = String(ayer.getMonth() + 1).padStart(2, '0');
-  const dia = String(ayer.getDate()).padStart(2, '0');
-  const fechaAyer = `${anio}-${mes}-${dia}`;
-
-  const { count: tareasAyer } = await sb.from('actividades')
-    .select('id', { count: 'exact', head: true })
-    .eq('usuario_id', currentUser.id)
-    .eq('fecha_programada', fechaAyer);
-
-  const { data: rendAyer } = await sb.from('rendimiento_leads')
-    .select('*')
-    .eq('usuario_id', currentUser.id)
-    .eq('fecha', fechaAyer)
-    .maybeSingle();
-
-  const totalContactadosAyer = rendAyer ? (rendAyer.contactados_llamada + rendAyer.contactados_whatsapp_mensaje + rendAyer.contactados_whatsapp_llamada) : 0;
-  
-  const elTA = document.getElementById('da_tareas_ayer');
-  if (elTA) elTA.textContent = tareasAyer || 0;
-  const elLA = document.getElementById('da_leads_ayer');
-  if (elLA) elLA.textContent = totalContactadosAyer || 0;
-
-  const planEl = document.getElementById('da_plan_texto');
-  if (planEl) {
-    if (totalContactadosAyer > 0) {
-      planEl.innerHTML = `<strong>Ayer contactaste a ${totalContactadosAyer} prospecto(s).</strong> Hoy haz seguimiento inmediato a los interesados para concretar sus visitas en campo al Proyecto Costa Dorada.`;
-    } else {
-      planEl.innerHTML = `<strong>Arranque con fuerza:</strong> Hoy es un día clave para prospectar en ferias y redes. Establece contacto con al menos 10 prospectos y agenda tus actividades antes del mediodía.`;
-    }
-  }
 }
 
 function toast(msg){
@@ -2542,8 +2350,7 @@ function obtenerHoyLocal(){
   const dia = String(d.getDate()).padStart(2, '0');
   return `${anio}-${mes}-${dia}`;
 }
-/* Convierte un timestamp ISO (guardado en UTC) a la fecha/hora LOCAL del celular.
-   Sin esto, un evento nocturno puede aparecer registrado un día después. */
+
 function fechaLocalDeISO(iso){
   if (!iso) return '';
   const d = new Date(iso);
@@ -2561,8 +2368,6 @@ function horaLocalDeISO(iso){
 }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 
-/* Agrega automáticamente una X arriba a la derecha en TODOS los modales, sin tener que editar cada uno.
-   (El script ya corre al final del <body>, así que el DOM ya está listo — no hace falta esperar DOMContentLoaded) */
 document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
   const sheet = backdrop.querySelector('.modal-sheet');
   if (!sheet || sheet.querySelector('.modal-x-close')) return;
@@ -2634,19 +2439,11 @@ async function mostrarApp(){
   activarAlarmasPush();
 
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial';
-  const esGerencia = rol === 'gerencia';
-  // BUG CRÍTICO CORREGIDO: "perm" se usaba en esta función sin estar definida
-  // en ningún lado (ni local ni global), lo que lanzaba un ReferenceError y
-  // detenía por completo la carga de la app para CUALQUIER usuario que no
-  // fuera exactamente rol "admin" o "superadmin" (el corto-circuito del ||
-  // ocultaba el error solo para esos dos roles).
   const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
 
   const elNavAdmin = document.getElementById('navAdmin');
   if (elNavAdmin) elNavAdmin.classList.toggle('hidden', !(rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || perm.gestionar_equipo));
 
-  // Solo el SuperAdmin (desarrollador) ve enlaces técnicos del código fuente y matriz
   const cardEnlaces = document.getElementById('cardEnlacesTecnicos');
   if (cardEnlaces) cardEnlaces.classList.toggle('hidden', rol !== 'superadmin');
 
@@ -2737,24 +2534,13 @@ function rolLabel(rol){
 async function cargarPerfil(){
   let { data } = await sb.from('usuarios').select('*').eq('id', currentUser.id).single();
 
-  // BUG CRÍTICO CORREGIDO: hasta ahora, si un colaborador pre-autorizado
-  // iniciaba sesión por primera vez, nunca se creaba su fila en "usuarios"
-  // (solo existía en "usuarios_preautorizados"), dejándolo sin perfil ni
-  // permisos. Ahora se activa automáticamente vía una función de base de
-  // datos (necesaria porque las políticas de seguridad normales exigen ser
-  // "admin" para crear un usuario, y uno nuevo aún no lo es).
   if (!data) {
-    const { data: activado, error: errActivar } = await sb.rpc('activar_usuario_preautorizado');
-    if (errActivar) {
-      console.error('No se pudo activar la cuenta pre-autorizada:', errActivar);
-    } else {
-      data = activado;
-    }
+    const { data: activado } = await sb.rpc('activar_usuario_preautorizado').catch(() => ({ data: null }));
+    if (activado) data = activado;
   }
 
   currentProfile = data || {};
   
-  // Regla SuperAdmin: joreal.ft2020@gmail.com siempre es SuperAdmin por defecto
   if (currentUser?.email === 'joreal.ft2020@gmail.com') {
     currentProfile.rol = 'superadmin';
     currentProfile.nombre = currentProfile.nombre || 'Jorge Alexander Luque Cepeda';
@@ -2769,8 +2555,7 @@ async function cargarPerfil(){
   }
 }
 
-
-/* ============ MENÚ LATERAL (DRAWER) ============ */
+/* ============ MENÚ LATERAL ============ */
 function abrirDrawer(){
   document.getElementById('drawerBackdrop').classList.add('open');
   actualizarDatosDrawer();
@@ -2808,8 +2593,6 @@ function actualizarDatosDrawer(){
 
   const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
   const rol = currentProfile?.rol;
-  const esSuperAdminODirector = rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial';
-  const esGerencia = rol === 'gerencia';
 
   const showDr = (id, cond) => {
     const el = document.getElementById(id);
@@ -2845,7 +2628,6 @@ document.getElementById('drBtnConfigRapida')?.addEventListener('click', () => {
   cerrarDrawer();
 });
 
-/* ---- Foto de perfil del colaborador ---- */
 document.getElementById('drFotoPerfilInput')?.addEventListener('change', async (e) => {
   let file = e.target.files[0];
   if (!file || !currentUser) return;
@@ -2857,8 +2639,6 @@ document.getElementById('drFotoPerfilInput')?.addEventListener('change', async (
     const { error: upErr } = await sb.storage.from('fotos-perfil').upload(path, file, { upsert: true });
     if (upErr) { toast('Error al subir la foto'); console.error(upErr); return; }
     const { data: pub } = sb.storage.from('fotos-perfil').getPublicUrl(path);
-    // Cache-busting: sin esto, el navegador podría seguir mostrando la foto vieja
-    // con la misma URL (mismo path) aunque el archivo ya se haya reemplazado.
     const urlConVersion = `${pub.publicUrl}?v=${Date.now()}`;
     const { error: updErr } = await sb.from('usuarios').update({ foto_url: urlConVersion }).eq('id', currentUser.id);
     if (updErr) { toast('Error al guardar la foto'); console.error(updErr); return; }
@@ -2964,14 +2744,7 @@ async function cargarKPIs(){
     </div>`).join('');
 }
 
-/* ============ PROYECCIÓN DE VENTAS ============
-   Dos componentes, cada uno etiquetado con honestidad para no confundir
-   "casi seguro" con "estimado":
-   1) Cierres del mes: separaciones ACTIVAS cuyo vencimiento cae este mes
-      (dinero real, ya comprometido por el cliente).
-   2) Pipeline ponderado: clientes en etapas avanzadas, multiplicados por
-      una probabilidad de cierre según su etapa y el valor promedio real
-      de lote (sacado del propio historial de separaciones). */
+/* ============ PROYECCIÓN DE VENTAS ============ */
 const PROBABILIDAD_POR_ETAPA = {
   'Cita agendada': 0.15,
   'Visita realizada': 0.30,
@@ -2998,10 +2771,6 @@ async function cargarAvisoClientesRiesgo(){
   `;
 }
 
-/* ============ COMPARATIVO POR MANZANA ============
-   Como Costa Dorada es por ahora el único proyecto, el comparativo se hace
-   por manzana (la etapa/zona real que ya existe en los datos de separaciones),
-   en vez de inventar un concepto de "proyectos" que no existe todavía. */
 async function cargarComparativoManzana(){
   const cont = document.getElementById('cardComparativoManzana');
   if (!cont) return;
@@ -3040,7 +2809,6 @@ async function cargarComparativoManzana(){
     </div>
   `).join('');
 }
-
 
 async function cargarProyeccionVentas(){
   const cont = document.getElementById('cardProyeccionVentas');
@@ -3093,12 +2861,10 @@ async function cargarProyeccionVentas(){
     </p>
   `;
 }
-
-
+/* ============ ACTIVIDADES ============ */
 async function cargarActividadesHoy(){
   const hoy = obtenerHoyLocal();
-  // Orden descendente: las nuevas arriba
-  const { data, error } = await sb.from('actividades')
+  const { data } = await sb.from('actividades')
     .select('*')
     .eq('usuario_id', currentUser.id)
     .eq('fecha_programada', hoy)
@@ -3119,9 +2885,6 @@ function cambiarFiltroFechaActividades(filtro){
 }
 
 async function cargarActividadesTodas(){
-  // Por defecto solo se muestra el día de hoy: las de días anteriores se
-  // "ocultan" automáticamente al cambiar de fecha, sin que nadie tenga que
-  // archivarlas a mano. El historial completo sigue disponible con un toque.
   let query = sb.from('actividades')
     .select('*')
     .eq('usuario_id', currentUser.id)
@@ -3217,8 +2980,6 @@ function renderActividades(items, contenedorId, mensajeVacio){
   `).join('');
 }
 
-/* Archivar en vez de eliminar: el registro se conserva siempre en la base de
-   datos para reportes e informes, solo deja de mostrarse en las listas activas. */
 async function archivarActividad(id){
   if (!confirm('¿Archivar esta actividad? Dejará de verse en tu lista, pero seguirá contando para los reportes e informes.')) return;
   const { error } = await sb.from('actividades').update({ archivada: true }).eq('id', id);
@@ -3231,8 +2992,6 @@ function estadoLabel(e){
   return { pendiente:'Pendiente', en_proceso:'En proceso', completada:'Realizada', cancelada:'Cancelada', activa:'Activa', vencida:'Vencida', convertida_venta:'Vendido' }[e] || e;
 }
 
-/** Llena un <select> con los clientes del vendedor (o de todo el equipo si es
- *  admin/superadmin), usado para vincular actividades y citas a un cliente. */
 async function poblarSelectClientes(selectId){
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
@@ -3244,7 +3003,6 @@ async function poblarSelectClientes(selectId){
   sel.innerHTML = '<option value="">— Ninguno —</option>' + (data || []).map(c => `<option value="${c.id}">${escapeHtml(c.nombre)}</option>`).join('');
 }
 
-/* ============ NUEVA ACTIVIDAD (modal) ============ */
 document.getElementById('btnFab').addEventListener('click', () => {
   if (currentView === 'agenda') { poblarSelectClientes('agClienteId'); openModal('modalAgenda'); }
   else if (currentView === 'separaciones') { prepararModalSeparacion(); openModal('modalSeparacion'); }
@@ -3260,7 +3018,6 @@ document.getElementById('btnFab').addEventListener('click', () => {
   }
 });
 
-/* ---- Temas y Acuerdos dentro de una actividad ---- */
 let actTemasAcuerdosTemp = [];
 
 function renderActTemasLista(){
@@ -3316,8 +3073,7 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
 
   toast('Guardando actividad realizada…');
 
-  // Se guarda como completada/realizada por defecto
-  const { data: nuevaAct, error } = await sb.from('actividades').insert({
+  const payloadCompleto = {
     usuario_id: currentUser.id,
     titulo,
     locacion: locacion || null,
@@ -3329,16 +3085,32 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
     temas_acuerdos: actTemasAcuerdosTemp,
     estado: 'completada',
     fecha_completada: new Date().toISOString()
-  }).select().single();
+  };
+
+  let { data: nuevaAct, error } = await sb.from('actividades').insert(payloadCompleto).select().single();
+
+  if (error && (error.message.includes('column') || error.message.includes('schema'))) {
+    const payloadRespaldo = {
+      usuario_id: currentUser.id,
+      titulo,
+      locacion: locacion ? `${locacion}${personas ? ' · Con: ' + personas : ''}` : (personas ? 'Con: ' + personas : null),
+      fecha_programada: fecha,
+      estado: 'completada',
+      descripcion: actTemasAcuerdosTemp.length > 0 ? JSON.stringify(actTemasAcuerdosTemp) : null
+    };
+    const resRespaldo = await sb.from('actividades').insert(payloadRespaldo).select().single();
+    nuevaAct = resRespaldo.data;
+    error = resRespaldo.error;
+  }
 
   actTemasAcuerdosTemp = [];
   renderActTemasLista();
 
-  if (error) { toast('Error al guardar'); console.error(error); return; }
+  if (error) { toast('Error al guardar: ' + error.message); console.error(error); return; }
 
-  if (archivo) {
+  if (archivo && nuevaAct) {
     try {
-      const ext = archivo.name.split('.').pop() || 'dat';
+      const ext = archivo.name.split('.').pop() || 'jpg';
       const path = `${currentUser.id}/${nuevaAct.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await sb.storage.from('evidencias-actividades').upload(path, archivo);
       if (!upErr) {
@@ -3363,7 +3135,7 @@ document.getElementById('btnGuardarActividad').addEventListener('click', async (
   cargarActividadesHoy(); cargarActividadesTodas(); cargarKPIs();
 });
 
-/* ============ REPORTE DIARIO EN PDF (CON SELECTOR DE FECHA Y PERMISO) ============ */
+/* ============ REPORTE DIARIO EN PDF ============ */
 document.getElementById('btnDescargarReporte').addEventListener('click', () => {
   const hoy = obtenerHoyLocal();
   const inputF = document.getElementById('repFecha');
@@ -3391,13 +3163,11 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
   try {
     const logoBase64 = typeof cargarLogoBase64 === 'function' ? await cargarLogoBase64() : null;
 
-    // 1. Actividades registradas directamente en Tareas
     const { data: actsRegistradas } = await sb.from('actividades')
       .select('*')
       .eq('usuario_id', currentUser.id)
       .eq('fecha_programada', fechaReporte);
 
-    // 2. Actividades de Agenda realizadas en esa fecha
     const { data: agendasRealizadas } = await sb.from('agenda')
       .select('*')
       .eq('usuario_id', currentUser.id)
@@ -3405,7 +3175,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
       .gte('fecha_inicio', fechaReporte + 'T00:00:00')
       .lte('fecha_inicio', fechaReporte + 'T23:59:59');
 
-    // 3. Unificar ambas fuentes para que el reporte sea 100% completo
     let actividades = [...(actsRegistradas || [])];
     (agendasRealizadas || []).forEach(ag => {
       const hIni = ag.fecha_inicio ? horaLocalDeISO(ag.fecha_inicio) : null;
@@ -3428,7 +3197,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
 
     actividades.sort((a, b) => (a.hora_inicio || '99:99').localeCompare(b.hora_inicio || '99:99'));
 
-    // 4. Agenda del día que NO se realizó (pendiente/reprogramada) — antes faltaba en el PDF
     const { data: agendaSinResolver } = await sb.from('agenda')
       .select('*')
       .eq('usuario_id', currentUser.id)
@@ -3438,7 +3206,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
     const agendaPendientes = (agendaSinResolver || []).filter(a => a.estado === 'programada');
     const agendaReprogramadas = (agendaSinResolver || []).filter(a => a.estado === 'reprogramada');
 
-    // 5. Solicitudes y Requerimientos con fecha límite ese día — antes faltaban por completo en el PDF
     const { data: solicitudesDia } = await sb.from('solicitudes')
       .select('*')
       .eq('asignado_a', currentUser.id)
@@ -3475,7 +3242,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
 
     function dibujarEncabezadoPrincipal(){
       dibujarFondoYMembrete();
-      
       y = 112;
       doc.setTextColor(...cNavy);
       doc.setFontSize(14);
@@ -3519,7 +3285,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
     dibujarEncabezadoPrincipal();
     let seccionNum = 1;
 
-    // SECCIÓN 1: RENDIMIENTO COMERCIAL
     if (rendimientoDia) {
       doc.setTextColor(...cNavy);
       doc.setFontSize(10);
@@ -3559,7 +3324,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
       y += 44;
     }
 
-    // SECCIÓN 2: ACTIVIDADES REALIZADAS
     doc.setTextColor(...cNavy);
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
@@ -3629,10 +3393,8 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
         y += cardHeight + 8;
       }
 
-      // SECCIÓN: EVIDENCIAS
       if (fotosParaAdjuntar.length > 0) {
         if (y > pageHeight - 180) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
-
         doc.setTextColor(...cNavy);
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
@@ -3677,10 +3439,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
       }
     }
 
-    // SECCIÓN: AGENDA DEL DÍA — PENDIENTES Y REPROGRAMADAS (lo realizado ya se listó arriba junto a Actividades)
-    // NOTA: esta sección va FUERA del if/else de actividades a propósito — antes vivía adentro
-    // y por eso desaparecía del PDF cuando no había actividades manuales ese día, aunque sí
-    // hubiera agenda o solicitudes pendientes. Debe mostrarse siempre.
     if (y > pageHeight - 140) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
     doc.setTextColor(...cNavy);
     doc.setFontSize(10);
@@ -3716,7 +3474,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
       y += 8;
     }
 
-    // SECCIÓN: SOLICITUDES Y REQUERIMIENTOS DEL DÍA (realizadas / pendientes / reprogramadas)
     if (y > pageHeight - 140) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
     doc.setTextColor(...cNavy);
     doc.setFontSize(10);
@@ -3753,7 +3510,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
       y += 8;
     }
 
-    // SECCIÓN 4: FIRMAS
     if (y > pageHeight - 110) { doc.addPage(); dibujarFondoYMembrete(); y = 120; }
     y = Math.max(y + 20, pageHeight - 105);
 
@@ -3781,7 +3537,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
     doc.setTextColor(...cDim);
     doc.text('Constructora & Inmobiliaria Casa Dorada', vbX + (colW / 2), y + 22, { align: 'center' });
 
-    // Copyright en el pie de TODAS las páginas del documento (no solo la última)
     const totalPaginasRD = doc.internal.getNumberOfPages();
     for (let p = 1; p <= totalPaginasRD; p++) {
       doc.setPage(p);
@@ -3816,7 +3571,6 @@ document.getElementById('btnConfirmarDescargaReporte').addEventListener('click',
   }
 });
 
-/* ============ EVIDENCIAS FOTOGRÁFICAS ============ */
 async function subirEvidencia(actividadId, file){
   if (!file) return;
   file = await comprimirImagenSiEsNecesario(file);
@@ -3845,7 +3599,6 @@ async function subirEvidencia(actividadId, file){
   }
 }
 
-/* ============ INFORME FORMAL (QUINCENAL / MENSUAL) ============ */
 document.getElementById('btnAbrirInformeFormal').addEventListener('click', () => openModal('modalInformeFormal'));
 
 async function cargarLogoBase64(){
@@ -3878,14 +3631,12 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
   try {
     const { data: empresa } = await sb.from('empresa_config').select('*').eq('id', 1).single();
 
-    // 1. Actividades registradas en Tareas
     const { data: acts1 } = await sb.from('actividades')
       .select('*')
       .eq('usuario_id', currentUser.id)
       .gte('fecha_programada', fechaInicio)
       .lte('fecha_programada', fechaFin);
 
-    // 2. Actividades de Agenda realizadas en el periodo
     const { data: ags1 } = await sb.from('agenda')
       .select('*')
       .eq('usuario_id', currentUser.id)
@@ -3914,7 +3665,6 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
 
     actividades.sort((a, b) => (a.fecha_programada || '').localeCompare(b.fecha_programada || ''));
 
-    // Agenda del periodo que NO se realizó (pendiente/reprogramada) — antes faltaba en este informe
     const { data: agendaSinResolverPeriodo } = await sb.from('agenda')
       .select('*')
       .eq('usuario_id', currentUser.id)
@@ -3924,7 +3674,6 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
     const agPendientesPeriodo = (agendaSinResolverPeriodo || []).filter(a => a.estado === 'programada');
     const agReprogramadasPeriodo = (agendaSinResolverPeriodo || []).filter(a => a.estado === 'reprogramada');
 
-    // Solicitudes y Requerimientos con fecha límite en el periodo — antes faltaban por completo en este informe
     const { data: solicitudesPeriodo } = await sb.from('solicitudes')
       .select('*')
       .eq('asignado_a', currentUser.id)
@@ -4101,7 +3850,6 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
       if (y > pageHeight - 160) { doc.addPage(); dibujarMembrete(); y = 150; }
     }
 
-    // AGENDA DEL PERIODO — PENDIENTES Y REPROGRAMADAS (lo realizado ya está en la tabla de arriba)
     const dibujarTablaSimple = (titulo, items, vacioTxt, campoFecha) => {
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
@@ -4177,7 +3925,6 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
     doc.setFont(undefined, 'normal');
     doc.text(cargoVendedor, marginX, y);
 
-    // Copyright en el pie de TODAS las páginas del documento
     const totalPaginasInf = doc.internal.getNumberOfPages();
     for (let p = 1; p <= totalPaginasInf; p++) {
       doc.setPage(p);
@@ -4189,7 +3936,7 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
 
     const nombreArchivo = `informe-${tipo}-${nombreVendedor.replace(/\s+/g,'-').toLowerCase()}-${fechaInicio}.pdf`;
     doc.save(nombreArchivo);
-    toast('Informe formal generado \u2713');
+    toast('Informe formal generado ✓');
     closeModal('modalInformeFormal');
   } catch (e) {
     toast('Error al generar el informe');
@@ -4197,8 +3944,6 @@ document.getElementById('btnGenerarInformeFormal').addEventListener('click', asy
   }
 });
 
-
-/* ============ COMPARTIR E INSTALAR APLICATIVO (SUPERADMIN) ============ */
 function copiarLinkInstalacion(tipo){
   const urlApp = 'https://jorealft2020-hue.github.io/casa-dorada-app/';
   let mensaje = '';
@@ -4254,10 +3999,14 @@ function compartirWhatsAppInvitacion(){
   window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
-/* ============ ADMIN: USUARIOS PRE-AUTORIZADOS (ALTA COMPLETA) ============ */
+/* ============ ADMIN: USUARIOS PRE-AUTORIZADOS ============ */
+let editandoEmailPreautorizado = null;
+
 document.getElementById('btnAbrirPreautorizar').addEventListener('click', () => {
-  // Reset completo: si no se hace, un usuario NUEVO puede heredar en silencio
-  // los datos y permisos del último colaborador que se editó en este formulario.
+  editandoEmailPreautorizado = null;
+  document.getElementById('pa_modal_titulo').textContent = 'Alta de colaborador en el equipo';
+  document.getElementById('btnGuardarPreautorizado').textContent = 'Agregar colaborador';
+  document.getElementById('pa_email').disabled = false;
   ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
@@ -4288,8 +4037,8 @@ async function cargarPreautorizados(){
         </div>
       </div>
       <div class="card-actions" style="margin-top:10px;">
-        <button class="chip-btn gold" onclick="abrirEditarPreautorizado('${p.email.replace(/'/g,"\'")}');">✏️ Editar ficha y permisos</button>
-        <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarPreautorizado('${p.email.replace(/'/g,"\'")}');">🗑️ Eliminar</button>
+        <button class="chip-btn gold" onclick="abrirEditarPreautorizado('${p.email.replace(/'/g,"\\\\'")}');">✏️ Editar ficha y permisos</button>
+        <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarPreautorizado('${p.email.replace(/'/g,"\\\\'")}');">🗑️ Eliminar</button>
       </div>
     </div>
   `).join('');
@@ -4299,7 +4048,9 @@ async function abrirEditarPreautorizado(email){
   const { data: p } = await sb.from('usuarios_preautorizados').select('*').eq('email', email).single();
   if (!p) { toast('No se encontró el registro'); return; }
 
-  document.getElementById('pa_modal_titulo').textContent = 'Editar colaborador pendiente';
+  editandoEmailPreautorizado = email;
+  document.getElementById('pa_modal_titulo').textContent = 'Editar colaborador y permisos';
+  document.getElementById('btnGuardarPreautorizado').textContent = 'Guardar cambios';
   document.getElementById('pa_nombre').value = p.nombre || '';
   document.getElementById('pa_email').value = p.email;
   document.getElementById('pa_email').disabled = true;
@@ -4310,26 +4061,11 @@ async function abrirEditarPreautorizado(email){
   document.getElementById('pa_rol').value = p.rol || 'usuario';
 
   const perm = fusionarPermisosConCatalogo(p.permisos);
-  window._permisosCompletosEnEdicionPA = perm; // preserva claves del catálogo sin checkbox propio en este formulario
-  document.getElementById('pa_perm_ver_actividades').checked = perm.ver_actividades !== false;
-  document.getElementById('pa_perm_ver_clientes').checked = perm.ver_clientes !== false;
-  document.getElementById('pa_perm_ver_separaciones').checked = perm.ver_separaciones !== false;
-  document.getElementById('pa_perm_ver_agenda').checked = perm.ver_agenda !== false;
-  document.getElementById('pa_perm_ver_rendimiento').checked = perm.ver_rendimiento !== false;
-  document.getElementById('pa_perm_ver_control').checked = perm.ver_control !== false;
-  document.getElementById('pa_perm_kpi_monto').checked = perm.kpi_monto === true;
-  document.getElementById('pa_perm_kpi_desglose').checked = perm.kpi_desglose === true;
-  document.getElementById('pa_perm_reportes_pasados').checked = perm.reportes_pasados === true;
-  document.getElementById('pa_perm_generar_informes').checked = perm.generar_informes !== false;
-  document.getElementById('pa_perm_eliminar_registros').checked = perm.eliminar_registros === true;
-  document.getElementById('pa_perm_ver_planos').checked = perm.ver_planos !== false;
-  document.getElementById('pa_perm_ver_cotizador').checked = perm.ver_cotizador !== false;
-  document.getElementById('pa_perm_ver_portafolio').checked = perm.ver_portafolio !== false;
-  document.getElementById('pa_perm_ver_solicitudes').checked = perm.ver_solicitudes !== false;
-  document.getElementById('pa_perm_ver_manualventas').checked = perm.ver_manualventas !== false;
-  document.getElementById('pa_perm_ver_majo_assistant').checked = perm.ver_majo_assistant !== false;
-  document.getElementById('pa_perm_ver_reporte_equipo').checked = perm.ver_reporte_equipo === true;
-  document.getElementById('pa_perm_ver_ajustes').checked = perm.ver_ajustes === true;
+  window._permisosCompletosEnEdicionPA = perm;
+  Object.keys(perm).forEach(key => {
+    const el = document.getElementById('pa_perm_' + key);
+    if (el) el.checked = perm[key] !== false;
+  });
 
   openModal('modalPreautorizar');
 }
@@ -4344,7 +4080,7 @@ async function eliminarPreautorizado(email){
 
 document.getElementById('btnGuardarPreautorizado').addEventListener('click', async () => {
   const nombre = document.getElementById('pa_nombre').value.trim();
-  const email = document.getElementById('pa_email').value.trim().toLowerCase();
+  const email = (editandoEmailPreautorizado || document.getElementById('pa_email').value).trim().toLowerCase();
   const dni = document.getElementById('pa_dni').value.trim();
   const celular = document.getElementById('pa_celular').value.trim();
   const area = document.getElementById('pa_area').value;
@@ -4356,6 +4092,29 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
     return;
   }
 
+  const permisos = {
+    ...fusionarPermisosConCatalogo(window._permisosCompletosEnEdicionPA),
+    ver_actividades: document.getElementById('pa_perm_ver_actividades')?.checked !== false,
+    ver_clientes: document.getElementById('pa_perm_ver_clientes')?.checked !== false,
+    ver_separaciones: document.getElementById('pa_perm_ver_separaciones')?.checked !== false,
+    ver_agenda: document.getElementById('pa_perm_ver_agenda')?.checked !== false,
+    ver_rendimiento: document.getElementById('pa_perm_ver_rendimiento')?.checked !== false,
+    ver_control: document.getElementById('pa_perm_ver_control')?.checked !== false,
+    kpi_monto: document.getElementById('pa_perm_kpi_monto')?.checked === true,
+    kpi_desglose: document.getElementById('pa_perm_kpi_desglose')?.checked === true,
+    reportes_pasados: document.getElementById('pa_perm_reportes_pasados')?.checked === true,
+    generar_informes: document.getElementById('pa_perm_generar_informes')?.checked !== false,
+    eliminar_registros: document.getElementById('pa_perm_eliminar_registros')?.checked === true,
+    ver_planos: document.getElementById('pa_perm_ver_planos')?.checked !== false,
+    ver_cotizador: document.getElementById('pa_perm_ver_cotizador')?.checked !== false,
+    ver_portafolio: document.getElementById('pa_perm_ver_portafolio')?.checked !== false,
+    ver_solicitudes: document.getElementById('pa_perm_ver_solicitudes')?.checked !== false,
+    ver_manualventas: document.getElementById('pa_perm_ver_manualventas')?.checked !== false,
+    ver_majo_assistant: document.getElementById('pa_perm_ver_majo_assistant')?.checked !== false,
+    ver_reporte_equipo: document.getElementById('pa_perm_ver_reporte_equipo')?.checked === true,
+    ver_ajustes: document.getElementById('pa_perm_ver_ajustes')?.checked === true
+  };
+
   const payload = {
     email,
     nombre,
@@ -4365,41 +4124,34 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
     cargo,
     rol,
     creado_por: currentUser.id,
-    permisos: {
-      ...fusionarPermisosConCatalogo(window._permisosCompletosEnEdicionPA),
-      ver_actividades: document.getElementById('pa_perm_ver_actividades').checked,
-      ver_clientes: document.getElementById('pa_perm_ver_clientes').checked,
-      ver_separaciones: document.getElementById('pa_perm_ver_separaciones').checked,
-      ver_agenda: document.getElementById('pa_perm_ver_agenda').checked,
-      ver_rendimiento: document.getElementById('pa_perm_ver_rendimiento').checked,
-      ver_control: document.getElementById('pa_perm_ver_control').checked,
-      kpi_monto: document.getElementById('pa_perm_kpi_monto').checked,
-      kpi_desglose: document.getElementById('pa_perm_kpi_desglose').checked,
-      reportes_pasados: document.getElementById('pa_perm_reportes_pasados').checked,
-      generar_informes: document.getElementById('pa_perm_generar_informes').checked,
-      eliminar_registros: document.getElementById('pa_perm_eliminar_registros').checked,
-      ver_planos: document.getElementById('pa_perm_ver_planos').checked,
-      ver_cotizador: document.getElementById('pa_perm_ver_cotizador').checked,
-      ver_portafolio: document.getElementById('pa_perm_ver_portafolio').checked,
-      ver_solicitudes: document.getElementById('pa_perm_ver_solicitudes').checked,
-      ver_manualventas: document.getElementById('pa_perm_ver_manualventas').checked,
-      ver_majo_assistant: document.getElementById('pa_perm_ver_majo_assistant').checked,
-      ver_reporte_equipo: document.getElementById('pa_perm_ver_reporte_equipo').checked,
-      ver_ajustes: document.getElementById('pa_perm_ver_ajustes').checked
-    }
+    permisos
   };
 
-  const { error } = await sb.from('usuarios_preautorizados').upsert(payload);
-  if (error) { toast('Error al agregar colaborador'); console.error(error); return; }
-  toast('Colaborador pre-autorizado ✓ ya puede iniciar sesión con Google');
+  let error = null;
+  if (editandoEmailPreautorizado) {
+    const res = await sb.from('usuarios_preautorizados').update(payload).eq('email', editandoEmailPreautorizado);
+    error = res.error;
+  } else {
+    const res = await sb.from('usuarios_preautorizados').upsert(payload, { onConflict: 'email' });
+    error = res.error;
+  }
+
+  if (error && (error.message.includes('column') || error.message.includes('schema'))) {
+    const payloadMinimo = { email, rol, permisos };
+    const resMin = editandoEmailPreautorizado 
+      ? await sb.from('usuarios_preautorizados').update(payloadMinimo).eq('email', editandoEmailPreautorizado)
+      : await sb.from('usuarios_preautorizados').upsert(payloadMinimo, { onConflict: 'email' });
+    error = resMin.error;
+  }
+
+  if (error) { toast('Error al guardar: ' + error.message); console.error(error); return; }
+  toast(editandoEmailPreautorizado ? 'Colaborador actualizado ✓' : 'Colaborador pre-autorizado ✓');
   closeModal('modalPreautorizar');
   ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => document.getElementById(id).value = '');
   cargarPreautorizados();
 });
 
-/* ============ ADMIN: GESTIÓN DE EQUIPO (FICHA COMPLETA) ============ */
-
-/* ============ ELIMINAR COLABORADOR ACTIVO ============ */
+/* ============ ADMIN: GESTIÓN DE EQUIPO ============ */
 async function eliminarUsuarioActivo(id, nombre){
   if (!id) return;
   if (id === currentUser.id) {
@@ -4412,14 +4164,12 @@ async function eliminarUsuarioActivo(id, nombre){
 
   toast('Eliminando colaborador…');
 
-  // 1. Intentar eliminar de la tabla usuarios
   let { error } = await sb.from('usuarios').delete().eq('id', id);
 
-  // 2. Si falla por llave foránea (violación de integridad referencial con actividades, clientes o separaciones):
   if (error) {
     console.warn('Error al eliminar usuario directamente:', error);
     if (error.message && (error.message.includes('foreign key') || error.message.includes('violates') || error.code === '23503')) {
-      const desactivar = confirm(`El colaborador tiene registros asociados (clientes, tareas o contratos de separación) y la base de datos protege su historial para no perder las ventas.\n\n¿Deseas DESACTIVARLO y BLOQUEAR SU ACCESO de inmediato? (Ya no podrá entrar a la app pero se conservarán sus ventas).`);
+      const desactivar = confirm(`El colaborador tiene registros asociados y la base de datos protege su historial para no perder las ventas.\n\n¿Deseas DESACTIVARLO y BLOQUEAR SU ACCESO de inmediato?`);
       if (desactivar) {
         await sb.from('usuarios').update({ activo: false }).eq('id', id);
         toast('Colaborador desactivado y bloqueado ✓');
@@ -4458,7 +4208,7 @@ async function cargarUsuariosAdmin(){
       </div>
       <div class="card-actions" style="margin-top:10px;">
         <button class="chip-btn gold" onclick="abrirEditarUsuario('${u.id}')">✏️ Editar ficha y permisos</button>
-        ${u.id !== currentUser.id ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarUsuarioActivo('${u.id}', '${(u.nombre || u.email).replace(/'/g,"\'")}')">🗑️ Eliminar</button>` : ''}
+        ${u.id !== currentUser.id ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarUsuarioActivo('${u.id}', '${(u.nombre || u.email).replace(/'/g,"\\\\'")}');">🗑️ Eliminar</button>` : ''}
       </div>
     </div>
   `).join('');
@@ -4488,11 +4238,15 @@ async function abrirEditarUsuario(id){
   selSup.value = data.supervisor_id || '';
   
   const perm = fusionarPermisosConCatalogo(data.permisos);
-  window._permisosCompletosEnEdicion = perm; // preserva claves del catálogo sin checkbox propio en este formulario
+  window._permisosCompletosEnEdicion = perm;
   document.getElementById('perm_ver_actividades').checked = perm.ver_actividades !== false;
   document.getElementById('perm_ver_clientes').checked = perm.ver_clientes !== false;
   document.getElementById('perm_ver_separaciones').checked = perm.ver_separaciones !== false;
   document.getElementById('perm_ver_agenda').checked = perm.ver_agenda !== false;
+  document.getElementById('perm_ver_rendimiento').checked = perm.ver_rendimiento !== false;
+  document.getElementById('perm_ver_control').checked = perm.ver_control !== false;
+  document.getElementById('perm_kpi_monto').checked = perm.kpi_monto === true;
+  document.getElementById('perm_kpi_desglose').checked = perm.kpi_desglose === true;
   document.getElementById('perm_reportes_pasados').checked = perm.reportes_pasados === true;
   document.getElementById('perm_generar_informes').checked = perm.generar_informes !== false;
   document.getElementById('perm_eliminar_registros').checked = perm.eliminar_registros === true;
@@ -4523,38 +4277,53 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
     reporte_email_adicional: document.getElementById('eu_reporte_email_adicional').value.trim() || null,
     reporte_diario_activo: document.getElementById('eu_reporte_diario_activo').checked,
     permisos: {
-      // Partimos de los permisos completos ya cargados (incluye claves del catálogo
-      // que no tienen checkbox en este formulario, como ver_control/ver_rendimiento/
-      // kpi_monto/kpi_desglose) y solo pisamos las que sí se editan aquí. Así nunca
-      // se pierde un permiso por no tener campo visible en este formulario puntual.
       ...fusionarPermisosConCatalogo(window._permisosCompletosEnEdicion),
-      ver_actividades: document.getElementById('perm_ver_actividades').checked,
-      ver_clientes: document.getElementById('perm_ver_clientes').checked,
-      ver_separaciones: document.getElementById('perm_ver_separaciones').checked,
-      ver_agenda: document.getElementById('perm_ver_agenda').checked,
-      reportes_pasados: document.getElementById('perm_reportes_pasados').checked,
-      generar_informes: document.getElementById('perm_generar_informes').checked,
-      eliminar_registros: document.getElementById('perm_eliminar_registros').checked,
-      gestionar_equipo: document.getElementById('perm_gestionar_equipo').checked,
-      ver_ranking_equipo: document.getElementById('perm_ver_ranking_equipo').checked,
-      ver_planos: document.getElementById('perm_ver_planos').checked,
-      ver_cotizador: document.getElementById('perm_ver_cotizador').checked,
-      ver_portafolio: document.getElementById('perm_ver_portafolio').checked,
-      ver_solicitudes: document.getElementById('perm_ver_solicitudes').checked,
-      ver_manualventas: document.getElementById('perm_ver_manualventas').checked,
-      ver_majo_assistant: document.getElementById('perm_ver_majo_assistant').checked,
-      ver_reporte_equipo: document.getElementById('perm_ver_reporte_equipo').checked,
-      ver_ajustes: document.getElementById('perm_ver_ajustes').checked,
+      ver_actividades: document.getElementById('perm_ver_actividades')?.checked !== false,
+      ver_clientes: document.getElementById('perm_ver_clientes')?.checked !== false,
+      ver_separaciones: document.getElementById('perm_ver_separaciones')?.checked !== false,
+      ver_agenda: document.getElementById('perm_ver_agenda')?.checked !== false,
+      ver_rendimiento: document.getElementById('perm_ver_rendimiento')?.checked !== false,
+      ver_control: document.getElementById('perm_ver_control')?.checked !== false,
+      kpi_monto: document.getElementById('perm_kpi_monto')?.checked === true,
+      kpi_desglose: document.getElementById('perm_kpi_desglose')?.checked === true,
+      reportes_pasados: document.getElementById('perm_reportes_pasados')?.checked === true,
+      generar_informes: document.getElementById('perm_generar_informes')?.checked !== false,
+      eliminar_registros: document.getElementById('perm_eliminar_registros')?.checked === true,
+      gestionar_equipo: document.getElementById('perm_gestionar_equipo')?.checked === true,
+      ver_ranking_equipo: document.getElementById('perm_ver_ranking_equipo')?.checked === true,
+      ver_planos: document.getElementById('perm_ver_planos')?.checked !== false,
+      ver_cotizador: document.getElementById('perm_ver_cotizador')?.checked !== false,
+      ver_portafolio: document.getElementById('perm_ver_portafolio')?.checked !== false,
+      ver_solicitudes: document.getElementById('perm_ver_solicitudes')?.checked !== false,
+      ver_manualventas: document.getElementById('perm_ver_manualventas')?.checked !== false,
+      ver_majo_assistant: document.getElementById('perm_ver_majo_assistant')?.checked !== false,
+      ver_reporte_equipo: document.getElementById('perm_ver_reporte_equipo')?.checked === true,
+      ver_ajustes: document.getElementById('perm_ver_ajustes')?.checked === true,
     }
   };
-  const { error } = await sb.from('usuarios').update(payload).eq('id', id);
-  if (error) { toast('Error al guardar'); console.error(error); return; }
+
+  let { error } = await sb.from('usuarios').update(payload).eq('id', id);
+
+  if (error && (error.message.includes('column') || error.message.includes('schema'))) {
+    const payloadRespaldo = {
+      nombre: payload.nombre,
+      area: payload.area,
+      cargo: payload.cargo,
+      rol: payload.rol,
+      activo: payload.activo,
+      permisos: payload.permisos
+    };
+    const res2 = await sb.from('usuarios').update(payloadRespaldo).eq('id', id);
+    error = res2.error;
+  }
+
+  if (error) { toast('Error al guardar: ' + error.message); console.error(error); return; }
   toast('Colaborador actualizado ✓');
   closeModal('modalEditarUsuario');
   cargarUsuariosAdmin();
 });
 
-/* ============ RENDIMIENTO (POR ÁREAS) ============ */
+/* ============ RENDIMIENTO ============ */
 document.querySelectorAll('.area-tab').forEach(tab => {
   tab.addEventListener('click', (e) => {
     document.querySelectorAll('.area-tab').forEach(t => t.classList.remove('active'));
@@ -4623,7 +4392,7 @@ function cargarRendimientoPorArea(area){
     panel.innerHTML = `
       <div class="card">
         <p class="card-title">Módulo de Rendimiento: Área ${escapeHtml(area.toUpperCase())}</p>
-        <p class="card-sub" style="margin-top:6px; line-height:1.5;">Este módulo está preparado para recibir los indicadores de gestión específicos para el área de ${escapeHtml(area)} (solicitudes, trámites, órdenes y tiempos de respuesta) en cuanto se definan sus métricas oficiales.</p>
+        <p class="card-sub" style="margin-top:6px; line-height:1.5;">Este módulo está preparado para recibir los indicadores de gestión específicos para el área de ${escapeHtml(area)} en cuanto se definan sus métricas oficiales.</p>
       </div>
     `;
   }
@@ -4743,7 +4512,6 @@ async function eliminarRendimiento(id){
   toast('Registro eliminado');
   cargarRendimiento();
 }
-
 /* ============ CLIENTES / PROSPECTOS ============ */
 document.getElementById('btnAbrirNuevoCliente').addEventListener('click', () => {
   prepararModalCliente();
@@ -4789,18 +4557,13 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
   btnGuardar.disabled = true;
   toast('Registrando cliente…');
 
-  // BLINDAJE: todo el proceso queda envuelto en try/catch/finally para que,
-  // pase lo que pase, SIEMPRE se muestre un mensaje final (éxito o error) y
-  // el botón se reactive — antes, un fallo inesperado en cualquier paso
-  // (ej. generar el código, o la sincronización con Calendar) dejaba el
-  // mensaje "Registrando cliente…" congelado para siempre, sin avisar nada.
   try {
     let codigoGenerado = null;
     try {
       const resultado = await sb.rpc('generar_codigo_cliente', { p_vendedor_id: currentUser.id });
       codigoGenerado = resultado?.data || null;
     } catch (eCodigo) {
-      console.error('No se pudo generar el código de cliente (se continúa sin él):', eCodigo);
+      console.error('No se pudo generar el código de cliente:', eCodigo);
     }
 
     const payload = {
@@ -4838,7 +4601,6 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
       toast('Error al guardar cliente'); console.error(error); return;
     }
 
-    // AUTO-AGENDAMIENTO DE LA PRÓXIMA ACCIÓN EN AGENDA Y CALENDAR:
     if (proximaFecha && proximaHora) {
       try {
         const fInicioISO = new Date(`${proximaFecha}T${proximaHora}:00`).toISOString();
@@ -4852,7 +4614,7 @@ document.getElementById('btnGuardarCliente').addEventListener('click', async () 
 
         if (agendaEv) sincronizarEventoCalendar(agendaEv);
       } catch (eAgenda) {
-        console.error('No se pudo auto-agendar la próxima acción (el cliente sí se guardó):', eAgenda);
+        console.error('No se pudo auto-agendar:', eAgenda);
       }
     }
 
@@ -4879,8 +4641,16 @@ async function cargarClientes(){
   }
   query = query.order('created_at', { ascending: false });
 
-  const { data } = await query;
-  clientesCache = data || []; // se reutiliza en la vista Pipeline sin volver a consultar
+  let { data, error } = await query;
+  
+  if (error && error.message.includes('archivado')) {
+    let qFallback = sb.from('clientes').select('*');
+    if (!esSuperAdminODirector) qFallback = qFallback.eq('vendedor_id', currentUser.id);
+    const res = await qFallback.order('created_at', { ascending: false });
+    data = res.data;
+  }
+
+  clientesCache = data || [];
   clientesSeleccionados.clear();
   actualizarContadorSeleccionados();
   document.getElementById('barraAccionesMasivasClientes')?.classList.toggle('hidden', !esSuperAdminODirector);
@@ -4892,8 +4662,6 @@ async function cargarClientes(){
   el.innerHTML = data.map(c => renderTarjetaCliente(c, esSuperAdminODirector)).join('');
 }
 
-/** Color de borde por estado, igual idea que el semáforo amarillo/rojo visto
- *  en el CRM de referencia: rojo = perdido, verde = cerrado, ámbar = en riesgo. */
 function colorEstadoCliente(c){
   if (c.estado_prospecto === 'No interesado') return 'var(--danger)';
   if (c.estado_prospecto === 'Separado') return 'var(--ok)';
@@ -4925,9 +4693,9 @@ function renderTarjetaCliente(c, esSuperAdminODirector){
         ${c.estado_prospecto ? `<span class="badge badge-pendiente">${escapeHtml(c.estado_prospecto)}</span>` : ''}
       </div>
       <div class="card-actions" style="margin-top:8px;">
-        <button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">🕒 Historial</button>
-        <button class="chip-btn" style="color:#2C5691; border-color:#2C5691;" onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')">📋 Legal</button>
-        <button class="chip-btn" style="color:var(--gold); border-color:var(--gold);" onclick="abrirGenerarDocumento('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}', '${(c.celular || '').replace(/'/g, "\\'")}')">📝 Minuta</button>
+        <button class="chip-btn" style="color:#7C6BAF; border-color:#7C6BAF;" onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\\\'")}');">🕒 Historial</button>
+        <button class="chip-btn" style="color:#2C5691; border-color:#2C5691;" onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\\\'")}');">📋 Legal</button>
+        <button class="chip-btn" style="color:var(--gold); border-color:var(--gold);" onclick="abrirGenerarDocumento('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\\\'")}','${(c.celular || '').replace(/'/g, "\\\\'")}')">📝 Minuta</button>
         ${wspUrl ? `<a class="chip-btn gold" href="${wspUrl}" target="_blank" style="text-decoration:none;">💬 WhatsApp</a>` : ''}
         ${c.celular ? `<a class="chip-btn" href="tel:${c.celular}" style="text-decoration:none;">📞 Llamar</a>` : ''}
         ${puedeEliminar ? `<button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarCliente('${c.id}')">🗑️</button>` : ''}
@@ -4936,11 +4704,6 @@ function renderTarjetaCliente(c, esSuperAdminODirector){
   `;
 }
 
-/* ============ ACCIONES MASIVAS Y ARCHIVADO DE CLIENTES ============
-   Inspirado en un patron visto en otro CRM del cliente: seleccionar varios
-   clientes y asignarlos/archivarlos de una vez, util para admins con
-   carteras grandes. Sigue el mismo criterio de "archivar, no borrar" que
-   ya usamos en Actividades. */
 let clientesSeleccionados = new Set();
 
 function toggleSeleccionCliente(id, marcado){
@@ -5012,19 +4775,13 @@ async function desarchivarCliente(id){
   cargarClientesArchivados(); cargarClientes();
 }
 
-/* ============ PIPELINE VISUAL (KANBAN) — corazón del CRM ============
-   Reutiliza exactamente las mismas 8 etapas ya definidas en el formulario
-   de cliente (cl_estado), sin cambios de esquema. Cada tarjeta tiene un
-   selector para "mover" de etapa al instante (más confiable en celular
-   que arrastrar y soltar con el dedo). */
+/* ============ PIPELINE VISUAL (KANBAN) ============ */
 let clientesCache = [];
 const ETAPAS_PIPELINE = [
   'Nuevo', 'En seguimiento', 'Interesado', 'Cita agendada',
   'Visita realizada', 'Evaluación crediticia', 'Separado', 'No interesado'
 ];
 
-/** Un cliente está "en riesgo" si lleva más de 7 días sin ninguna fecha de
- *  contacto/próxima acción registrada y no está ya cerrado (separado o descartado). */
 function clienteEnRiesgo(c){
   if (c.estado_prospecto === 'Separado' || c.estado_prospecto === 'No interesado') return false;
   const ultimaFecha = c.proxima_fecha || c.fecha_contacto || c.created_at?.slice(0, 10);
@@ -5041,7 +4798,7 @@ function cambiarVistaClientes(vista){
   document.getElementById('pipelineClientes').classList.toggle('hidden', vista !== 'pipeline');
   document.getElementById('listaClientesArchivados').classList.toggle('hidden', vista !== 'archivados');
   if (vista !== 'lista') document.getElementById('barraAccionesMasivasClientes')?.classList.add('hidden');
-  else cargarClientes(); // recalcula la visibilidad de la barra según el rol, sin duplicar lógica
+  else cargarClientes();
   if (vista === 'pipeline') renderPipelineClientes();
   if (vista === 'archivados') cargarClientesArchivados();
 }
@@ -5070,8 +4827,8 @@ function renderPipelineClientes(){
                 <select onchange="moverClientePipeline('${c.id}', this.value)" style="width:100%; font-size:11px; padding:5px; border-radius:6px; border:1px solid #E5DFCF; margin-bottom:6px;">
                   ${ETAPAS_PIPELINE.map(e2 => `<option value="${e2}" ${e2 === etapa ? 'selected' : ''}>➜ ${e2}</option>`).join('')}
                 </select>
-                <button onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')" style="width:100%; font-size:10.5px; padding:4px; border-radius:6px; border:1px solid #7C6BAF; background:none; color:#7C6BAF; cursor:pointer; margin-bottom:4px;">🕒 Historial</button>
-                <button onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\'")}')" style="width:100%; font-size:10.5px; padding:4px; border-radius:6px; border:1px solid #2C5691; background:none; color:#2C5691; cursor:pointer;">📋 Legal</button>
+                <button onclick="abrirHistorialCliente('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\\\'")}')" style="width:100%; font-size:10.5px; padding:4px; border-radius:6px; border:1px solid #7C6BAF; background:none; color:#7C6BAF; cursor:pointer; margin-bottom:4px;">🕒 Historial</button>
+                <button onclick="abrirChecklistLegal('${c.id}', '${escapeHtml(c.nombre).replace(/'/g, "\\\\'")}')" style="width:100%; font-size:10.5px; padding:4px; border-radius:6px; border:1px solid #2C5691; background:none; color:#2C5691; cursor:pointer;">📋 Legal</button>
               </div>`;
             }).join('')}
           </div>
@@ -5090,8 +4847,6 @@ async function moverClientePipeline(id, nuevaEtapa){
   renderPipelineClientes();
 }
 
-/** Línea de tiempo de interacciones: mezcla actividades y citas de agenda
- *  vinculadas a un cliente, ordenadas de la más reciente a la más antigua. */
 async function abrirHistorialCliente(clienteId, nombreCliente){
   document.getElementById('hc_titulo').textContent = `Historial · ${nombreCliente}`;
   const cont = document.getElementById('hc_contenido');
@@ -5131,10 +4886,7 @@ async function abrirHistorialCliente(clienteId, nombreCliente){
   `;
 }
 
-/* ============ CHECKLIST LEGAL POR CLIENTE ============
-   Documentos estándar para el cierre de una venta inmobiliaria en Perú.
-   Se guarda como jsonb en clientes.checklist_legal — cada casilla se
-   auto-guarda al instante, sin necesidad de un botón "Guardar" aparte. */
+/* ============ CHECKLIST LEGAL ============ */
 const DOCUMENTOS_LEGALES = [
   { key: 'dni', label: 'DNI vigente del titular' },
   { key: 'dni_conyuge', label: 'DNI del cónyuge (si es casado/a)' },
@@ -5175,9 +4927,7 @@ async function marcarDocumentoLegal(key, valor){
   renderChecklistLegal(checklistActualizado);
 }
 
-/* ============ GENERADOR DE MINUTAS/DOCUMENTOS CON IA ============
-   Usa la misma infraestructura gratuita de Gemini que MAJO ASSISTANT.
-   Siempre incluye la advertencia de que es un borrador para revisión legal. */
+/* ============ GENERADOR DE DOCUMENTOS CON IA ============ */
 let documentoClienteActual = null;
 
 function abrirGenerarDocumento(clienteId, nombreCliente, celular){
@@ -5231,9 +4981,8 @@ document.getElementById('btnGenerarDocumento')?.addEventListener('click', async 
 document.getElementById('btnCopiarDocumento')?.addEventListener('click', () => {
   const ta = document.getElementById('doc_resultado');
   ta.select();
-  navigator.clipboard.writeText(ta.value).then(() => toast('Copiado al portapapeles ✓')).catch(() => toast('No se pudo copiar automáticamente, selecciona y copia manualmente'));
+  navigator.clipboard.writeText(ta.value).then(() => toast('Copiado al portapapeles ✓')).catch(() => toast('Copia manualmente'));
 });
-
 
 async function eliminarCliente(id){
   if (!confirm('¿Eliminar este cliente?')) return;
@@ -5242,10 +4991,7 @@ async function eliminarCliente(id){
   toast('Cliente eliminado');
   cargarClientes(); cargarKPIs();
 }
-
-
-
-/* ============ MÓDULO COTIZADOR RÁPIDO DE LOTES ============ */
+/* ============ COTIZADOR RÁPIDO DE LOTES ============ */
 function abrirModalCotizador(clienteNombre, celular, manzana, lote, area, precioM2){
   const selMz = document.getElementById('cot_manzana');
   if (selMz && selMz.options.length === 0) {
@@ -5413,7 +5159,6 @@ async function descargarCotizacionPDF(){
     doc.text(asesor, marginX + 380, y + 32);
 
     y += 65;
-    // Tabla del lote
     doc.setFontSize(10.5);
     doc.setTextColor(26, 35, 50);
     doc.text('DETALLE DEL LOTE COTIZADO', marginX, y);
@@ -5444,7 +5189,6 @@ async function descargarCotizacionPDF(){
     doc.text(`S/ ${Number(total).toLocaleString('es-PE', {minimumFractionDigits:2})}`, marginX + 350, y);
 
     y += 35;
-    // Plan de financiamiento
     doc.setFontSize(10.5);
     doc.setTextColor(26, 35, 50);
     doc.text('PLAN DE FINANCIAMIENTO DIRECTO (SIN INTERESES)', marginX, y);
@@ -5513,7 +5257,7 @@ function pasarCotizacionASeparacion(){
   toast('Datos transferidos a la separación ✓');
 }
 
-/* ============ MÓDULO CONTROL DE COBRANZAS Y CUOTAS ============ */
+/* ============ CONTROL DE COBRANZAS Y CUOTAS ============ */
 function cambiarPestanaSeparaciones(tab){
   const btnSeps = document.getElementById('tabBtnSeps');
   const btnCob = document.getElementById('tabBtnCobranzas');
@@ -5576,7 +5320,7 @@ async function cargarCobranzasCuotas(){
           <span class="badge badge-activa">Financiado</span>
         </div>
         <div class="card-actions" style="margin-top:10px;">
-          ${tel ? `<button class="chip-btn gold" onclick="enviarRecordatorioCuotaWhatsApp('${cliNombre.replace(/'/g,"\\'")}', '${tel}', '${loteCod.replace(/'/g,"\\'")}', '${cuotaMensual}')">💬 Recordatorio WhatsApp</button>` : ''}
+          ${tel ? `<button class="chip-btn gold" onclick="enviarRecordatorioCuotaWhatsApp('${cliNombre.replace(/'/g,"\\\\'")}','${tel}','${loteCod.replace(/'/g,"\\\\\\'")}','${cuotaMensual}')">💬 Recordatorio WhatsApp</button>` : ''}
           ${tel ? `<a class="chip-btn" href="tel:${tel}">📞 Llamar</a>` : ''}
           <button class="chip-btn" onclick="toast('Pago de cuota registrado ✓')">✓ Registrar Abono</button>
         </div>
@@ -5600,7 +5344,7 @@ function enviarRecordatorioCuotaWhatsApp(cliente, tel, lote, monto){
   window.open(url, '_blank');
 }
 
-/* ============ MÓDULO PLANOS INTERACTIVOS ============ */
+/* ============ PLANOS INTERACTIVOS ============ */
 const PLANOS_URLS = {
   sire: 'https://usesire.com/ver_plano_publico.php?plano_id=206&ref=416&wb=0',
   '360': 'https://www.costadorada360.com/'
@@ -5624,6 +5368,11 @@ function recargarPlano(){
     iframe.src = PLANOS_URLS[planoActivoKey];
     toast('Recargando plano…');
   }
+}
+
+function abrirPlanoExterno(){
+  const url = PLANOS_URLS[planoActivoKey];
+  window.open(url, '_blank');
 }
 
 /* ============ PORTAFOLIO COMERCIAL ============ */
@@ -5661,12 +5410,11 @@ async function cargarPortafolio(){
   const { data, error } = await sb.from('portafolio_items').select('*').order('orden').order('created_at', { ascending: false });
   if (error) {
     console.error('Error cargando portafolio:', error);
-    const msjError = emptyState('⚠️', 'No se pudo cargar esta sección (revisa tu conexión y vuelve a intentar).');
+    const msjError = emptyState('⚠️', 'No se pudo cargar esta sección.');
     ['pfBrochureViewer', 'pfVideoCDViewer', 'pfTestimoniosViewer', 'pfDocumentosLista'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = msjError;
     });
-    toast('Error al cargar el Portafolio Comercial');
     return;
   }
 
@@ -5675,11 +5423,9 @@ async function cargarPortafolio(){
   const testimonios = (data || []).filter(i => i.categoria === 'testimonio');
   const documentos = (data || []).filter(i => i.categoria === 'documento');
 
-  // Brochure
   if (brochure) cargarBrochurePDF(brochure.url);
   else document.getElementById('pfBrochureViewer').innerHTML = emptyState('📖', 'Aún no se ha subido el Brochure.');
 
-  // Video Costa Dorada
   const elVCD = document.getElementById('pfVideoCDViewer');
   if (videoCD) {
     const embedUrl = urlYoutubeAEmbed(videoCD.url);
@@ -5694,7 +5440,6 @@ async function cargarPortafolio(){
     elVCD.innerHTML = emptyState('🎬', 'Aún no se ha agregado el video de Costa Dorada.');
   }
 
-  // Testimonios
   const elTest = document.getElementById('pfTestimoniosViewer');
   if (testimonios.length === 0) {
     elTest.innerHTML = emptyState('🗣️', 'Aún no hay testimonios cargados.');
@@ -5716,7 +5461,6 @@ async function cargarPortafolio(){
     }).join('');
   }
 
-  // Documentación (9 subcategorías fijas)
   const elDocs = document.getElementById('pfDocumentosLista');
   elDocs.innerHTML = DOC_SUBCATEGORIAS.map(sub => {
     const doc = documentos.find(d => d.subcategoria === sub.key);
@@ -5747,9 +5491,6 @@ async function abrirVisorDocumento({ url, titulo }){
   const esImagen = /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url);
 
   if (esPDF) {
-    // Usamos pdf.js (renderizado en canvas) en vez de <iframe>: los navegadores móviles
-    // a menudo no muestran PDFs grandes dentro de un iframe y en su lugar disparan una
-    // descarga nativa sin avisar. Renderizar en canvas evita ese problema de raíz.
     cont.innerHTML = `<div class="spinner"></div>`;
     try {
       if (window.pdfjsLib) {
@@ -5779,11 +5520,11 @@ async function abrirVisorDocumento({ url, titulo }){
       document.getElementById('visdoc_pdf_next').onclick = () => { if (paginaActual < doc.numPages) render(++paginaActual); };
       await render(paginaActual);
     } catch (e) {
-      console.error('Error al renderizar PDF en visor de documentos:', e);
+      console.error('Error al renderizar PDF:', e);
       cont.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; text-align:center; padding:20px;">
           <div style="font-size:40px;">⚠️</div>
-          <p>No se pudo previsualizar este PDF (puede ser muy pesado para tu conexión actual).</p>
+          <p>No se pudo previsualizar este PDF.</p>
           <a href="${url}" target="_blank" rel="noopener" class="chip-btn gold" style="text-decoration:none;">📥 Abrir / Descargar directamente</a>
         </div>`;
     }
@@ -5798,13 +5539,11 @@ async function abrirVisorDocumento({ url, titulo }){
       img.style.cursor = escala === 1 ? 'zoom-in' : 'zoom-out';
     });
   } else {
-    // Cualquier otro tipo de archivo (docx, xlsx, etc.): no intentamos "adivinar" cómo mostrarlo,
-    // mostramos un mensaje claro y el botón de descarga, en vez de dejar un espacio en blanco.
     const ext = (url.split('?')[0].split('.').pop() || '').toUpperCase();
     cont.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; text-align:center; padding:20px;">
         <div style="font-size:40px;">📄</div>
-        <p>Este archivo (${escapeHtml(ext)}) no se puede previsualizar aquí, pero puedes abrirlo o descargarlo.</p>
+        <p>Este archivo (${escapeHtml(ext)}) no se puede previsualizar aquí.</p>
         <a href="${url}" target="_blank" rel="noopener" class="chip-btn gold" style="text-decoration:none;">📥 Abrir / Descargar</a>
       </div>`;
   }
@@ -5817,7 +5556,6 @@ function urlYoutubeAEmbed(url){
   return m ? `https://www.youtube.com/embed/${m[1]}` : null;
 }
 
-/* ---- Brochure: subir PDF ---- */
 document.getElementById('pfBrochureInput')?.addEventListener('change', async (e) => {
   let file = e.target.files[0];
   if (!file) return;
@@ -5829,7 +5567,6 @@ document.getElementById('pfBrochureInput')?.addEventListener('change', async (e)
     if (upErr) { toast('Error al subir'); console.error(upErr); return; }
     const { data: pub } = sb.storage.from('portafolio-comercial').getPublicUrl(path);
 
-    // Borrar el brochure anterior (solo debe existir uno)
     await sb.from('portafolio_items').delete().eq('categoria', 'brochure');
     const { error: insErr } = await sb.from('portafolio_items').insert({
       categoria: 'brochure', titulo: 'Brochure', url: pub.publicUrl, tipo: 'pdf', created_by: currentUser.id
@@ -5844,7 +5581,6 @@ document.getElementById('pfBrochureInput')?.addEventListener('change', async (e)
   }
 });
 
-/* ---- Brochure: visor tipo libro con PDF.js ---- */
 async function cargarBrochurePDF(url){
   const cont = document.getElementById('pfBrochureViewer');
   cont.innerHTML = `<div class="spinner"></div>`;
@@ -5907,7 +5643,6 @@ async function pfPaginaAnterior(){
   }, 280);
 }
 
-/* ---- Video Costa Dorada ---- */
 async function guardarVideoCostaDorada(){
   const url = document.getElementById('pfVideoCDInput').value.trim();
   if (!url) { toast('Pega el link de YouTube'); return; }
@@ -5921,7 +5656,6 @@ async function guardarVideoCostaDorada(){
   cargarPortafolio();
 }
 
-/* ---- Testimonios ---- */
 async function agregarTestimonio(){
   const titulo = document.getElementById('pfTestimonioTitulo').value.trim();
   const url = document.getElementById('pfTestimonioUrl').value.trim();
@@ -5986,7 +5720,6 @@ document.getElementById('pfVideoCDArchivo')?.addEventListener('change', async (e
   }
 });
 
-/* ---- Documentación (9 subcategorías) ---- */
 async function subirDocumentoPortafolio(subcategoria, file){
   if (!file) return;
   file = await prepararArchivoParaSubida(file);
@@ -6021,12 +5754,7 @@ async function eliminarItemPortafolio(id){
   cargarPortafolio();
 }
 
-function abrirPlanoExterno(){
-  const url = PLANOS_URLS[planoActivoKey];
-  window.open(url, '_blank');
-}
-
-/* ============ SEPARACIONES (CON ACORDEÓN DESPLEGABLE) ============ */
+/* ============ SEPARACIONES ============ */
 document.getElementById('btnAbrirNuevaSeparacion').addEventListener('click', () => {
   prepararModalSeparacion();
   openModal('modalSeparacion');
@@ -6062,7 +5790,6 @@ function prepararModalSeparacion(){
   document.getElementById('sp_meses_otro_wrap').classList.add('hidden');
   document.getElementById('sp_voucher').value = '';
 
-  // Abrir la primera sección del acordeón y colapsar las demás
   document.getElementById('secCli').classList.remove('collapsed');
   document.getElementById('secLote').classList.add('collapsed');
   document.getElementById('secPago').classList.add('collapsed');
@@ -6186,7 +5913,6 @@ document.getElementById('btnGuardarSeparacion').addEventListener('click', async 
     closeModal('modalSeparacion');
     cargarSeparacionesTodas(); cargarSeparacionesPorVencer(); cargarClientes(); cargarKPIs();
 
-    // Sincronización automática a Google Calendar con alarmas (3d, 2d, 1d)
     sincronizarSeparacionCalendar({
       id: nuevaSep?.id,
       cliente_nombre: nombre,
@@ -6269,7 +5995,7 @@ async function eliminarSeparacion(id){
   cargarSeparacionesTodas(); cargarSeparacionesPorVencer(); cargarKPIs();
 }
 
-/* ============ AGENDA + SINCRONIZACIÓN AUTOMÁTICA ============ */
+/* ============ AGENDA ============ */
 document.getElementById('btnGuardarAgenda').addEventListener('click', async () => {
   const actividad = document.getElementById('agActividad').value.trim();
   const locacion = document.getElementById('agLocacion').value.trim();
@@ -6282,7 +6008,7 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
 
   const fechaInicio = new Date(`${fecha}T${hora}:00`).toISOString();
 
-  const { data: nuevoEv, error } = await sb.from('agenda').insert({
+  const payloadCompleto = {
     usuario_id: currentUser.id,
     titulo: actividad,
     locacion: locacion || null,
@@ -6291,9 +6017,25 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
     contacto_whatsapp: contactoWhatsapp || null,
     cliente_id: clienteId,
     estado: 'programada'
-  }).select().single();
+  };
 
-  if (error) { toast('Error al guardar'); console.error(error); return; }
+  let { data: nuevoEv, error } = await sb.from('agenda').insert(payloadCompleto).select().single();
+
+  if (error && (error.message.includes('column') || error.message.includes('schema'))) {
+    const locExtra = [locacion, contactoNombre ? `Contacto: ${contactoNombre}` : '', contactoWhatsapp ? `WSP: ${contactoWhatsapp}` : ''].filter(Boolean).join(' · ');
+    const payloadRespaldo = {
+      usuario_id: currentUser.id,
+      titulo: actividad,
+      locacion: locExtra || null,
+      fecha_inicio: fechaInicio,
+      estado: 'programada'
+    };
+    const res2 = await sb.from('agenda').insert(payloadRespaldo).select().single();
+    nuevoEv = res2.data;
+    error = res2.error;
+  }
+
+  if (error) { toast('Error al agendar: ' + error.message); console.error(error); return; }
 
   toast('Evento agendado ✓');
   closeModal('modalAgenda');
@@ -6306,14 +6048,11 @@ document.getElementById('btnGuardarAgenda').addEventListener('click', async () =
   document.getElementById('agClienteId').value = '';
   cargarAgenda();
 
-  // Sincronización automática de Google Calendar (Alarmas: 1h, 30m, 15m)
-  sincronizarEventoCalendar(nuevoEv);
+  if (nuevoEv) sincronizarEventoCalendar(nuevoEv);
 });
 
 document.getElementById('btnAbrirNuevaAgenda')?.addEventListener('click', () => { poblarSelectClientes('agClienteId'); openModal('modalAgenda'); });
 
-/* Pide un access_token fresco mediante el refresh_token guardado en el servidor.
-   Sin esto, el token dejaba de funcionar pasada 1 hora y la sincronización fallaba en silencio. */
 let ultimoErrorTokenGoogle = null;
 async function obtenerTokenGoogleFresco(){
   try {
@@ -6332,11 +6071,10 @@ async function obtenerTokenGoogleFresco(){
       localStorage.setItem('google_provider_token', result.access_token);
       return result.access_token;
     }
-    // Motivo detallado real de Google (no solo el código genérico)
     const detalleGoogle = result.detalle ? JSON.stringify(result.detalle) : '';
     ultimoErrorTokenGoogle = `${result.mensaje || result.error || `HTTP ${resp.status}`}${detalleGoogle ? ' — ' + detalleGoogle : ''}`;
     console.warn('No se pudo renovar el token de Google:', ultimoErrorTokenGoogle);
-    localStorage.removeItem('google_provider_token'); // el token viejo puede estar revocado, no lo reutilizamos
+    localStorage.removeItem('google_provider_token');
     return null;
   } catch (e) {
     ultimoErrorTokenGoogle = `Error de red al pedir el token: ${String(e)}`;
@@ -6345,7 +6083,6 @@ async function obtenerTokenGoogleFresco(){
   }
 }
 
-// Alarmas automáticas para eventos de Agenda (60m, 30m, 15m)
 async function sincronizarEventoCalendar(ev){
   const googleToken = await obtenerTokenGoogleFresco();
   if (!googleToken) {
@@ -6355,7 +6092,7 @@ async function sincronizarEventoCalendar(ev){
       await sb.from('notificaciones').insert({
         usuario_id: currentUser.id, tipo: 'error_sync_calendar',
         titulo: '⚠️ No se pudo obtener token de Google',
-        mensaje: `Cita "${ev.titulo}" no se sincronizó. Motivo: ${ultimoErrorTokenGoogle || 'no hay ningún token guardado (vuelve a iniciar sesión con Google).'}`,
+        mensaje: `Cita "${ev.titulo}" no se sincronizó. Motivo: ${ultimoErrorTokenGoogle || 'no hay ningún token guardado.'}`,
       }).catch(() => {});
     }
     return;
@@ -6398,10 +6135,8 @@ async function sincronizarEventoCalendar(ev){
       const errBody = await resp.json().catch(() => ({}));
       const intentosActuales = (ev.sync_calendar_intentos || 0) + 1;
       await sb.from('agenda').update({ sync_calendar_intentos: intentosActuales }).eq('id', ev.id);
-      // Solo se avisa en el PRIMER intento fallido, para no repetir la misma alerta 3 veces
       if (intentosActuales === 1) {
-        const pistaToken = googleToken ? `${googleToken.slice(0,12)}...(${googleToken.length} caracteres)` : 'VACÍO';
-        const msg = `Google rechazó "${ev.titulo}" (código ${resp.status}): ${errBody?.error?.message || 'sin detalle'} · Token usado: ${pistaToken}`;
+        const msg = `Google rechazó "${ev.titulo}" (código ${resp.status}): ${errBody?.error?.message || 'sin detalle'}`;
         console.error(msg, errBody);
         await sb.from('notificaciones').insert({
           usuario_id: currentUser.id, tipo: 'error_sync_calendar',
@@ -6423,7 +6158,6 @@ async function sincronizarEventoCalendar(ev){
   }
 }
 
-// Alarmas automáticas para Solicitudes y Requerimientos con fecha límite (1 día antes y el mismo día)
 async function sincronizarSolicitudCalendar(sol){
   const googleToken = await obtenerTokenGoogleFresco();
   if (!googleToken) {
@@ -6433,7 +6167,7 @@ async function sincronizarSolicitudCalendar(sol){
       await sb.from('notificaciones').insert({
         usuario_id: sol.asignado_a || currentUser.id, tipo: 'error_sync_calendar',
         titulo: '⚠️ No se pudo obtener token de Google',
-        mensaje: `Solicitud "${sol.titulo}" no se sincronizó con Calendar. Motivo: ${ultimoErrorTokenGoogle || 'no hay ningún token guardado (vuelve a iniciar sesión con Google).'}`,
+        mensaje: `Solicitud "${sol.titulo}" no se sincronizó con Calendar. Motivo: ${ultimoErrorTokenGoogle || 'no hay ningún token guardado.'}`,
       }).catch(() => {});
     }
     return;
@@ -6448,9 +6182,9 @@ async function sincronizarSolicitudCalendar(sol){
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'email', minutes: 1440 }, // 1 día antes
-          { method: 'popup', minutes: 1440 }, // 1 día antes
-          { method: 'popup', minutes: 0 }      // el mismo día
+          { method: 'email', minutes: 1440 },
+          { method: 'popup', minutes: 1440 },
+          { method: 'popup', minutes: 0 }
         ]
       }
     };
@@ -6464,8 +6198,6 @@ async function sincronizarSolicitudCalendar(sol){
     if (resp.ok) {
       const gEvent = await resp.json();
       await sb.from('solicitudes').update({ google_calendar_event_id: gEvent.id }).eq('id', sol.id);
-      // Además de la alarma en Google Calendar, se registra como notificación
-      // interna para que aparezca también en la campanita 🔔 de la app.
       await sb.from('notificaciones').insert({
         usuario_id: sol.asignado_a || currentUser.id, tipo: 'solicitud_alarma',
         titulo: `📋 Recordatorio: "${sol.titulo}" vence el ${fmtFecha(sol.fecha_limite)}`,
@@ -6488,7 +6220,7 @@ async function sincronizarSolicitudCalendar(sol){
     const intentosActuales = (sol.sync_calendar_intentos || 0) + 1;
     await sb.from('solicitudes').update({ sync_calendar_intentos: intentosActuales }).eq('id', sol.id).catch(() => {});
     if (intentosActuales === 1) {
-      console.error(`Error de conexión al sincronizar solicitud "${sol.titulo}" con Google Calendar:`, err);
+      console.error(`Error de conexión al sincronizar solicitud:`, err);
       await sb.from('notificaciones').insert({
         usuario_id: sol.asignado_a || currentUser.id, tipo: 'error_sync_calendar',
         titulo: '⚠️ Error de conexión con Google Calendar', mensaje: String(err),
@@ -6497,7 +6229,6 @@ async function sincronizarSolicitudCalendar(sol){
   }
 }
 
-// Alarmas automáticas para Separaciones (3 días, 2 días, 1 día)
 async function sincronizarSeparacionCalendar(sep){
   const googleToken = await obtenerTokenGoogleFresco();
   if (!googleToken) return;
@@ -6539,12 +6270,10 @@ async function sincronizarSeparacionCalendar(sep){
   }
 }
 
-/* Agenda ordenada de forma descendente (las nuevas y futuras arriba) */
-
-/* ============ CALENDARIO INTERACTIVO (VISTAS: DÍA, SEMANA, MES, CHECKLIST) ============ */
+/* ============ CALENDARIO INTERACTIVO ============ */
 const calEstado = {
-  view: 'mes', // 'dia', 'semana', 'mes', 'checklist'
-  fechaRef: new Date(), // Fecha de navegación del mes/semana
+  view: 'mes',
+  fechaRef: new Date(),
   diaSeleccionado: obtenerHoyLocal(),
   eventos: []
 };
@@ -6552,7 +6281,6 @@ const calEstado = {
 const MESES_CAL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 const DIAS_SEMANA_CORTO = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
 
-// Selector de Vistas
 document.querySelectorAll('.cal-view-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.cal-view-btn').forEach(b => b.classList.remove('active'));
@@ -6586,7 +6314,6 @@ function cambiarVistaCalendario(vista){
   }
 }
 
-// Navegación de Fechas (◀ Hoy ▶)
 document.getElementById('btnCalPrev').addEventListener('click', () => navegarCal(-1));
 document.getElementById('btnCalNext').addEventListener('click', () => navegarCal(1));
 document.getElementById('btnCalToday').addEventListener('click', () => {
@@ -6646,7 +6373,6 @@ function getLunesDeSemana(d){
   return new Date(date.setDate(diff));
 }
 
-// 1. RENDER VISTA MES (GRILLA ESTILO GOOGLE CALENDAR)
 function renderizarMes(){
   const grid = document.getElementById('calMonthGrid');
   if (!grid) return;
@@ -6665,7 +6391,6 @@ function renderizarMes(){
   const ultimoDiaMesAnt = new Date(year, month, 0).getDate();
 
   const celdas = [];
-  // Mes anterior
   for (let i = offsetLunes - 1; i >= 0; i--) {
     const diaNum = ultimoDiaMesAnt - i;
     const mAnt = month === 0 ? 11 : month - 1;
@@ -6673,12 +6398,10 @@ function renderizarMes(){
     const dateStr = `${yAnt}-${String(mAnt+1).padStart(2,'0')}-${String(diaNum).padStart(2,'0')}`;
     celdas.push({ diaNum, dateStr, esMesActual: false });
   }
-  // Mes actual
   for (let d = 1; d <= ultimoDiaMes; d++) {
     const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     celdas.push({ diaNum: d, dateStr, esMesActual: true });
   }
-  // Mes siguiente
   const restantes = (7 - (celdas.length % 7)) % 7;
   for (let d = 1; d <= restantes; d++) {
     const mSig = month === 11 ? 0 : month + 1;
@@ -6691,7 +6414,6 @@ function renderizarMes(){
     const esHoy = c.dateStr === hoyStr;
     const esSeleccionado = c.dateStr === calEstado.diaSeleccionado;
     
-    // Filtrar eventos de este día
     const evsDia = (calEstado.eventos || []).filter(ev => ev.fecha_inicio && fechaLocalDeISO(ev.fecha_inicio) === c.dateStr);
 
     const cellEl = document.createElement('div');
@@ -6714,7 +6436,6 @@ function renderizarMes(){
       renderizarEventosDiaSeleccionado();
     });
 
-    // Agrupar en filas de 7 (una fila = una semana), en vez de una sola grilla continua
     if (idx % 7 === 0) {
       const filaEl = document.createElement('div');
       filaEl.className = 'cal-week-row';
@@ -6743,7 +6464,6 @@ function renderizarEventosDiaSeleccionado(){
   cont.innerHTML = evs.map(ev => renderizarTarjetaAgenda(ev)).join('');
 }
 
-// 2. RENDER VISTA SEMANA
 function renderizarSemana(){
   const strip = document.getElementById('calWeekStrip');
   const list = document.getElementById('calWeekEventsList');
@@ -6751,7 +6471,6 @@ function renderizarSemana(){
 
   strip.innerHTML = '';
   const lunes = getLunesDeSemana(calEstado.fechaRef);
-  const hoyStr = obtenerHoyLocal();
 
   const diasSemana = [];
   for (let i = 0; i < 7; i++) {
@@ -6795,7 +6514,6 @@ function renderizarEventosSemanaDia(dateStr){
   list.innerHTML = evs.map(ev => renderizarTarjetaAgenda(ev)).join('');
 }
 
-// 3. RENDER VISTA DÍA
 function renderizarDia(){
   const list = document.getElementById('calDiaEventsList');
   if (!list) return;
@@ -6838,7 +6556,6 @@ function renderizarTarjetaAgenda(ev){
   `;
 }
 
-// Cargar Agenda Principal y actualizar vistas
 async function cargarAgenda(){
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
@@ -6862,8 +6579,6 @@ async function cargarAgenda(){
   actualizarTituloNavCal();
   renderizarVistaActiva();
 
-  // Sincronización automática de Google Calendar para eventos propios pendientes
-  // (se detiene después de 3 intentos fallidos, para no reintentar sin parar ni saturar de alertas)
   const pendientesPropios = (data || []).filter(ev => ev.usuario_id === currentUser.id && !ev.google_calendar_event_id && (ev.sync_calendar_intentos || 0) < 3);
   for (const ev of pendientesPropios) {
     sincronizarEventoCalendar(ev);
@@ -6878,7 +6593,6 @@ async function eliminarEventoAgenda(id){
   cargarAgenda();
 }
 
-/* Semáforo según minutos restantes: verde >60min, amarillo 15-60min, rojo <15min o vencido */
 function semaforoAgenda(fechaInicio){
   const minutosRestantes = (new Date(fechaInicio) - new Date()) / 60000;
   if (minutosRestantes <= 15) return { color: '#B4453C', label: '🔴' };
@@ -6886,9 +6600,8 @@ function semaforoAgenda(fechaInicio){
   return { color: '#4C7A5E', label: '🟢' };
 }
 
-/* ============ CHECKLIST PERSISTENTE CON RESOLUCIÓN (RESULTADO / MOTIVO) ============ */
+/* ============ CHECKLIST PERSISTENTE ============ */
 async function cargarChecklist(){
-  // Trae TODAS las actividades programadas pendientes (no desaparecen hasta que se resuelvan)
   const { data } = await sb.from('agenda')
     .select('*')
     .eq('usuario_id', currentUser.id)
@@ -6959,6 +6672,7 @@ document.getElementById('mra_evidencia_input')?.addEventListener('change', (e) =
     prev.innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:100%; max-height:180px; border-radius:10px;">`;
   }
 });
+
 document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', async () => {
   const id = document.getElementById('mra_id').value;
   const estado = document.getElementById('mra_estado').value;
@@ -7012,12 +6726,11 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   if (estado === 'reprogramada') {
     payload.fecha_inicio = new Date(`${nuevaFecha}T${nuevaHora}:00`).toISOString();
     payload.estado = 'programada';
-    payload.google_calendar_event_id = null; // fuerza a resincronizar con la nueva fecha/hora
+    payload.google_calendar_event_id = null;
   }
 
   let { error } = await sb.from('agenda').update(payload).eq('id', id);
 
-  // Si la actividad fue REALIZADA, asegurar que se registre en actividades para que forme parte del reporte oficial
   if (estado === 'realizada') {
     try {
       const { data: evAg } = await sb.from('agenda').select('*').eq('id', id).single();
@@ -7031,6 +6744,7 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
           fecha_programada: fProg,
           hora_inicio: hIni,
           hora_fin: null,
+          cliente_id: evAg.cliente_id || null,
           estado: 'completada',
           descripcion: resultado ? `Resultado: ${resultado}` : null,
           fecha_completada: new Date().toISOString()
@@ -7054,7 +6768,6 @@ document.getElementById('btnGuardarResolucionAgenda').addEventListener('click', 
   cargarNotificacionesBadge();
 });
 
-/* ============ CENTRO DE ALARMAS Y NOTIFICACIONES EN TIEMPO REAL ============ */
 async function eliminarNotificacion(id){
   const { error } = await sb.from('notificaciones').delete().eq('id', id);
   if (error) { toast('Error al eliminar'); console.error(error); return; }
@@ -7063,7 +6776,7 @@ async function eliminarNotificacion(id){
   cargarNotificacionesBadge();
 }
 
-/* ============ SOLICITUDES Y REQUERIMIENTOS ============ */
+/* ============ SOLICITUDES ============ */
 let solicitudesFiltroActual = 'pendiente';
 
 function cambiarFiltroSolicitudes(estado){
@@ -7151,7 +6864,7 @@ async function abrirModalNuevaSolicitud(){
   }
 }
 
-/* ============ REPORTE DIARIO DEL EQUIPO (vista para supervisores) ============ */
+/* ============ REPORTE DIARIO DEL EQUIPO ============ */
 async function obtenerIdsEquipo(){
   const rol = currentProfile?.rol;
   const esSuperAdminODirector = rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || rol === 'gerencia';
@@ -7159,7 +6872,6 @@ async function obtenerIdsEquipo(){
     const { data } = await sb.from('usuarios').select('id, nombre').eq('activo', true).order('nombre');
     return data || [];
   }
-  // Supervisor: su equipo son los usuarios con supervisor_id = él, más él mismo
   const { data } = await sb.from('usuarios').select('id, nombre').or(`supervisor_id.eq.${currentUser.id},id.eq.${currentUser.id}`).eq('activo', true).order('nombre');
   return data || [];
 }
@@ -7249,7 +6961,7 @@ document.getElementById('btnCargarReporteEquipo')?.addEventListener('click', () 
   cargarReporteEquipo(fecha);
 });
 
-/* ============ MAJO ASSISTANT (agente IA interno) ============ */
+/* ============ MAJO ASSISTANT ============ */
 let majoConversacionActual = null;
 
 async function obtenerTokenSesion(){
@@ -7285,8 +6997,6 @@ function cambiarTabMajo(tab){
   if (tab === 'base') { cargarDocumentosMajo(); cargarSitiosMajo(); }
 }
 
-/** Convierte un subconjunto simple de markdown (negritas, listas, saltos de línea)
- *  a HTML seguro (el texto ya pasó por escapeHtml antes de llegar aquí). */
 function markdownSimpleAHtml(textoEscapado){
   let html = textoEscapado
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
@@ -7351,29 +7061,25 @@ async function enviarMensajeMajo(){
     });
     document.getElementById('majoEscribiendo')?.remove();
     if (!resp.ok) {
-      const errTxt = await resp.text();
-      console.error('Error de majo-chat:', errTxt);
-      renderBurbujaMajo('assistant', '⚠️ Tuve un problema para responder. Puede que falte configurar las claves de API en el servidor — avisa a soporte técnico.');
+      renderBurbujaMajo('assistant', '⚠️ Tuve un problema para responder.');
       return;
     }
     const data = await resp.json();
     renderBurbujaMajo('assistant', data.respuesta, data.fuentes, data.imagenes);
   } catch (e) {
     document.getElementById('majoEscribiendo')?.remove();
-    console.error(e);
-    renderBurbujaMajo('assistant', '⚠️ Error de conexión al hablar con MAJO. Intenta de nuevo.');
+    renderBurbujaMajo('assistant', '⚠️ Error de conexión al hablar con MAJO.');
   }
 }
 
 document.getElementById('btnEnviarMajoChat')?.addEventListener('click', enviarMensajeMajo);
 document.getElementById('majoChatInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarMensajeMajo(); });
 
-/* ---- Base de conocimiento: documentos ---- */
 async function cargarDocumentosMajo(){
   const { data, error } = await sb.from('majo_documentos').select('*').order('created_at', { ascending: false });
   const el = document.getElementById('majoListaDocumentos');
-  if (error) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar la lista de documentos.'); return; }
-  if (!data || data.length === 0) { el.innerHTML = emptyState('📚', 'Aún no has subido documentos a la base de conocimiento.'); return; }
+  if (error) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar la lista.'); return; }
+  if (!data || data.length === 0) { el.innerHTML = emptyState('📚', 'Aún no has subido documentos.'); return; }
 
   const estadoInfo = { procesando: ['⏳ Procesando…', '#C9973E'], listo: ['✓ Listo', '#3D8B5F'], error: ['⚠️ Error', '#B4453C'] };
   el.innerHTML = data.map(d => {
@@ -7382,7 +7088,6 @@ async function cargarDocumentosMajo(){
     <div class="card" style="margin-bottom:10px; border-left:4px solid ${color};">
       <p class="card-title" style="font-size:13.5px;">${escapeHtml(d.titulo)}</p>
       <p class="card-sub">${d.tipo.toUpperCase()} · <span style="color:${color}; font-weight:700;">${txt}</span></p>
-      ${d.estado === 'error' && d.error_detalle ? `<p class="card-sub" style="color:#B4453C; margin-top:4px;">${escapeHtml(d.error_detalle.slice(0, 200))}</p>` : ''}
       <div class="card-actions" style="margin-top:8px;">
         <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarDocumentoMajo('${d.id}')">🗑️ Eliminar</button>
       </div>
@@ -7391,7 +7096,7 @@ async function cargarDocumentosMajo(){
 }
 
 async function eliminarDocumentoMajo(id){
-  if (!confirm('¿Eliminar este documento de la base de conocimiento de MAJO?')) return;
+  if (!confirm('¿Eliminar este documento de la base de conocimiento?')) return;
   const { error } = await sb.from('majo_documentos').delete().eq('id', id);
   if (error) { toast('Error al eliminar'); console.error(error); return; }
   toast('Documento eliminado');
@@ -7436,36 +7141,23 @@ document.getElementById('btnSubirDocMajo')?.addEventListener('click', async () =
     document.getElementById('majoDocTexto').value = '';
     cargarDocumentosMajo();
 
-    if (!textoDirecto) {
-      // Se procesa en segundo plano: extraer texto (PDF/video) + generar sus vectores
-      const token = await obtenerTokenSesion();
-      fetch(`${SUPABASE_URL}/functions/v1/majo-ingest-documento`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documento_id: nuevoDoc.id }),
-      }).then(() => cargarDocumentosMajo()).catch(err => console.error('Error en ingesta:', err));
-      toast('Documento en proceso — MAJO lo estará "leyendo" en unos momentos ✓');
-    } else {
-      // Texto directo: igual necesita generar sus vectores para búsqueda semántica
-      const token = await obtenerTokenSesion();
-      fetch(`${SUPABASE_URL}/functions/v1/majo-ingest-documento`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documento_id: nuevoDoc.id }),
-      }).then(() => cargarDocumentosMajo()).catch(err => console.error('Error en ingesta:', err));
-      toast('Texto agregado a la base de conocimiento ✓');
-    }
+    const token = await obtenerTokenSesion();
+    fetch(`${SUPABASE_URL}/functions/v1/majo-ingest-documento`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ documento_id: nuevoDoc.id }),
+    }).then(() => cargarDocumentosMajo()).catch(err => console.error('Error en ingesta:', err));
+    toast('Documento en proceso ✓');
   } catch (e) {
-    toast('Error inesperado al subir');
+    toast('Error al subir');
     console.error(e);
   }
 });
 
-/* ---- Sitios oficiales autorizados ---- */
 async function cargarSitiosMajo(){
   const { data } = await sb.from('majo_sitios_oficiales').select('*').order('nombre');
   const el = document.getElementById('majoListaSitios');
-  if (!data || data.length === 0) { el.innerHTML = emptyState('🌐', 'No hay sitios oficiales configurados.'); return; }
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🌐', 'No hay sitios configurados.'); return; }
   el.innerHTML = data.map(s => `
     <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #EFEAE0;">
       <div>
@@ -7531,7 +7223,6 @@ document.getElementById('btnGuardarSolicitud')?.addEventListener('click', async 
   document.getElementById('sol_fecha_limite').value = '';
   cargarSolicitudes(solicitudesFiltroActual);
 
-  // Si tiene fecha límite, se crea la alarma en Google Calendar + notificación en la campanita
   if (fechaLimite && nuevaSol) {
     sincronizarSolicitudCalendar(nuevaSol);
   }
@@ -7561,7 +7252,7 @@ async function cargarManualVentas(){
     .order('updated_at', { ascending: false });
 
   if (error) { console.error('Error cargando manual de ventas:', error); el.innerHTML = emptyState('⚠️', 'No se pudo cargar.'); return; }
-  if (!data || data.length === 0) { el.innerHTML = emptyState('🎯', 'Aún no hay speeches cargados en esta categoría.'); return; }
+  if (!data || data.length === 0) { el.innerHTML = emptyState('🎯', 'Aún no hay speeches cargados.'); return; }
 
   el.innerHTML = data.map(item => `
     <div class="card" style="margin-bottom:10px;">
@@ -7621,10 +7312,10 @@ async function eliminarSpeech(id){
   cargarManualVentas();
 }
 
-/* ============ DEPARTAMENTOS: reorganiza el drawer según lo configurado por SuperAdmin ============ */
+/* ============ DEPARTAMENTOS ============ */
 async function reorganizarDrawerPorDepartamentos(){
   const { data, error } = await sb.from('modulo_departamentos').select('*').order('orden');
-  if (error || !data) { console.error('Error cargando departamentos de módulos:', error); return; }
+  if (error || !data) { return; }
 
   const grupos = {};
   document.querySelectorAll('.dr-dept-group').forEach(g => { grupos[g.dataset.dept] = g.querySelector('.dr-dept-items'); });
@@ -7635,7 +7326,6 @@ async function reorganizarDrawerPorDepartamentos(){
     if (btn && destino) destino.appendChild(btn);
   });
 
-  // Ocultar el grupo si quedó sin ningún botón visible
   document.querySelectorAll('.dr-dept-group').forEach(g => {
     const items = g.querySelector('.dr-dept-items');
     const algunoVisible = [...items.children].some(el => !el.classList.contains('hidden'));
@@ -7643,7 +7333,6 @@ async function reorganizarDrawerPorDepartamentos(){
   });
 }
 
-/* Pantalla para que SuperAdmin asigne cada módulo a un departamento */
 async function cargarConfigDepartamentos(){
   const el = document.getElementById('listaConfigDepartamentos');
   if (!el) return;
@@ -7669,14 +7358,21 @@ async function cargarConfigDepartamentos(){
   `).join('');
 }
 
-/* ============ RESPALDOS AUTOMÁTICOS (solo SuperAdmin) ============ */
+async function cambiarDepartamentoModulo(moduloKey, nuevoDepto){
+  const { error } = await sb.from('modulo_departamentos').update({ departamento: nuevoDepto }).eq('modulo_key', moduloKey);
+  if (error) { toast('Error al guardar'); console.error(error); return; }
+  toast('Actualizado ✓');
+  reorganizarDrawerPorDepartamentos();
+}
+
+/* ============ RESPALDOS AUTOMÁTICOS ============ */
 async function cargarListaRespaldos(){
   const el = document.getElementById('listaRespaldos');
   if (!el) return;
   el.innerHTML = `<div class="spinner"></div>`;
 
   const { data, error } = await sb.storage.from('respaldos-sistema').list('', { sortBy: { column: 'created_at', order: 'desc' } });
-  if (error) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar la lista de respaldos.'); console.error(error); return; }
+  if (error) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar la lista.'); return; }
   if (!data || data.length === 0) { el.innerHTML = `<p class="card-sub">Aún no hay respaldos generados.</p>`; return; }
 
   el.innerHTML = `<div style="display:flex; flex-direction:column; gap:6px;">` + data.map(f => `
@@ -7692,7 +7388,7 @@ async function cargarListaRespaldos(){
 
 async function descargarRespaldo(nombreArchivo){
   const { data, error } = await sb.storage.from('respaldos-sistema').createSignedUrl(nombreArchivo, 60);
-  if (error || !data) { toast('Error al generar el enlace de descarga'); console.error(error); return; }
+  if (error || !data) { toast('Error al generar enlace'); console.error(error); return; }
   window.open(data.signedUrl, '_blank');
 }
 
@@ -7718,32 +7414,21 @@ document.getElementById('btnGenerarRespaldoAhora')?.addEventListener('click', as
   }
 });
 
-async function cambiarDepartamentoModulo(moduloKey, nuevoDepto){
-  const { error } = await sb.from('modulo_departamentos').update({ departamento: nuevoDepto }).eq('modulo_key', moduloKey);
-  if (error) { toast('Error al guardar'); console.error(error); return; }
-  toast('Actualizado ✓');
-  reorganizarDrawerPorDepartamentos();
-}
-
+/* ============ NOTIFICACIONES ============ */
 async function cargarNotificacionesBadge(){
   let totalAlertas = 0;
   try {
-    // 1. Separaciones por vencer en <= 7 días
-    const { data: seps, error: errSeps } = await sb.from('vista_separaciones_por_vencer').select('id').lte('dias_restantes', 7);
-    if (errSeps) console.error('Error contando separaciones por vencer:', errSeps);
+    const { data: seps } = await sb.from('vista_separaciones_por_vencer').select('id').lte('dias_restantes', 7);
     totalAlertas += (seps || []).length;
 
-    // 2. Citas de agenda futuras aún no resueltas (toda actividad pendiente: hoy, mañana, cualquier fecha futura)
     const rol = currentProfile?.rol;
     const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
 
     let qAg = sb.from('agenda').select('id', { count: 'exact', head: true }).eq('estado', 'programada');
     if (!esSuperAdminODirector) qAg = qAg.eq('usuario_id', currentUser.id);
-    const { count: numAgenda, error: errAg } = await qAg;
-    if (errAg) console.error('Error contando agenda pendiente:', errAg);
+    const { count: numAgenda } = await qAg;
     totalAlertas += (numAgenda || 0);
 
-    // 3. Solicitudes y Requerimientos con fecha límite en los próximos 3 días (o ya vencidas) y sin resolver
     const en3Dias = new Date(); en3Dias.setDate(en3Dias.getDate() + 3);
     const en3DiasStr = `${en3Dias.getFullYear()}-${String(en3Dias.getMonth() + 1).padStart(2, '0')}-${String(en3Dias.getDate()).padStart(2, '0')}`;
     let qSol = sb.from('solicitudes').select('id', { count: 'exact', head: true })
@@ -7751,19 +7436,16 @@ async function cargarNotificacionesBadge(){
       .not('fecha_limite', 'is', null)
       .lte('fecha_limite', en3DiasStr);
     if (!esSuperAdminODirector) qSol = qSol.eq('asignado_a', currentUser.id);
-    const { count: numSol, error: errSol } = await qSol;
-    if (errSol) console.error('Error contando solicitudes por vencer:', errSol);
+    const { count: numSol } = await qSol;
     totalAlertas += (numSol || 0);
 
-    // 4. Clientes en riesgo: sin contacto/próxima acción hace más de 7 días
     let qCli = sb.from('clientes').select('proxima_fecha, fecha_contacto, created_at, estado_prospecto')
       .not('estado_prospecto', 'in', '("Separado","No interesado")');
     if (!esSuperAdminODirector) qCli = qCli.eq('vendedor_id', currentUser.id);
-    const { data: clientesRiesgo, error: errCli } = await qCli;
-    if (errCli) console.error('Error contando clientes en riesgo:', errCli);
+    const { data: clientesRiesgo } = await qCli;
     totalAlertas += (clientesRiesgo || []).filter(clienteEnRiesgo).length;
   } catch (e) {
-    console.error('Error general en cargarNotificacionesBadge:', e);
+    console.error('Error general en badge:', e);
   }
 
   const dot = document.getElementById('bellDot');
@@ -7789,7 +7471,6 @@ async function cargarNotificaciones(asesorIdFiltro){
   const puedeVerEquipo = rolActual === 'admin' || rolActual === 'superadmin' || rolActual === 'director_comercial' || rolActual === 'gerencia';
   const idObjetivo = puedeVerEquipo ? (asesorIdFiltro || 'todos') : currentUser.id;
 
-  // Selector de asesor (solo para quien puede ver el equipo)
   const selector = document.getElementById('notifAsesorSelector');
   if (selector) {
     if (puedeVerEquipo) {
@@ -7816,11 +7497,9 @@ async function cargarNotificaciones(asesorIdFiltro){
     dManana.setDate(dManana.getDate() + 1);
     const mananaStr = `${dManana.getFullYear()}-${String(dManana.getMonth() + 1).padStart(2, '0')}-${String(dManana.getDate()).padStart(2, '0')}`;
 
-    // 0. Errores de sincronización con Google Calendar (para poder diagnosticarlos sin perder el mensaje)
     let qErr = sb.from('notificaciones').select('*').eq('tipo', 'error_sync_calendar').order('created_at', { ascending: false }).limit(10);
     qErr = idObjetivo === 'todos' ? qErr : qErr.eq('usuario_id', idObjetivo);
-    const { data: errsSync, error: errErrsSync } = await qErr;
-    if (errErrsSync) console.error('Error cargando notificaciones de sync:', errErrsSync);
+    const { data: errsSync } = await qErr;
 
     (errsSync || []).forEach(n => {
       alertas.push({
@@ -7829,12 +7508,10 @@ async function cargarNotificaciones(asesorIdFiltro){
       });
     });
 
-    // 1. Separaciones de lotes por vencer
-    const { data: seps, error: errSeps } = await sb.from('vista_separaciones_por_vencer')
+    const { data: seps } = await sb.from('vista_separaciones_por_vencer')
       .select('*')
       .lte('dias_restantes', 7)
       .order('dias_restantes', { ascending: true });
-    if (errSeps) console.error('Error cargando separaciones por vencer:', errSeps);
 
     (seps || []).forEach(s => {
       const sem = s.dias_restantes <= 1 ? '🔴 URGENTE' : (s.dias_restantes <= 3 ? '🟡 ATENCIÓN' : '🟢 PRÓXIMO');
@@ -7848,7 +7525,6 @@ async function cargarNotificaciones(asesorIdFiltro){
       });
     });
 
-    // 2. Citas de Agenda (Hoy, Mañana y Próximas de toda la semana)
     const rol = currentProfile?.rol;
     const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
 
@@ -7863,8 +7539,7 @@ async function cargarNotificaciones(asesorIdFiltro){
       qAg = qAg.eq('usuario_id', currentUser.id);
     }
 
-    const { data: ags, error: errAgs } = await qAg.limit(50);
-    if (errAgs) console.error('Error cargando agenda para notificaciones:', errAgs);
+    const { data: ags } = await qAg.limit(50);
 
     (ags || []).forEach(ag => {
       const fStr = ag.fecha_inicio ? fechaLocalDeISO(ag.fecha_inicio) : '';
@@ -7900,7 +7575,6 @@ async function cargarNotificaciones(asesorIdFiltro){
       });
     });
 
-    // 3. Solicitudes y Requerimientos con fecha límite próxima (o vencida) y sin resolver
     const en3DiasNotif = new Date(hoy); en3DiasNotif.setDate(en3DiasNotif.getDate() + 3);
     const en3DiasNotifStr = `${en3DiasNotif.getFullYear()}-${String(en3DiasNotif.getMonth() + 1).padStart(2, '0')}-${String(en3DiasNotif.getDate()).padStart(2, '0')}`;
 
@@ -7915,8 +7589,7 @@ async function cargarNotificaciones(asesorIdFiltro){
     } else if (!esSuperAdminODirector) {
       qSolNotif = qSolNotif.eq('asignado_a', currentUser.id);
     }
-    const { data: sols, error: errSols } = await qSolNotif.limit(50);
-    if (errSols) console.error('Error cargando solicitudes para notificaciones:', errSols);
+    const { data: sols } = await qSolNotif.limit(50);
 
     (sols || []).forEach(s => {
       const vencida = s.fecha_limite < hoyStr;
@@ -7933,7 +7606,6 @@ async function cargarNotificaciones(asesorIdFiltro){
       });
     });
 
-    // 4. Clientes en riesgo: sin contacto/próxima acción hace más de 7 días
     let qCliNotif = sb.from('clientes').select('*')
       .not('estado_prospecto', 'in', '("Separado","No interesado")');
     if (idObjetivo !== 'todos') {
@@ -7941,8 +7613,7 @@ async function cargarNotificaciones(asesorIdFiltro){
     } else if (!esSuperAdminODirector) {
       qCliNotif = qCliNotif.eq('vendedor_id', currentUser.id);
     }
-    const { data: clientesNotif, error: errCliNotif } = await qCliNotif.limit(100);
-    if (errCliNotif) console.error('Error cargando clientes en riesgo para notificaciones:', errCliNotif);
+    const { data: clientesNotif } = await qCliNotif.limit(100);
 
     (clientesNotif || []).filter(clienteEnRiesgo).forEach(c => {
       alertas.push({
@@ -7975,13 +7646,11 @@ async function cargarNotificaciones(asesorIdFiltro){
       </div>
     `).join('');
   } catch (e) {
-    console.error('Error general al cargar notificaciones:', e);
-    el.innerHTML = emptyState('⚠️', 'No se pudieron cargar las notificaciones. Vuelve a intentar.');
+    console.error('Error al cargar notificaciones:', e);
+    el.innerHTML = emptyState('⚠️', 'No se pudieron cargar las notificaciones.');
   }
 }
 
-
-/* ============ HELPERS ============ */
 function emptyState(icon, text){
   return `<div class="empty"><div class="big">${icon}</div><p>${text}</p></div>`;
 }
@@ -7991,7 +7660,6 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
-/* ============ INICIALIZACIÓN ============ */
 (async function init(){
   const { data: { session } } = await sb.auth.getSession();
   if (session?.user) {
@@ -8010,7 +7678,6 @@ function escapeHtml(str){
   }
 })();
 
-/* ===== ALARMAS PROPIAS: registrar service worker + suscribirse a notificaciones push ===== */
 const VAPID_PUBLIC_KEY = 'BBXmb9mf_kQWsiwCfN9Rx9lDavEw_Gb5VbKv-g0lgL2lLYpEMwYveykg_BHRnquVhbBg3WYeOiQ9NJjMVOKoybc';
 
 function urlBase64ToUint8Array(base64String) {
