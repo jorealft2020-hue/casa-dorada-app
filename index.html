@@ -922,6 +922,9 @@
         <div id="cardProyeccionVentas" class="card"></div>
         <div id="avisoClientesRiesgo"></div>
 
+        <div class="section-title">🗺️ Comparativo por Manzana</div>
+        <div id="cardComparativoManzana" class="card"></div>
+
         <div class="section-title">Actividades realizadas hoy <button class="see-all" data-nav="actividades">Ver todo</button></div>
         <button class="chip-btn gold" id="btnDescargarReporte" style="margin-bottom:12px; width:100%; padding:11px; font-size:13px; font-weight:700;">📄 Descargar reporte diario</button>
         <button class="chip-btn" id="btnAbrirInformeFormal" style="margin-bottom:12px; width:100%; padding:11px; font-size:13px; border-color:#1A2332; color:#1A2332; font-weight:700;">🗂️ Descargar informe formal (quincenal/mensual)</button>
@@ -1274,6 +1277,14 @@
           <p class="card-title">🤖 Trabajar modificaciones con Claude</p>
           <p class="card-sub">Continúa esta misma conversación/proyecto donde se construyó y mantiene la app.</p>
           <a href="https://claude.ai/project/01a0687a-6a2a-71cc-b53b-565a65e6a58f" target="_blank" rel="noopener" class="chip-btn gold" style="display:inline-block; text-decoration:none; margin-top:8px;">Abrir proyecto en Claude</a>
+        </div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">💾 RESPALDOS AUTOMÁTICOS</p>
+        <div class="card">
+          <p class="card-title">Copia de seguridad diaria (3:00 am)</p>
+          <p class="card-sub">Exporta clientes, separaciones, actividades, agenda, solicitudes y usuarios. Se conservan los últimos 30 días.</p>
+          <button class="chip-btn gold" id="btnGenerarRespaldoAhora" style="margin-top:10px;">🔄 Generar respaldo ahora</button>
+          <div id="listaRespaldos" style="margin-top:12px;"></div>
         </div>
 
         <p style="font-size:12px; font-weight:700; color:var(--ink-dim); margin:16px 0 4px;">🗄️ BASE DE DATOS — SUPABASE (backend)</p>
@@ -2895,7 +2906,7 @@ function irAVista(vista){
   document.getElementById('btnFab').classList.toggle('hidden', (vista !== 'actividades' && vista !== 'agenda' && vista !== 'separaciones' && vista !== 'clientes'));
 
   if (vista === 'inicio') cargarPortadaInicio();
-  if (vista === 'control') { cargarKPIs(); cargarActividadesHoy(); cargarSeparacionesPorVencer(); cargarProyeccionVentas(); cargarAvisoClientesRiesgo(); }
+  if (vista === 'control') { cargarKPIs(); cargarActividadesHoy(); cargarSeparacionesPorVencer(); cargarProyeccionVentas(); cargarAvisoClientesRiesgo(); cargarComparativoManzana(); }
   if (vista === 'actividades') cargarActividadesTodas();
   if (vista === 'clientes') cargarClientes();
   if (vista === 'separaciones') cargarSeparacionesTodas();
@@ -2911,7 +2922,7 @@ function irAVista(vista){
   if (vista === 'manualventas') cargarManualVentas();
   if (vista === 'majo_assistant') iniciarMajoAssistant();
   if (vista === 'admin') { cargarUsuariosAdmin(); cargarPreautorizados(); }
-  if (vista === 'sistema') cargarConfigDepartamentos();
+  if (vista === 'sistema') { cargarConfigDepartamentos(); cargarListaRespaldos(); }
   if (vista === 'portafolio') cargarPortafolio();
 }
 document.getElementById('btnBell').addEventListener('click', () => irAVista('notificaciones'));
@@ -2974,6 +2985,49 @@ async function cargarAvisoClientesRiesgo(){
       <p class="card-sub">Sin contacto ni próxima acción hace más de 7 días. Toca para revisar.</p>
     </div>
   `;
+}
+
+/* ============ COMPARATIVO POR MANZANA ============
+   Como Costa Dorada es por ahora el único proyecto, el comparativo se hace
+   por manzana (la etapa/zona real que ya existe en los datos de separaciones),
+   en vez de inventar un concepto de "proyectos" que no existe todavía. */
+async function cargarComparativoManzana(){
+  const cont = document.getElementById('cardComparativoManzana');
+  if (!cont) return;
+
+  const rol = currentProfile?.rol;
+  const esSuperAdminODirector = rol === 'admin' || rol === 'superadmin' || rol === 'director_comercial' || rol === 'gerencia';
+  let query = sb.from('separaciones').select('manzana, valor_total, estado');
+  if (!esSuperAdminODirector) query = query.eq('vendedor_id', currentUser.id);
+  const { data } = await query;
+
+  if (!data || data.length === 0) {
+    cont.innerHTML = `<p class="card-sub" style="padding:8px 0;">Aún no hay separaciones registradas para comparar por manzana.</p>`;
+    return;
+  }
+
+  const porManzana = {};
+  data.forEach(s => {
+    const mz = s.manzana || 'Sin manzana';
+    if (!porManzana[mz]) porManzana[mz] = { lotes: 0, monto: 0 };
+    porManzana[mz].lotes += 1;
+    porManzana[mz].monto += Number(s.valor_total || 0);
+  });
+
+  const maxLotes = Math.max(...Object.values(porManzana).map(m => m.lotes));
+  const filas = Object.entries(porManzana).sort((a, b) => b[1].monto - a[1].monto);
+
+  cont.innerHTML = filas.map(([mz, info]) => `
+    <div style="margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;">
+        <span style="font-weight:700;">Manzana ${escapeHtml(mz)}</span>
+        <span style="color:var(--ink-dim);">${info.lotes} lote${info.lotes > 1 ? 's' : ''} · S/ ${Math.round(info.monto).toLocaleString('es-PE')}</span>
+      </div>
+      <div style="background:#F0EBDD; border-radius:100px; height:8px; overflow:hidden;">
+        <div style="background:linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 100%); height:100%; width:${(info.lotes / maxLotes) * 100}%;"></div>
+      </div>
+    </div>
+  `).join('');
 }
 
 
@@ -7479,6 +7533,55 @@ async function cargarConfigDepartamentos(){
     </div>
   `).join('');
 }
+
+/* ============ RESPALDOS AUTOMÁTICOS (solo SuperAdmin) ============ */
+async function cargarListaRespaldos(){
+  const el = document.getElementById('listaRespaldos');
+  if (!el) return;
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  const { data, error } = await sb.storage.from('respaldos-sistema').list('', { sortBy: { column: 'created_at', order: 'desc' } });
+  if (error) { el.innerHTML = emptyState('⚠️', 'No se pudo cargar la lista de respaldos.'); console.error(error); return; }
+  if (!data || data.length === 0) { el.innerHTML = `<p class="card-sub">Aún no hay respaldos generados.</p>`; return; }
+
+  el.innerHTML = `<div style="display:flex; flex-direction:column; gap:6px;">` + data.map(f => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #EFEAE0;">
+      <div>
+        <p style="font-size:12.5px; font-weight:700; margin:0;">${escapeHtml(f.name)}</p>
+        <p style="font-size:11px; color:var(--ink-dim); margin:2px 0 0;">${((f.metadata?.size || 0) / 1024).toFixed(0)} KB</p>
+      </div>
+      <button class="chip-btn" onclick="descargarRespaldo('${f.name}')">⬇️ Descargar</button>
+    </div>
+  `).join('') + `</div>`;
+}
+
+async function descargarRespaldo(nombreArchivo){
+  const { data, error } = await sb.storage.from('respaldos-sistema').createSignedUrl(nombreArchivo, 60);
+  if (error || !data) { toast('Error al generar el enlace de descarga'); console.error(error); return; }
+  window.open(data.signedUrl, '_blank');
+}
+
+document.getElementById('btnGenerarRespaldoAhora')?.addEventListener('click', async () => {
+  const btn = document.getElementById('btnGenerarRespaldoAhora');
+  btn.disabled = true;
+  btn.textContent = 'Generando…';
+  try {
+    const token = (await sb.auth.getSession()).data?.session?.access_token;
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/respaldo-diario`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!resp.ok) throw new Error('Error del servidor');
+    toast('Respaldo generado ✓');
+    cargarListaRespaldos();
+  } catch (e) {
+    toast('Error al generar el respaldo');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 Generar respaldo ahora';
+  }
+});
 
 async function cambiarDepartamentoModulo(moduloKey, nuevoDepto){
   const { error } = await sb.from('modulo_departamentos').update({ departamento: nuevoDepto }).eq('modulo_key', moduloKey);
