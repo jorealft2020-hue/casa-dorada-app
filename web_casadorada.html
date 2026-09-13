@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Casa Dorada · Constructora e Inmobiliaria | Lotes Exclusivos en Tacna</title>
+  <meta name="description" content="Lotes exclusivos para tu futuro en Tacna. Proyectos residenciales en La Yarada Los Palos con títulos de propiedad garantizados y financiamiento directo.">
+  <meta name="theme-color" content="#58BEE6">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --cyan-primary: #58BEE6;
+      --cyan-dark: #3FAFD9;
+      --cyan-light: #EBF8FD;
+      --dark-btn: #4A5056;
+      --dark-btn-hover: #373C41;
+      --text-dark: #1A1A1A;
+      --text-muted: #555A60;
+      --bg-light: #F8F9FA;
+      --white: #FFFFFF;
+      --font: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--white);
+      color: var(--text-dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    /* ============ BARRA LATERAL FIJA DE REDES (ESTILO CASADORADA) ============ */
+    .social-floating-sidebar {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1001;
+      background: var(--cyan-primary);
+      padding: 14px 8px;
+      border-radius: 0 12px 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 2px 4px 14px rgba(0, 0, 0, 0.12);
+    }
+    .social-floating-sidebar a {
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: transform 0.2s;
+    }
+    .social-floating-sidebar a:hover { transform: scale(1.15); }
+
+    /* ============ HEADER / CABECERA ============ */
+    .header-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid #EAECEE;
+      padding: 14px 6vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo-img {
+      height: 48px;
+      object-fit: contain;
+    }
+    .brand-title-box {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-name {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: 0.5px;
+    }
+    .brand-tagline {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--cyan-dark);
+      letter-spacing: 0.3px;
+    }
+
+    .nav-links-center {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+    .nav-item {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-dark);
+      transition: color 0.2s;
+    }
+    .nav-item:hover { color: var(--cyan-primary); }
+
+    .nav-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-outline-header {
+      border: 2px solid var(--text-dark);
+      color: var(--text-dark);
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 700;
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .btn-outline-header:hover {
+      background: var(--text-dark);
+      color: #FFF;
+    }
+    .btn-dark-header {
+      background: var(--dark-btn);
+      color: #FFF;
+      padding: 9px 20px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-dark-header:hover { background: var(--dark-btn-hover); }
+    .btn-intranet-link {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--cyan-dark);
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: var(--cyan-light);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ============ HERO SECTION ============ */
+    .hero-banner {
+      position: relative;
+      min-height: 85vh;
+      background: linear-gradient(rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.48)),
+                  url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #FFF;
+      padding: 60px 6vw;
+    }
+    .hero-content {
+      max-width: 860px;
+      z-index: 2;
+    }
+    .hero-title {
+      font-size: 46px;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 18px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+    .hero-sub {
+      font-size: 17px;
+      font-weight: 500;
+      max-width: 680px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+      color: #F0F3F6;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .btn-cyan-hero {
+      background: var(--cyan-primary);
+      color: #FFF;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 14px 38px;
+      border-radius: 100px;
+      border: none;
+      box-shadow: 0 6px 20px rgba(88, 190, 230, 0.4);
+      display: inline-block;
+      transition: all 0.25s ease;
+    }
+    .btn-cyan-hero:hover {
+      background: var(--cyan-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(88, 190, 230, 0.55);
+    }
+
+    /* TICKER DE DIVISAS BAJO EL HERO */
+    .rates-ticker-bar {
+      background: #F1F4F7;
+      border-bottom: 1px solid #E2E6EA;
+      padding: 10px 6vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .rates-ticker-bar b { color: var(--text-dark); }
+    .rates-ticker-bar span.pill-rate {
+      background: #FFF;
+      border: 1px solid #D1D7DC;
+      padding: 3px 10px;
+      border-radius: 100px;
+      margin-left: 4px;
+    }
+
+    /* ============ SECCIÓN SOBRE NOSOTROS ============ */
+    .section-padding { padding: 90px 6vw; }
+    .nosotros-layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .tag-section-cyan {
+      color: var(--cyan-dark);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .title-section {
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--text-dark);
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+    .text-section {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .nosotros-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .nosotros-card-dark {
+      background: var(--dark-btn);
+      color: #FFF;
+      border-radius: 16px;
+      padding: 26px 22px;
+      transition: transform 0.25s, background 0.25s;
+    }
+    .nosotros-card-dark:hover {
+      transform: translateY(-4px);
+      background: var(--dark-btn-hover);
+    }
+    .ncd-icon { font-size: 26px; margin-bottom: 12px; display: inline-block; }
+    .ncd-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .ncd-desc { font-size: 12px; color: #D1D5DB; line-height: 1.5; }
+
+    /* ============ SECCIÓN NUESTROS PROYECTOS ============ */
+    .proyectos-section {
+      background: var(--bg-light);
+      border-top: 1px solid #EAECEE;
+      border-bottom: 1px solid #EAECEE;
+    }
+    .center-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 50px;
+    }
+    .proyectos-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 30px;
+    }
+    .proyecto-card-box {
+      background: #FFF;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid #E8EBED;
+    }
+    .proyecto-card-box:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 36px rgba(0,0,0,0.1);
+    }
+    .pcb-img-container {
+      position: relative;
+      height: 230px;
+      background: #E2E8F0;
+      overflow: hidden;
+    }
+    .pcb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+    .proyecto-card-box:hover .pcb-img { transform: scale(1.04); }
+    .pcb-badge-preventa {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--cyan-primary);
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pcb-badge-location {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(26, 26, 26, 0.75);
+      backdrop-filter: blur(6px);
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .pcb-body {
+      padding: 26px 24px;
+    }
+    .pcb-title {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+    .pcb-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+    .pcb-specs-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-top: 1px solid #EEF0F2;
+      border-bottom: 1px solid #EEF0F2;
+      padding: 12px 0;
+      margin-bottom: 20px;
+    }
+    .pcb-spec-item {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .pcb-spec-item b { color: var(--text-dark); }
+    .btn-proyecto-detalles {
+      width: 100%;
+      background: var(--dark-btn);
+      color: #FFF;
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 100px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+    .btn-proyecto-detalles:hover { background: var(--dark-btn-hover); }
+
+    /* ============ BANNER CITA INTERMEDIA ============ */
+    .banner-quote {
+      position: relative;
+      background: linear-gradient(rgba(20, 30, 45, 0.75), rgba(20, 30, 45, 0.8)),
+                  url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+      color: #FFF;
+      text-align: center;
+      padding: 85px 6vw;
+    }
+    .bq-title {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.3;
+      max-width: 800px;
+      margin: 0 auto 16px;
+    }
+    .bq-sub {
+      font-size: 16px;
+      color: #E2E8F0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ============ COTIZADOR MULTIDIVISA FLUIDO ============ */
+    .cotizador-section {
+      background: #FFF;
+      padding: 80px 6vw;
+    }
+    .cotizador-box-white {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1.5px solid #E2E6EA;
+      border-radius: 24px;
+      box-shadow: 0 10px 36px rgba(0,0,0,0.06);
+      padding: 36px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 40px;
+    }
+    .form-group-custom { margin-bottom: 16px; }
+    .form-group-custom label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+    .input-custom {
+      width: 100%;
+      border: 1.5px solid #D8DCE0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-custom:focus { border-color: var(--cyan-primary); }
+
+    .divisa-selector-tabs {
+      display: flex;
+      gap: 6px;
+      background: #F1F4F7;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+    .divisa-tab-btn {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .divisa-tab-btn.active {
+      background: var(--cyan-primary);
+      color: #FFF;
+      box-shadow: 0 2px 6px rgba(88, 190, 230, 0.3);
+    }
+
+    .cot-resumen-panel {
+      background: #F8FAFC;
+      border: 1px solid #E2E6EA;
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .res-cuota-big {
+      background: var(--cyan-light);
+      border: 1px solid rgba(88, 190, 230, 0.4);
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      margin: 14px 0;
+    }
+    .rcb-label { font-size: 11.5px; font-weight: 700; color: var(--cyan-dark); text-transform: uppercase; }
+    .rcb-number { font-size: 32px; font-weight: 900; color: var(--text-dark); margin: 4px 0; }
+    .rcb-equiv { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+    /* ============ ACORDEÓN DE FAQS ============ */
+    .faq-section {
+      background: var(--bg-light);
+      padding: 80px 6vw;
+    }
+    .faq-accordion-box {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .faq-item-card {
+      background: #FFF;
+      border: 1px solid #E2E6EA;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .faq-item-card.open {
+      border-color: var(--cyan-primary);
+      box-shadow: 0 4px 16px rgba(88, 190, 230, 0.12);
+    }
+    .faq-question-btn {
+      width: 100%;
+      text-align: left;
+      padding: 18px 22px;
+      background: none;
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-question-btn .faq-icon {
+      font-size: 18px;
+      color: var(--cyan-dark);
+      transition: transform 0.2s;
+    }
+    .faq-item-card.open .faq-icon { transform: rotate(180deg); }
+    .faq-answer-content {
+      padding: 0 22px 18px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      display: none;
+    }
+    .faq-item-card.open .faq-answer-content { display: block; }
+
+    /* ============ FORMULARIO DE CONTACTO (BLOQUE AZUL CELESTE) ============ */
+    .contacto-block-cyan {
+      background: var(--cyan-primary);
+      color: #FFF;
+      padding: 80px 6vw;
+    }
+    .contacto-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .contacto-info-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .cic-card {
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 24px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .cic-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+    .cic-desc { font-size: 13px; color: #F0F9FD; line-height: 1.5; }
+
+    .contacto-form-wrapper {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 36px;
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      max-width: 740px;
+      margin: 0 auto;
+    }
+    .cf-input {
+      width: 100%;
+      background: #FFF;
+      border: none;
+      border-radius: 100px;
+      padding: 13px 20px;
+      font-size: 14px;
+      font-family: var(--font);
+      color: var(--text-dark);
+      outline: none;
+      margin-bottom: 14px;
+    }
+    .cf-textarea {
+      width: 100%;
+      background: #FFF;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 20px;
+      font-size: 14px;
+      font-family: var(--font);
+      color: var(--text-dark);
+      outline: none;
+      margin-bottom: 20px;
+      resize: vertical;
+      min-height: 100px;
+    }
+    .btn-enviar-contacto {
+      width: 100%;
+      background: var(--dark-btn);
+      color: #FFF;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 14px;
+      border-radius: 100px;
+      border: none;
+      transition: background 0.2s;
+    }
+    .btn-enviar-contacto:hover { background: var(--dark-btn-hover); }
+
+    /* ============ FOOTER (AZUL CELESTE) ============ */
+    .footer-cyan {
+      background: var(--cyan-primary);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFF;
+      padding: 40px 6vw 25px;
+      text-align: center;
+    }
+    .footer-nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin: 20px 0;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .footer-nav-links a:hover { text-decoration: underline; }
+    .footer-social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 18px 0;
+      font-size: 18px;
+    }
+    .footer-copy {
+      font-size: 12px;
+      color: #E2F4FA;
+      margin-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 18px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .nosotros-layout { grid-template-columns: 1fr; gap: 40px; }
+      .cotizador-box-white { grid-template-columns: 1fr; padding: 24px; }
+      .contacto-info-cards { grid-template-columns: 1fr; }
+      .nav-links-center { display: none; }
+      .hero-title { font-size: 32px; }
+      .social-floating-sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA LATERAL FIJA DE REDES (AZUL CELESTE) -->
+  <aside class="social-floating-sidebar">
+    <a href="https://instagram.com" target="_blank" title="Instagram">📷</a>
+    <a href="https://facebook.com" target="_blank" title="Facebook">📘</a>
+    <a href="https://tiktok.com" target="_blank" title="TikTok">🎵</a>
+  </aside>
+
+  <!-- TICKER SUPERIOR DE TIPO DE CAMBIO Y ACCESO -->
+  <div class="rates-ticker-bar">
+    <div>
+      <span>💵 Dólar SUNAT: <span class="pill-rate"><b>S/ 3.76</b></span></span>
+      <span>🇨🇱 Peso Chileno: <span class="pill-rate"><b>246 CLP / S/</b></span></span>
+      <span style="margin-left:8px;">📍 La Yarada Los Palos · Tacna</span>
+    </div>
+    <div>
+      <a href="index.html" class="btn-intranet-link">
+        <span>🔐 Intranet Asesores / CRM</span> →
+      </a>
+    </div>
+  </div>
+
+  <!-- HEADER / CABECERA -->
+  <header class="header-nav">
+    <div class="brand-container">
+      <img src="logo-casa-dorada.png" alt="Casa Dorada" class="brand-logo-img">
+      <div class="brand-title-box">
+        <span class="brand-name">CASA DORADA</span>
+        <span class="brand-tagline">CONSTRUCTORA - INMOBILIARIA</span>
+      </div>
+    </div>
+
+    <nav class="nav-links-center">
+      <a href="#inicio" class="nav-item">Inicio</a>
+      <a href="#nosotros" class="nav-item">Nosotros</a>
+      <a href="#proyectos" class="nav-item">Proyectos</a>
+      <a href="#cotizador" class="nav-item">Cotizador</a>
+      <a href="#faq" class="nav-item">FAQ</a>
+    </nav>
+
+    <div class="nav-actions-right">
+      <a href="#proyectos" class="btn-outline-header">Proyectos</a>
+      <a href="#contacto" class="btn-dark-header">Contacto →</a>
+    </div>
+  </header>
+
+  <!-- BANNER PRINCIPAL (HERO) -->
+  <section class="hero-banner" id="inicio">
+    <div class="hero-content">
+      <h1 class="hero-title">Lotes exclusivos para tu futuro en Tacna</h1>
+      <p class="hero-sub">
+        Nuestro proyecto está diseñado con confianza y experiencia. Encuentra el lugar perfecto para construir tus sueños junto a tu familia.
+      </p>
+      <a href="#proyectos" class="btn-cyan-hero">Descubrir</a>
+    </div>
+  </section>
+
+  <!-- SECCIÓN SOBRE NOSOTROS -->
+  <section class="section-padding" id="nosotros">
+    <div class="nosotros-layout">
+      <div>
+        <span class="tag-section-cyan">Sobre Nosotros</span>
+        <h2 class="title-section">Descubre Casa Dorada</h2>
+        <p class="text-section">
+          Somos líderes en el desarrollo de habilitaciones urbanas en Tacna, brindando calidad, sostenibilidad y títulos de propiedad garantizados. Un lugar exclusivo donde el lujo, el confort y la naturaleza se combinan para redefinir tu estilo de vida.
+        </p>
+        <p class="text-section">
+          En <b>Casa Dorada</b>, no solo construimos casas, creamos experiencias únicas y aseguramos la plusvalía de tu patrimonio familiar con seguridad jurídica en Registros Públicos.
+        </p>
+      </div>
+
+      <div class="nosotros-cards-grid">
+        <div class="nosotros-card-dark">
+          <span class="ncd-icon">⭐</span>
+          <h4 class="ncd-title">Experiencia Garantizada</h4>
+          <p class="ncd-desc">Años de solidez desarrollando habilitaciones y lotizaciones seguras en Tacna.</p>
+        </div>
+        <div class="nosotros-card-dark">
+          <span class="ncd-icon">📍</span>
+          <h4 class="ncd-title">Ubicaciones Estratégicas</h4>
+          <p class="ncd-desc">Cercanía a playas, vías principales afirmadas y al corredor binacional Tacna - Arica.</p>
+        </div>
+        <div class="nosotros-card-dark">
+          <span class="ncd-icon">🤝</span>
+          <h4 class="ncd-title">Compromiso y Transparencia</h4>
+          <p class="ncd-desc">Contratos notariales, independización en trámite formal y trato directo sin intermediarios.</p>
+        </div>
+        <div class="nosotros-card-dark">
+          <span class="ncd-icon">📈</span>
+          <h4 class="ncd-title">Proyectos con Futuro</h4>
+          <p class="ncd-desc">Plusvalía proyectada superior al 100% en 5 años gracias al avance constante de obras.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN PROYECTOS -->
+  <section class="section-padding proyectos-section" id="proyectos">
+    <div class="center-header">
+      <span class="tag-section-cyan">Proyectos</span>
+      <h2 class="title-section">Descubre Nuestro Proyecto Exclusivo</h2>
+      <p class="text-section">Proyecto más ambicioso y exclusivo, diseñado para ofrecerte un estilo de vida único.</p>
+    </div>
+
+    <div class="proyectos-grid">
+      <!-- PROYECTO 1: COSTA DORADA -->
+      <div class="proyecto-card-box">
+        <div class="pcb-img-container">
+          <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80" alt="Costa Dorada" class="pcb-img">
+          <span class="pcb-badge-preventa">Preventa</span>
+          <span class="pcb-badge-location">📍 La Yarada Los Palos, Tacna</span>
+        </div>
+        <div class="pcb-body">
+          <h3 class="pcb-title">Condominio Costa Dorada</h3>
+          <p class="pcb-desc">
+            Condominio residencial y vacacional de playa y campo. Terrenos independizados con pórtico monumental de entrada, amplias vías de 14m y clima cálido todo el año.
+          </p>
+          <div class="pcb-specs-list">
+            <span class="pcb-spec-item">📐 Área: <b>160 m² - 180 m²</b></span>
+            <span class="pcb-spec-item">🌊 Playa: <b>15 min</b></span>
+            <span class="pcb-spec-item">🏷️ Inicial flexible: <b>Sin intereses</b></span>
+          </div>
+          <button class="btn-proyecto-detalles" onclick="document.getElementById('cotizador').scrollIntoView({behavior:'smooth'})">
+            Ver Cotizador y Planos →
+          </button>
+        </div>
+      </div>
+
+      <!-- PROYECTO 2: VILLA EL SOL -->
+      <div class="proyecto-card-box">
+        <div class="pcb-img-container">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Villa El Sol" class="pcb-img">
+          <span class="pcb-badge-preventa">Lanzamiento</span>
+          <span class="pcb-badge-location">📍 Tacna, Perú</span>
+        </div>
+        <div class="pcb-body">
+          <h3 class="pcb-title">Villa El Sol</h3>
+          <p class="pcb-desc">
+            Desarrollo campestre enfocado en la tranquilidad familiar y áreas recreativas. Excelente proyección de plusvalía y financiamiento directo.
+          </p>
+          <div class="pcb-specs-list">
+            <span class="pcb-spec-item">📐 Área: <b>120 m² - 200 m²</b></span>
+            <span class="pcb-spec-item">☀️ Sol: <b>365 días</b></span>
+            <span class="pcb-spec-item">📑 Título: <b>Garantizado</b></span>
+          </div>
+          <a href="#contacto" class="btn-proyecto-detalles">
+            Solicitar Información →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BANNER INTERMEDIO -->
+  <section class="banner-quote">
+    <h2 class="bq-title">«Vive donde otros solo Sueñan con Vacacionar»</h2>
+    <p class="bq-sub">Invierte en tu tranquilidad y asegura el patrimonio de tu familia con Casa Dorada.</p>
+  </section>
+
+  <!-- COTIZADOR MULTIDIVISA (AMPLIADO Y MEJORADO) -->
+  <section class="cotizador-section" id="cotizador">
+    <div class="center-header">
+      <span class="tag-section-cyan">Simulación Financiera</span>
+      <h2 class="title-section">Cotizador de Lotes en Tiempo Real</h2>
+      <p class="text-section">Simula tu cuota fija mensual en Soles, Dólares o Pesos Chilenos sin evaluación bancaria.</p>
+    </div>
+
+    <div class="cotizador-box-white">
+      <div>
+        <div class="divisa-selector-tabs">
+          <button type="button" class="divisa-tab-btn active" id="btnTabPEN" onclick="seleccionarDivisaCotizador('PEN')">🇵🇪 Soles (S/)</button>
+          <button type="button" class="divisa-tab-btn" id="btnTabUSD" onclick="seleccionarDivisaCotizador('USD')">🇺🇸 Dólares ($)</button>
+          <button type="button" class="divisa-tab-btn" id="btnTabCLP" onclick="seleccionarDivisaCotizador('CLP')">🇨🇱 Pesos ($ CLP)</button>
+        </div>
+
+        <div class="form-group-custom">
+          <label>Proyecto y Manzana</label>
+          <select id="cot_mz" class="input-custom" onchange="recalcularValoresWeb()">
+            <option value="A">Costa Dorada · Manzana A (Estándar 160m²)</option>
+            <option value="B" selected>Costa Dorada · Manzana B (Estándar 160m²)</option>
+            <option value="C">Costa Dorada · Manzana C (Estándar 160m²)</option>
+            <option value="E">Costa Dorada · Manzana E (Esquina Panorámica 180m²)</option>
+          </select>
+        </div>
+
+        <div class="form-group-custom">
+          <label>Valor Total del Terreno (<span id="lblDivisaTotal">S/</span>)</label>
+          <input type="number" id="cot_total" class="input-custom" value="38000" oninput="recalcularValoresWeb()" style="font-weight:700;">
+        </div>
+
+        <div class="form-group-custom">
+          <label>Inicial Pactada Flexible (<span id="lblDivisaIni">S/</span>)</label>
+          <input type="number" id="cot_inicial" class="input-custom" value="10000" oninput="recalcularValoresWeb()" style="font-weight:700; color:var(--cyan-dark);">
+        </div>
+
+        <div class="form-group-custom">
+          <label>Plazo de Financiamiento Directo</label>
+          <select id="cot_plazo" class="input-custom" onchange="recalcularValoresWeb()">
+            <option value="12">12 Meses sin intereses</option>
+            <option value="24">24 Meses sin intereses</option>
+            <option value="36" selected>36 Meses sin intereses</option>
+            <option value="48">48 Meses sin intereses</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cot-resumen-panel">
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted); border-bottom:1px solid #EAECEE; padding-bottom:8px;">
+            <span>Saldo a Financiar:</span>
+            <b id="res_saldo_txt" style="color:var(--text-dark); font-size:15px;">S/ 28,000</b>
+          </div>
+
+          <div class="res-cuota-big">
+            <span class="rcb-label">Inversión Mensual Fija</span>
+            <div class="rcb-number" id="res_cuota_txt">S/ 778 / mes</div>
+            <div class="rcb-equiv" id="res_equiv_txt">≈ $ 207 USD · ≈ $ 191,388 CLP</div>
+          </div>
+
+          <div class="form-group-custom">
+            <input type="text" id="cot_lead_nombre" class="input-custom" placeholder="Tu Nombre Completo">
+          </div>
+          <div class="form-group-custom">
+            <input type="tel" id="cot_lead_celular" class="input-custom" placeholder="Tu Celular / WhatsApp (+51 / +56)">
+          </div>
+        </div>
+
+        <button type="button" class="btn-enviar-contacto" onclick="enviarCotizacionWhatsAppOficial()">
+          ENVIAR COTIZACIÓN POR WHATSAPP →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN FAQS -->
+  <section class="faq-section" id="faq">
+    <div class="center-header">
+      <span class="tag-section-cyan">Preguntas Frecuentes</span>
+      <h2 class="title-section">Resolvemos tus Dudas</h2>
+      <p class="text-section">Nuestro proyecto más ambicioso y exclusivo, diseñado para ofrecerte un estilo de vida único.</p>
+    </div>
+
+    <div class="faq-accordion-box">
+      <div class="faq-item-card open">
+        <button class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>¿Qué tipos de lotes ofrecen?</span>
+          <span class="faq-icon">▾</span>
+        </button>
+        <div class="faq-answer-content">
+          Ofrecemos lotes residenciales y vacacionales estándar de 160 m² (8 metros de frente por 20 metros de fondo) y lotes en esquina o frente a parque de hasta 180 m² y 200 m², con topografía plana y óptima para construir.
+        </div>
+      </div>
+
+      <div class="faq-item-card">
+        <button class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>¿Tienen facilidades de financiamiento directo?</span>
+          <span class="faq-icon">▾</span>
+        </button>
+        <div class="faq-answer-content">
+          Sí. En Casa Dorada financiamos directamente sin intermediación bancaria, sin comisiones ocultas y con cuotas fijas hasta en 48 meses. Además, puedes separar tu lote hoy mismo con solo S/ 500 (~$133 USD).
+        </div>
+      </div>
+
+      <div class="faq-item-card">
+        <button class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>¿Dónde están ubicados exactamente los lotes?</span>
+          <span class="faq-icon">▾</span>
+        </button>
+        <div class="faq-answer-content">
+          Nuestros proyectos están ubicados en el distrito balneario de La Yarada Los Palos, Tacna, a solo 15 minutos de la playa Los Palos, 20 minutos del centro de Tacna y 35 minutos del límite con Arica, Chile.
+        </div>
+      </div>
+
+      <div class="faq-item-card">
+        <button class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>¿Puedo visitar los lotes antes de comprar?</span>
+          <span class="faq-icon">▾</span>
+        </button>
+        <div class="faq-answer-content">
+          ¡Por supuesto! Disponemos de una Van corporativa de cortesía de 14 asientos que realiza traslados guiados todos los sábados y domingos desde el centro de Tacna hacia el proyecto Costa Dorada.
+        </div>
+      </div>
+
+      <div class="faq-item-card">
+        <button class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>¿Qué documentos se entregan al adquirir un lote?</span>
+          <span class="faq-icon">▾</span>
+        </button>
+        <div class="faq-answer-content">
+          Se suscribe un contrato formal de compraventa con firma legalizada ante notario público, recibos oficiales correlativos de pago y expediente técnico de habilitación urbana inscrita en Sunarp.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMULARIO DE CONTACTO (BLOQUE AZUL CELESTE IDÉNTICO A CASADORADA) -->
+  <section class="contacto-block-cyan" id="contacto">
+    <div class="contacto-container">
+      <div style="text-align:center; margin-bottom:36px;">
+        <span style="font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#E8F8FE;">Estamos Aquí para Ayudarte</span>
+        <h2 style="font-size:36px; font-weight:900; margin-top:4px;">Contáctanos</h2>
+      </div>
+
+      <!-- 3 COLUMNAS DE INFORMACIÓN -->
+      <div class="contacto-info-cards">
+        <div class="cic-card">
+          <div style="font-size:24px; margin-bottom:6px;">📍</div>
+          <h4 class="cic-title">Oficina</h4>
+          <p class="cic-desc">Av. dos mayo 319<br>Tacna, Perú</p>
+        </div>
+        <div class="cic-card">
+          <div style="font-size:24px; margin-bottom:6px;">📞</div>
+          <h4 class="cic-title">Información</h4>
+          <p class="cic-desc">968 737 269 / 942 236 677<br>ventas@casadoradainmobiliaria.com.pe</p>
+        </div>
+        <div class="cic-card">
+          <div style="font-size:24px; margin-bottom:6px;">⏰</div>
+          <h4 class="cic-title">Horario</h4>
+          <p class="cic-desc">Lunes - Sábado<br>9:00AM - 6:00PM</p>
+        </div>
+      </div>
+
+      <!-- FORMULARIO DE CONTACTO BLANCO -->
+      <div class="contacto-form-wrapper">
+        <form onsubmit="enviarFormularioContactoDirecto(event)">
+          <input type="text" id="fc_nombre" class="cf-input" placeholder="Nombres y Apellidos" required>
+          <input type="tel" id="fc_telefono" class="cf-input" placeholder="Teléfono / WhatsApp" required>
+          <input type="email" id="fc_email" class="cf-input" placeholder="Email" required>
+          <textarea id="fc_mensaje" class="cf-textarea" placeholder="Mensaje"></textarea>
+          <button type="submit" class="btn-enviar-contacto">ENVIAR</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER (AZUL CELESTE) -->
+  <footer class="footer-cyan">
+    <div style="max-width:800px; margin:0 auto;">
+      <img src="logo-casa-dorada.png" alt="Casa Dorada" style="height:48px; object-fit:contain; filter:brightness(0) invert(1); margin-bottom:12px;">
+      <p style="font-size:14px; font-weight:600; color:#EBF8FD;">Construimos confianza, desarrollamos tus sueños.</p>
+
+      <div class="footer-nav-links">
+        <a href="#inicio">Inicio</a>
+        <a href="#nosotros">Nosotros</a>
+        <a href="#proyectos">Proyectos</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contacto">Contactar</a>
+      </div>
+
+      <div class="footer-social-icons">
+        <a href="https://facebook.com" target="_blank" style="color:#FFF;">📘</a>
+        <a href="https://instagram.com" target="_blank" style="color:#FFF;">📷</a>
+        <a href="https://tiktok.com" target="_blank" style="color:#FFF;">🎵</a>
+      </div>
+
+      <p class="footer-copy">
+        © 2026 Casa Dorada. Todos los Derechos Reservados · Tacna, Perú
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://nboikojylmkujdxinztj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib2lrb2p5bG1rdWpkeGluenRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyOTU1NzksImV4cCI6MjEwMzg3MTU3OX0.O6yaQPFwjYmIhQD--smhX1IRY0D1KETHsX30kFOmU5s';
+    const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+    const WSP_OFICIAL = '51942236677';
+
+    const tasas = { usd: 3.76, clp: 246.0 };
+    let divisaSeleccionada = 'PEN';
+
+    function seleccionarDivisaCotizador(moneda){
+      divisaSeleccionada = moneda;
+      ['btnTabPEN','btnTabUSD','btnTabCLP'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+      document.getElementById('btnTab' + moneda)?.classList.add('active');
+      document.getElementById('lblDivisaTotal').textContent = moneda === 'USD' ? '$ USD' : (moneda === 'CLP' ? '$ CLP' : 'S/');
+      document.getElementById('lblDivisaIni').textContent = moneda === 'USD' ? '$ USD' : (moneda === 'CLP' ? '$ CLP' : 'S/');
+      recalcularValoresWeb();
+    }
+
+    function recalcularValoresWeb(){
+      const total = parseFloat(document.getElementById('cot_total')?.value) || 38000;
+      const inicial = parseFloat(document.getElementById('cot_inicial')?.value) || 10000;
+      const plazo = parseInt(document.getElementById('cot_plazo')?.value) || 36;
+
+      const saldo = Math.max(0, total - inicial);
+      const cuota = Math.round(saldo / plazo);
+
+      const fmt = (n, m) => {
+        if (m === 'USD') return '$ ' + Math.round(n / tasas.usd).toLocaleString('en-US') + ' USD';
+        if (m === 'CLP') return '$ ' + Math.round(n * tasas.clp).toLocaleString('es-CL') + ' CLP';
+        return 'S/ ' + Math.round(n).toLocaleString('es-PE');
+      };
+
+      document.getElementById('res_saldo_txt').textContent = fmt(saldo, divisaSeleccionada);
+      document.getElementById('res_cuota_txt').textContent = fmt(cuota, divisaSeleccionada) + ' / mes';
+
+      const cuotaUsd = Math.round(cuota / tasas.usd);
+      const cuotaClp = Math.round(cuota * tasas.clp);
+      document.getElementById('res_equiv_txt').textContent = `≈ $ ${cuotaUsd.toLocaleString('en-US')} USD · ≈ $ ${cuotaClp.toLocaleString('es-CL')} CLP`;
+    }
+
+    async function enviarCotizacionWhatsAppOficial(){
+      const nom = document.getElementById('cot_lead_nombre')?.value.trim() || 'Estimado(a)';
+      const cel = document.getElementById('cot_lead_celular')?.value.trim();
+      const mz = document.getElementById('cot_mz')?.value || 'B';
+      const total = parseFloat(document.getElementById('cot_total')?.value) || 38000;
+      const inicial = parseFloat(document.getElementById('cot_inicial')?.value) || 10000;
+      const plazo = parseInt(document.getElementById('cot_plazo')?.value) || 36;
+      const saldo = Math.max(0, total - inicial);
+      const cuota = Math.round(saldo / plazo);
+
+      if (sb && cel) {
+        try {
+          await sb.from('clientes').insert({
+            nombre: nom !== 'Estimado(a)' ? nom : 'Prospecto Web',
+            celular: cel,
+            origen_prospeccion: 'Página Web Oficial (casadoradainmobiliaria.com.pe)',
+            estado_prospecto: 'Contactado',
+            observaciones: `Simulación Manzana ${mz}: Total S/ ${total}, Inicial S/ ${inicial}, Cuota S/ ${cuota} a ${plazo} meses.`
+          });
+        } catch(e) { console.warn(e); }
+      }
+
+      const txt = `Hola, mi nombre es *${nom}*. Acabo de simular mi terreno en la página web oficial de *Casa Dorada*:
+━━━━━━━━━━━━━━━━━━━
+🏡 *Proyecto:* Costa Dorada · Manzana ${mz}
+💰 *Valor Total:* S/ ${total.toLocaleString('es-PE')} (~$ ${Math.round(total/tasas.usd)} USD | ~$ ${Math.round(total*tasas.clp)} CLP)
+🏷️ *Inicial:* S/ ${inicial.toLocaleString('es-PE')}
+🗓️ *Plazo:* ${plazo} meses sin intereses
+✨ *Cuota Mensual:* S/ ${cuota.toLocaleString('es-PE')} / mes (~$ ${Math.round(cuota/tasas.usd)} USD | ~$ ${Math.round(cuota*tasas.clp)} CLP)
+
+Solicito atención de un asesor comercial para coordinar visita al proyecto. ¡Gracias!`;
+
+      window.open(`https://wa.me/${WSP_OFICIAL}?text=${encodeURIComponent(txt)}`, '_blank');
+    }
+
+    async function enviarFormularioContactoDirecto(e){
+      e.preventDefault();
+      const nom = document.getElementById('fc_nombre')?.value.trim();
+      const tel = document.getElementById('fc_telefono')?.value.trim();
+      const mail = document.getElementById('fc_email')?.value.trim();
+      const msg = document.getElementById('fc_mensaje')?.value.trim();
+
+      if (sb && tel) {
+        try {
+          await sb.from('clientes').insert({
+            nombre: nom,
+            celular: tel,
+            correo: mail,
+            origen_prospeccion: 'Formulario Contacto Web',
+            estado_prospecto: 'Contactado',
+            observaciones: msg || 'Consulta enviada desde el formulario de contacto.'
+          });
+        } catch(e) { console.warn(e); }
+      }
+
+      const txt = `Hola Casa Dorada, me contacto desde la página web:
+*Nombre:* ${nom}
+*Teléfono:* ${tel}
+*Email:* ${mail}
+*Mensaje:* ${msg || 'Solicito información sobre lotes y financiamiento.'}`;
+
+      window.open(`https://wa.me/${WSP_OFICIAL}?text=${encodeURIComponent(txt)}`, '_blank');
+    }
+
+    function toggleFaq(btn){
+      const card = btn.closest('.faq-item-card');
+      const wasOpen = card.classList.contains('open');
+      document.querySelectorAll('.faq-item-card').forEach(c => c.classList.remove('open'));
+      if (!wasOpen) card.classList.add('open');
+    }
+
+    recalcularValoresWeb();
+  </script>
+</body>
+</html>
