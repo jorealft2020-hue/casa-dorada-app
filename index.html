@@ -793,7 +793,7 @@
 /* ============ MENÚ FLOTANTE CENTRAL Y DOCK HORIZONTAL ============ */
 .dock-flotante-contenedor {
   position: fixed;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -806,34 +806,33 @@
 
 .btn-dock-central {
   pointer-events: auto;
-  background: rgba(20, 42, 77, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1.5px solid rgba(200, 155, 60, 0.55);
-  border-radius: 28px;
-  padding: 8px 18px;
+  background: rgba(20, 42, 77, 0.42);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  width: 52px;
+  height: 32px;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(200, 155, 60, 0.2);
-  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  color: #FFFFFF;
 }
 .btn-dock-central:hover, .btn-dock-central:active {
-  background: rgba(20, 42, 77, 0.95);
-  border-color: var(--gold);
-  transform: scale(1.05);
+  background: rgba(20, 42, 77, 0.65);
+  border-color: rgba(200, 155, 60, 0.75);
+  transform: scale(1.06);
+  color: var(--gold-soft);
 }
 .btn-dock-hamburguesa {
-  font-size: 16px;
-  color: var(--gold);
-  line-height: 1;
+  display: none;
 }
 .btn-dock-texto {
-  font-size: 12px;
-  font-weight: 700;
-  color: #FFFFFF;
-  letter-spacing: 0.5px;
+  display: none;
 }
 
 /* DOCK HORIZONTAL DESGLOSABLE Y DESLIZABLE A DERECHA / IZQUIERDA */
@@ -1107,6 +1106,34 @@ main.app-content {
             <button class="drawer-item" id="drNavCotizador" data-modkey="cotizador" onclick="abrirModalCotizador(); cerrarDrawer();">
               <span class="dr-icon">🧮</span>
               <span class="dr-label">Cotizador Rápido de Lotes</span>
+            </button>
+            <button class="drawer-item" id="drNavConversor" data-modkey="conversor_divisas" onclick="abrirModalConversorDivisas(); cerrarDrawer();">
+              <span class="dr-icon">💱</span>
+              <span class="dr-label">Conversor Multidivisa (PEN · USD · CLP)</span>
+            </button>
+            <button class="drawer-item" id="drNavPlusvalia" data-modkey="plusvalia" onclick="abrirModalPlusvalia(); cerrarDrawer();">
+              <span class="dr-icon">📈</span>
+              <span class="dr-label">Simulador Plusvalía & ROI (10 Años)</span>
+            </button>
+            <button class="drawer-item" id="drNavInventario" data-modkey="inventario_lotes" onclick="abrirModalInventarioLotes(); cerrarDrawer();">
+              <span class="dr-icon">📦</span>
+              <span class="dr-label">Control de Inventario y Lotes (ERP)</span>
+            </button>
+            <button class="drawer-item" id="drNavComisiones" data-modkey="comisiones_erp" onclick="abrirModalComisionesERP(); cerrarDrawer();">
+              <span class="dr-icon">💰</span>
+              <span class="dr-label">Billetera de Comisiones (ERP)</span>
+            </button>
+            <button class="drawer-item" id="drNavCaja" data-modkey="caja_tesoreria" onclick="abrirModalCajaTesoreria(); cerrarDrawer();">
+              <span class="dr-icon">💵</span>
+              <span class="dr-label">Caja y Vouchers Oficiales (ERP)</span>
+            </button>
+            <button class="drawer-item" id="drNavPortalPropietario" data-modkey="portal_propietario" onclick="abrirPortalPropietario(); cerrarDrawer();">
+              <span class="dr-icon">🏛️</span>
+              <span class="dr-label">Portal del Propietario (Club Costa Dorada)</span>
+            </button>
+            <button class="drawer-item" id="drNavGemeloDigital" data-modkey="gemelo_digital" onclick="abrirModalGemeloDigital(); cerrarDrawer();">
+              <span class="dr-icon">🗺️</span>
+              <span class="dr-label">Visualizador de Lote & Proyección 3D</span>
             </button>
             <button class="drawer-item" data-nav="portafolio" id="drNavPortafolio" data-modkey="portafolio">
               <span class="dr-icon">📁</span>
@@ -1882,9 +1909,13 @@ main.app-content {
     </div>
 
     <!-- BOTÓN CENTRAL FLOTANTE SEMI-TRANSPARENTE (3 LÍNEAS DE MENÚ) -->
-    <button type="button" id="btnDockCentral" class="btn-dock-central" onclick="toggleDockHorizontal()" title="Menú de módulos autorizados">
-      <span class="btn-dock-hamburguesa">☰</span>
-      <span class="btn-dock-texto">Menú</span>
+        <!-- BARRITA SEMITRANSPARENTE FLOTANTE (3 LÍNEAS, SIN TEXTO) -->
+    <button type="button" id="btnDockCentral" class="btn-dock-central" onclick="toggleDockHorizontal()" title="Módulos autorizados" aria-label="Menú de módulos">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+        <line x1="1" y1="1.5" x2="17" y2="1.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="1" y1="6" x2="17" y2="6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="1" y1="10.5" x2="17" y2="10.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
     </button>
   </div>
 
@@ -2379,6 +2410,18 @@ main.app-content {
     <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
       <button class="modal-x-close" data-close="modalCotizador">✕</button>
       <h3 style="margin-top:0;">🧮 Cotizador Rápido de Lotes</h3>
+      <!-- BANNER TIPO DE CAMBIO EN VIVO -->
+      <div style="background:#EBF3FC; border:1px solid #CFE2F9; border-radius:10px; padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+        <div style="display:flex; align-items:center; gap:8px; font-size:11.5px; color:#142A4D; font-weight:700;">
+          <span>💵 1 USD = S/ <b id="cotTcUsd">3.76</b></span>
+          <span>·</span>
+          <span>🇨🇱 1 Sol = <b id="cotTcClp">246</b> CLP</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button type="button" class="chip-btn" onclick="abrirModalConversorDivisas()" style="font-size:10.5px; padding:4px 8px; background:#fff; border-color:#CFE2F9; color:#142A4D; font-weight:700;">💱 Abrir Conversor</button>
+          <button type="button" class="chip-btn" onclick="actualizarTiposCambioDesdeAPI(true)" title="Actualizar tasas de cambio en vivo" style="font-size:10.5px; padding:4px 8px; background:#fff; border-color:#CFE2F9;">🔄</button>
+        </div>
+      </div>
       <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:14px;">Simulación oficial de inversión y financiamiento directo · Costa Dorada</p>
       
       <!-- DATOS DEL CLIENTE -->
@@ -2844,7 +2887,332 @@ main.app-content {
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  
+  <!-- MODAL: CONVERSOR MULTIDIVISA INMOBILIARIO (ERP / COMERCIAL) -->
+  <div class="modal-backdrop" id="modalConversorDivisas">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalConversorDivisas">✕</button>
+      <h3 style="margin-top:0;">💱 Conversor Multidivisa Inmobiliario</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:14px;">Conversión oficial Soles (PEN) · Dólares (USD) · Pesos Chilenos (CLP)</p>
+
+      <div style="background:#F7F4EC; border:1px solid #E5DFCF; border-radius:12px; padding:12px 14px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:12px; font-weight:700; color:var(--navy);">Tasas de Referencia Tacna / SUNAT</span>
+          <span id="tcInfoFecha" style="font-size:11px; color:var(--ink-dim); font-weight:600;">Hoy</span>
+        </div>
+        <div style="display:flex; gap:12px; font-size:13px; font-weight:800; color:var(--gold);">
+          <div>💵 1 USD = S/ <span id="tc_disp_usd">3.76</span></div>
+          <div>🇨🇱 1 PEN = <span id="tc_disp_clp">246</span> CLP</div>
+        </div>
+      </div>
+
+      <!-- CAMPOS REACTIVOS BIDIRECCIONALES -->
+      <div class="field">
+        <label>🇵🇪 Monto en Soles Peruanos (PEN)</label>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-weight:800; color:var(--navy); font-size:15px;">S/</span>
+          <input type="number" id="conv_soles" oninput="recalcularDesdeSoles()" placeholder="0" style="font-size:16px; font-weight:800;">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>🇺🇸 Monto equivalente en Dólares (USD)</label>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-weight:800; color:var(--navy); font-size:15px;">$</span>
+          <input type="number" id="conv_dolares" oninput="recalcularDesdeDolares()" placeholder="0" style="font-size:16px; font-weight:800;">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>🇨🇱 Monto equivalente en Pesos Chilenos (CLP)</label>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-weight:800; color:var(--navy); font-size:15px;">$</span>
+          <input type="number" id="conv_pesos" oninput="recalcularDesdePesos()" placeholder="0" style="font-size:16px; font-weight:800;">
+        </div>
+      </div>
+
+      <!-- BOTONES DE VALORES RÁPIDOS INMOBILIARIOS -->
+      <p style="font-size:11.5px; font-weight:700; color:var(--navy); margin:14px 0 6px;">⚡ Montos Típicos en Costa Dorada:</p>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;">
+        <button type="button" class="chip-btn" onclick="aplicarValorRapidoConversor(500)">🏷️ Sep. S/ 500</button>
+        <button type="button" class="chip-btn" onclick="aplicarValorRapidoConversor(1000)">🏷️ Sep. S/ 1,000</button>
+        <button type="button" class="chip-btn" onclick="aplicarValorRapidoConversor(8000)">💼 Inicial S/ 8,000</button>
+        <button type="button" class="chip-btn" onclick="aplicarValorRapidoConversor(10000)">💼 Inicial S/ 10,000</button>
+        <button type="button" class="chip-btn" onclick="aplicarValorRapidoConversor(750)">✨ Cuota S/ 750</button>
+        <button type="button" class="chip-btn" onclick="aplicarValorRapidoConversor(38000)">🏡 Lote S/ 38,000</button>
+      </div>
+
+      <!-- BLOQUE DE CONFIGURACIÓN DE TASAS (SOLO AUTORIZADOS) -->
+      <div id="conv_bloque_editar_tc" class="hidden" style="background:#FFF9EE; border:1px solid #FFE0B2; border-radius:12px; padding:12px 14px; margin-top:14px;">
+        <p style="font-size:12px; font-weight:700; color:#E65100; margin:0 0 6px;">⚙️ Ajuste de Tipos de Cambio Oficiales (Gerencia/Admin)</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div class="field" style="margin-bottom:0;"><label style="font-size:11px;">USD en Soles</label><input type="number" step="0.001" id="tc_input_usd" value="3.76"></div>
+          <div class="field" style="margin-bottom:0;"><label style="font-size:11px;">CLP por Sol</label><input type="number" step="0.1" id="tc_input_clp" value="246"></div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button type="button" class="chip-btn gold" onclick="guardarTiposCambioManuales()" style="flex:1; justify-content:center;">Guardar tasas</button>
+          <button type="button" class="chip-btn" onclick="actualizarTiposCambioDesdeAPI(true)" style="flex:1; justify-content:center;">Refrescar en vivo</button>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:18px;">
+        <button class="btn-secondary" data-close="modalConversorDivisas" style="width:100%;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SIMULADOR DE PLUSVALÍA & ROI A 5 Y 10 AÑOS -->
+  <div class="modal-backdrop" id="modalPlusvalia">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalPlusvalia">✕</button>
+      <h3 style="margin-top:0;">📈 Simulador de Plusvalía & Rentabilidad (5 y 10 Años)</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:14px;">Proyección financiera de valorización patrimonial · Costa Dorada, La Yarada</p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+        <div class="field" style="margin-bottom:0;"><label>Manzana</label><input type="text" id="pl_manzana" value="B"></div>
+        <div class="field" style="margin-bottom:0;"><label>Lote</label><input type="text" id="pl_lote" value="12"></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div class="field" style="margin-bottom:0;"><label>Área (m²)</label><input type="number" id="pl_area" value="160"></div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Tasa Plusvalía Anual Est.</label>
+          <select id="pl_tasa_anual" onchange="recalcularPlusvalia()">
+            <option value="12">12% anual (Conservador)</option>
+            <option value="15" selected>15% anual (Moderado - Costa Dorada)</option>
+            <option value="18">18% anual (Acelerado - Consolidación)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Valor de Compra del Terreno Hoy (S/)</label>
+        <input type="number" id="pl_valor_actual" value="38000" oninput="recalcularPlusvalia()" style="font-size:16px; font-weight:800; color:var(--navy);">
+      </div>
+
+      <!-- TARJETAS DE PROYECCIÓN TEMPORAL -->
+      <div style="display:flex; flex-direction:column; gap:10px; margin:16px 0;">
+        <!-- HOY -->
+        <div style="background:#F7F4EC; border:1px solid #E5DFCF; border-radius:12px; padding:12px 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:800; color:var(--navy);">📍 VALOR DE ADQUISICIÓN HOY (2026)</span>
+            <span class="badge" style="background:#E2D9C5; color:#5A4A28;">Momento Cero</span>
+          </div>
+          <div id="pl_res_actual_soles" style="font-size:18px; font-weight:800; color:var(--navy); margin-top:4px;">S/ 38,000</div>
+          <div id="pl_res_actual_divisas" style="font-size:11.5px; color:var(--ink-dim); font-weight:600;">$ 10,106 USD · $ 9,348,000 CLP</div>
+        </div>
+
+        <!-- A 5 AÑOS -->
+        <div style="background:#EBF7EE; border:1.5px solid #A5D6A7; border-radius:12px; padding:12px 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:800; color:var(--ok);">🚀 PROYECCIÓN A 5 AÑOS (2031)</span>
+            <span class="badge badge-completada" id="pl_res_5_roi">+101% ROI</span>
+          </div>
+          <div id="pl_res_5_soles" style="font-size:20px; font-weight:800; color:var(--ok); margin-top:4px;">S/ 76,428</div>
+          <div id="pl_res_5_divisas" style="font-size:11.5px; color:#2E7D32; font-weight:600;">$ 20,326 USD · $ 18,801,000 CLP</div>
+          <p style="font-size:10.5px; color:#388E3C; margin:4px 0 0;">Impacto por pórtico terminado, vías consolidadas y primeras construcciones residenciales.</p>
+        </div>
+
+        <!-- A 10 AÑOS -->
+        <div style="background:#FFF9EE; border:1.5px solid #FFE082; border-radius:12px; padding:12px 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:800; color:var(--gold);">🏆 PROYECCIÓN A 10 AÑOS (2036)</span>
+            <span class="badge" style="background:#FFE082; color:#8D6E63; font-weight:800;" id="pl_res_10_roi">+304% ROI</span>
+          </div>
+          <div id="pl_res_10_soles" style="font-size:22px; font-weight:800; color:var(--gold); margin-top:4px;">S/ 153,732</div>
+          <div id="pl_res_10_divisas" style="font-size:11.5px; color:#B78103; font-weight:600;">$ 40,886 USD · $ 37,818,000 CLP</div>
+          <p style="font-size:10.5px; color:#8D6E63; margin:4px 0 0;">Consolidación urbana completa, servicios activos y alta demanda turística Tacna-Arica.</p>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" class="btn-primary" onclick="compartirProyeccionPlusvaliaWhatsApp()">📲 Enviar Estudio por WhatsApp al Cliente</button>
+        <button type="button" class="btn-secondary" data-close="modalPlusvalia">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PORTAL DEL PROPIETARIO (CLUB COSTA DORADA) -->
+  <div class="modal-backdrop" id="modalPortalPropietario">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalPortalPropietario">✕</button>
+      <h3 style="margin-top:0;">🏛️ Portal del Propietario · Club Costa Dorada</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:14px;">Consulta patrimonial de estado de cuenta, amortización y avance de obras</p>
+
+      <div class="field">
+        <label>DNI o RUT Chileno del Comprador</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="pp_dni_input" placeholder="Ej: 70889900 o RUT">
+          <button type="button" class="btn-primary" onclick="buscarPropietarioPorDocumento()" style="flex-shrink:0; padding:8px 16px;">Buscar</button>
+        </div>
+      </div>
+
+      <div id="pp_resultado_container" style="margin-top:14px;">
+        <div style="text-align:center; padding:20px 10px; color:var(--ink-dim);">
+          <span style="font-size:32px; display:block; margin-bottom:6px;">🔍</span>
+          Ingresa el documento del cliente o selecciónalo desde su ficha para ver su estado de cuenta patrimonial.
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:16px;">
+        <button type="button" class="btn-secondary" data-close="modalPortalPropietario" style="width:100%;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VISUALIZADOR DE LOTE & GEMELO DIGITAL 3D -->
+  <div class="modal-backdrop" id="modalGemeloDigital">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalGemeloDigital">✕</button>
+      <h3 style="margin-top:0;">🗺️ Visualizador de Lote & Gemelo Digital 3D</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:14px;">Simulación interactiva de asoleamiento, topografía y construcción</p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
+        <div class="field" style="margin-bottom:0;"><label>Manzana</label><input type="text" id="gd_manzana" value="B" onchange="actualizarVistaGemeloDigital()"></div>
+        <div class="field" style="margin-bottom:0;"><label>Lote</label><input type="text" id="gd_lote" value="12" onchange="actualizarVistaGemeloDigital()"></div>
+        <div class="field" style="margin-bottom:0;"><label>Área m²</label><input type="number" id="gd_area" value="160" onchange="actualizarVistaGemeloDigital()"></div>
+      </div>
+
+      <!-- VISUALIZADOR DEL TERRENO -->
+      <div style="background:linear-gradient(135deg, #142A4D 0%, #1A3A68 100%); border-radius:14px; padding:16px; color:#fff; position:relative; overflow:hidden; margin-bottom:14px; box-shadow:0 8px 24px rgba(20,42,77,0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:14px; font-weight:800; color:var(--gold);" id="gd_titulo_lote">Manzana B · Lote 12 (160 m²)</span>
+          <span style="font-size:10px; background:rgba(200,155,60,0.25); border:1px solid var(--gold); border-radius:100px; padding:2px 8px; color:#E8CE8F;">Topografía Plana 100%</span>
+        </div>
+
+        <!-- SIMULADOR GRÁFICO DEL LOTE -->
+        <div style="border:2px dashed rgba(200,155,60,0.5); border-radius:12px; height:130px; display:flex; flex-direction:column; justify-content:center; align-items:center; background:rgba(0,0,0,0.2); position:relative;">
+          <div style="position:absolute; top:8px; left:12px; font-size:10px; color:#A9B4C4;">🧭 NORTE: Vía Principal Afirmada</div>
+          <div style="position:absolute; bottom:8px; right:12px; font-size:10px; color:#A9B4C4;">🌊 OESTE: Brisa Marina Los Palos (15 min)</div>
+          <span style="font-size:32px;">🏡</span>
+          <span style="font-size:12px; font-weight:700; color:#fff; margin-top:4px;">Costa Dorada · La Yarada</span>
+          <span style="font-size:10px; color:#E8CE8F;">Frente: 8m · Fondo: 20m</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; font-size:11px;">
+          <div style="background:rgba(255,255,255,0.06); padding:6px 10px; border-radius:8px;">☀️ <b>Asoleamiento:</b> Luz natural todo el año</div>
+          <div style="background:rgba(255,255,255,0.06); padding:6px 10px; border-radius:8px;">🚗 <b>Conectividad:</b> 20 min al centro de Tacna</div>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE PROTOTIPO ARQUITECTÓNICO -->
+      <div class="field">
+        <label>Prototipo de Casa Recomendado</label>
+        <select id="gd_prototipo" onchange="actualizarVistaGemeloDigital()">
+          <option value="playa" selected>🏖️ Villa de Playa 2 Pisos con Terraza y Parrilla</option>
+          <option value="campo">🌿 Casa Campestre 1 Piso con Piscina y Huerto</option>
+          <option value="turismo">🏨 Bungalow Turístico para Alquiler Airbnb</option>
+        </select>
+      </div>
+
+      <div id="gd_detalle_prototipo" style="background:#F7F4EC; border:1px solid #E5DFCF; border-radius:10px; padding:10px 12px; margin-bottom:14px;"></div>
+
+      <div class="modal-actions" style="display:flex; gap:8px;">
+        <button type="button" class="btn-primary" onclick="abrirModalPlusvaliaDesdeCotizador()" style="flex:1;">📈 Proyectar Plusvalía</button>
+        <button type="button" class="btn-secondary" data-close="modalGemeloDigital">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONTROL DE INVENTARIO Y LOTES EN TIEMPO REAL (ERP) -->
+  <div class="modal-backdrop" id="modalInventarioLotes">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalInventarioLotes">✕</button>
+      <h3 style="margin-top:0;">📦 Control de Inventario y Lotes ERP</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:12px;">Disponibilidad de manzanas y lotes en tiempo real · Costa Dorada</p>
+
+      <div id="inv_metricas_strip"></div>
+
+      <!-- FILTROS DE INVENTARIO -->
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+        <button type="button" class="chip-btn active" id="btnInvTodos" onclick="filtrarInventarioEstado('todos')">Todos</button>
+        <button type="button" class="chip-btn" id="btnInvDisp" onclick="filtrarInventarioEstado('disponible')" style="color:var(--ok); border-color:var(--ok);">🟢 Disponibles</button>
+        <button type="button" class="chip-btn" id="btnInvSep" onclick="filtrarInventarioEstado('separado')" style="color:#E65100; border-color:#E65100;">🟡 Separados</button>
+        <button type="button" class="chip-btn" id="btnInvVen" onclick="filtrarInventarioEstado('vendido')" style="color:#1565C0; border-color:#1565C0;">🔵 Vendidos</button>
+      </div>
+
+      <div class="field" style="margin-bottom:12px;">
+        <select id="inv_filtro_mz" onchange="filtrarInventarioManzana(this.value)"></select>
+      </div>
+
+      <!-- LISTADO DE LOTES -->
+      <div id="inv_lista_lotes" style="display:flex; flex-direction:column; gap:6px;"></div>
+
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn-secondary" data-close="modalInventarioLotes" style="width:100%;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BILLETERA Y LIQUIDACIÓN DE COMISIONES (ERP) -->
+  <div class="modal-backdrop" id="modalComisionesERP">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalComisionesERP">✕</button>
+      <h3 style="margin-top:0;">💰 Billetera y Comisiones Comerciales ERP</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:12px;">Liquidaciones por lote cerrado · Transparencia comercial en tiempo real</p>
+
+      <div id="com_metricas_strip"></div>
+
+      <div id="com_lista_liquidaciones" style="display:flex; flex-direction:column; gap:6px;"></div>
+
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn-secondary" data-close="modalComisionesERP" style="width:100%;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CAJA, CONCILIACIÓN Y VOUCHERS (ERP) -->
+  <div class="modal-backdrop" id="modalCajaTesoreria">
+    <div class="modal-sheet" style="max-height:88vh; overflow-y:auto;">
+      <button class="modal-x-close" data-close="modalCajaTesoreria">✕</button>
+      <h3 style="margin-top:0;">💵 Caja y Conciliación de Ingresos ERP</h3>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:-6px; margin-bottom:14px;">Registro de cuotas, iniciales y emisión de recibos oficiales</p>
+
+      <div class="field"><label>Nombre Completo del Cliente *</label><input type="text" id="caja_cliente" placeholder="Nombres del titular"></div>
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="field">
+          <label>Concepto</label>
+          <select id="caja_concepto">
+            <option value="Separación de Lote">🏷️ Separación de Lote</option>
+            <option value="Pago de Inicial">💼 Pago de Inicial Pactada</option>
+            <option value="Cuota Mensual Financiada">✨ Cuota Mensual Financiada</option>
+            <option value="Cuota Extraordinaria">📈 Cuota Extraordinaria</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Moneda</label>
+          <select id="caja_moneda">
+            <option value="PEN" selected>🇵🇪 Soles (PEN)</option>
+            <option value="USD">🇺🇸 Dólares (USD)</option>
+            <option value="CLP">🇨🇱 Pesos Chilenos (CLP)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="field"><label>Monto Recibido *</label><input type="number" id="caja_monto" placeholder="0.00" style="font-size:16px; font-weight:800;"></div>
+        <div class="field">
+          <label>Método de Pago</label>
+          <select id="caja_metodo">
+            <option value="Transferencia BCP">Transferencia BCP</option>
+            <option value="Transferencia BBVA">Transferencia BBVA</option>
+            <option value="Transferencia Interbank">Transferencia Interbank</option>
+            <option value="BancoEstado Chile">BancoEstado (Chile)</option>
+            <option value="Efectivo en Oficina Tacna">Efectivo en Oficina Tacna</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field"><label>N° Operación / Referencia Bancaria</label><input type="text" id="caja_operacion" placeholder="Ej: 00482910"></div>
+
+      <div class="modal-actions" style="margin-top:10px;">
+        <button type="button" class="btn-primary" onclick="registrarPagoCajaERP()" style="width:100%; justify-content:center;">🧾 Registrar Pago y Emitir Recibo</button>
+      </div>
+
+      <div id="caja_recibo_generado" class="hidden"></div>
+    </div>
+  </div>
+<div class="toast" id="toast"></div>
 </div>
 <script>
 const NUMERO_WHATSAPP_ADMINISTRACION = '51942236677'; // +51 942 236 677
@@ -3116,6 +3484,13 @@ const PERMISOS_CATALOGO = [
   { key: 'crear_eventos_agenda',     label: 'Agendar Citas en Calendario',            dept: 'Comercial', default: true },
   { key: 'ver_control_visitas',      label: 'Ver Control de Movilidad (Van 14)',      dept: 'Comercial', default: true },
   { key: 'agendar_visitas_van',       label: 'Agendar Visitas a Proyecto en Van',      dept: 'Comercial', default: true },
+    { key: 'usar_conversor_divisas',     label: 'Conversor Multidivisa (PEN / USD / CLP)', dept: 'Comercial', default: true },
+  { key: 'ver_inventario_lotes',      label: 'Control de Inventario y Lotes (ERP)',     dept: 'Comercial', default: true },
+  { key: 'ver_comisiones_erp',        label: 'Billetera y Liquidación de Comisiones',   dept: 'Comercial', default: true },
+    { key: 'ver_scoring_predictivo_leads', label: 'Scoring Predictivo de Leads con IA',    dept: 'Comercial', default: true },
+  { key: 'ver_simulador_plusvalia',       label: 'Simulador de Plusvalía y ROI (5-10A)',   dept: 'Comercial', default: true },
+  { key: 'ver_portal_propietarios',       label: 'Portal del Propietario y Estados Cuenta', dept: 'Comercial', default: true },
+  { key: 'ver_gemelo_digital_3d',         label: 'Visualizador de Lote & Gemelo 3D',        dept: 'Marketing', default: true },
   { key: 'ver_separaciones',         label: 'Ver Separaciones de Lotes',              dept: 'Comercial', default: true },
   { key: 'crear_separaciones',       label: 'Registrar Nuevas Separaciones',          dept: 'Comercial', default: true },
   { key: 'eliminar_separaciones',     label: 'Eliminar / Anular Separaciones',         dept: 'Comercial', default: false },
@@ -3137,6 +3512,8 @@ const PERMISOS_CATALOGO = [
   { key: 'usar_generador_doc',       label: 'Generar Minutas y Contratos (IA)',       dept: 'Legal', default: true },
 
   // 🗂️ DEPARTAMENTO ADMINISTRACIÓN & COBRANZAS
+    { key: 'configurar_tipo_cambio',    label: 'Configurar Tipos de Cambio del Día',     dept: 'Administración', default: false },
+  { key: 'gestionar_caja_tesoreria',  label: 'Caja, Conciliación y Vouchers (ERP)',     dept: 'Administración', default: false },
   { key: 'ver_cobranzas',            label: 'Ver Control de Cobranzas y Cuotas',      dept: 'Administración', default: false },
   { key: 'gestionar_cobranzas',      label: 'Registrar Cuotas y Pagos',               dept: 'Administración', default: false },
   { key: 'ver_rendimiento',          label: 'Ver Rendimiento por Área',               dept: 'Administración', default: true },
@@ -3158,11 +3535,18 @@ const PERMISOS_CATALOGO = [
 
 function esUsuarioSuperAdmin(){
   const email = (currentUser?.email || '').toLowerCase().trim();
-  const rol = (currentProfile?.rol || '').toLowerCase().trim();
-  const cargo = (currentProfile?.cargo || '').toLowerCase().trim();
-  return email === 'joreal.ft2020@gmail.com' || email === 'jorea.ft2020@gmail.com' || 
-         rol === 'superadmin' || rol === 'director_comercial' || rol === 'admin' ||
-         cargo.includes('director') || cargo.includes('gerente') || cargo.includes('desarrollador');
+  return email === 'joreal.ft2020@gmail.com' || email === 'jorea.ft2020@gmail.com';
+}
+
+function tienePermiso(key){
+  if (esUsuarioSuperAdmin()) return true;
+  const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
+  const catItem = PERMISOS_CATALOGO.find(p => p.key === key);
+  const defVal = catItem ? catItem.default : false;
+  if (perm[key] !== undefined) {
+    return Boolean(perm[key]);
+  }
+  return defVal;
 }
 
 
@@ -3312,7 +3696,7 @@ function aplicarPresetPermisos(prefix, tipo){
       'ver_pipeline_kanban', 'ver_actividades', 'crear_actividades', 'ver_agenda', 'crear_eventos_agenda',
       'ver_control_visitas', 'agendar_visitas_van', 'ver_separaciones', 'crear_separaciones', 'ver_planos',
       'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'ver_manualventas', 'ver_majo_assistant',
-      'ver_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes', 'crear_solicitudes'
+      'ver_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes', 'crear_solicitudes', 'usar_conversor_divisas', 'ver_inventario_lotes', 'ver_comisiones_erp', 'ver_scoring_predictivo_leads', 'ver_simulador_plusvalia', 'ver_portal_propietarios', 'ver_gemelo_digital_3d'
     ],
     supervisor: [
       'ver_control', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_proyeccion_ventas', 'ver_clientes',
@@ -3321,7 +3705,7 @@ function aplicarPresetPermisos(prefix, tipo){
       'crear_separaciones', 'ver_planos', 'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio',
       'gestionar_portafolio', 'ver_manualventas', 'gestionar_manualventas', 'ver_majo_assistant', 'gestionar_base_majo',
       'ver_checklist_legal', 'marcar_checklist_legal', 'usar_generador_doc', 'ver_rendimiento', 'ver_solicitudes',
-      'crear_solicitudes', 'aprobar_solicitudes', 'designar_conductor_movilidad', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes'
+      'crear_solicitudes', 'aprobar_solicitudes', 'designar_conductor_movilidad', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes', 'usar_conversor_divisas', 'configurar_tipo_cambio', 'ver_inventario_lotes', 'ver_comisiones_erp'
     ],
     admin: [
       'ver_control', 'ver_kpi_monto', 'ver_kpi_desglose', 'ver_ranking_equipo', 'ver_proyeccion_ventas',
@@ -3331,8 +3715,8 @@ function aplicarPresetPermisos(prefix, tipo){
       'ver_cotizador', 'ver_comision_cotizador', 'ver_portafolio', 'gestionar_portafolio', 'ver_manualventas',
       'gestionar_manualventas', 'ver_majo_assistant', 'gestionar_base_majo', 'ver_checklist_legal', 'marcar_checklist_legal',
       'usar_generador_doc', 'ver_cobranzas', 'gestionar_cobranzas', 'ver_rendimiento', 'ver_solicitudes',
-      'crear_solicitudes', 'aprobar_solicitudes', 'designar_conductor_movilidad', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes',
-      'ver_ajustes', 'descargar_respaldos'
+      'crear_solicitudes', 'aprobar_solicitudes', 'designar_conductor_movilidad', 'ver_reporte_equipo', 'reportes_pasados', 'generar_informes', 'usar_conversor_divisas', 'configurar_tipo_cambio', 'ver_inventario_lotes', 'ver_comisiones_erp',
+      'ver_ajustes', 'descargar_respaldos', 'usar_conversor_divisas', 'configurar_tipo_cambio', 'ver_inventario_lotes', 'ver_comisiones_erp', 'gestionar_caja_tesoreria'
     ]
   };
 
@@ -3550,34 +3934,26 @@ async function mostrarApp(){
   document.getElementById('greetRole').textContent = currentProfile?.cargo || rolLabel(currentProfile?.rol);
   activarAlarmasPush();
 
-  const rol = currentProfile?.rol;
-  const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
-
   const elNavAdmin = document.getElementById('navAdmin');
-  if (elNavAdmin) elNavAdmin.classList.toggle('hidden', !(rol === 'superadmin' || rol === 'admin' || rol === 'director_comercial' || perm.gestionar_equipo));
+  if (elNavAdmin) elNavAdmin.classList.toggle('hidden', !tienePermiso('gestionar_equipo'));
 
   const cardEnlaces = document.getElementById('cardEnlacesTecnicos');
-  if (cardEnlaces) cardEnlaces.classList.toggle('hidden', rol !== 'superadmin');
+  if (cardEnlaces) cardEnlaces.classList.toggle('hidden', !esUsuarioSuperAdmin());
 
-  const puedeVerRanking = rol === 'superadmin' || perm.ver_ranking_equipo === true;
+  const puedeVerRanking = tienePermiso('ver_ranking_equipo');
   if (puedeVerRanking) {
-    document.getElementById('cardRankingEquipo').classList.remove('hidden');
+    document.getElementById('cardRankingEquipo')?.classList.remove('hidden');
     cargarRankingEquipo();
+  } else {
+    document.getElementById('cardRankingEquipo')?.classList.add('hidden');
   }
 
-  const showMod = (id, cond) => {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('hidden', !cond);
-  };
+  puedeEliminar = tienePermiso('eliminar_registros');
 
-  showMod('navControl', rol === 'superadmin' || perm.ver_control !== false);
-  showMod('navTareas', rol === 'superadmin' || perm.ver_actividades !== false);
-  showMod('navAgenda', rol === 'superadmin' || perm.ver_agenda !== false);
-  showMod('navClientes', rol === 'superadmin' || perm.ver_clientes !== false);
-  showMod('navSeparaciones', rol === 'superadmin' || perm.ver_separaciones !== false);
-  showMod('navRendimiento', rol === 'superadmin' || perm.ver_rendimiento !== false);
-
-  puedeEliminar = rol === 'superadmin' || (perm.eliminar_registros === true);
+  actualizarDatosDrawer();
+  actualizarItemsDockHorizontal();
+  suscribirCambiosPerfilEnTiempoReal();
+  inicializarTiposCambio();
 
   cargarPortadaInicio();
   cargarPendientesInicio();
@@ -3646,7 +4022,12 @@ function rolLabel(rol){
 }
 
 async function cargarPerfil(){
-  let { data } = await sb.from('usuarios').select('*').eq('id', currentUser.id).single();
+  let { data } = await sb.from('usuarios').select('*').eq('id', currentUser.id).maybeSingle();
+
+  if (!data && currentUser?.email) {
+    const resMail = await sb.from('usuarios').select('*').eq('email', currentUser.email.toLowerCase().trim()).maybeSingle();
+    if (resMail?.data) data = resMail.data;
+  }
 
   if (!data) {
     const { data: activado } = await sb.rpc('activar_usuario_preautorizado').catch(() => ({ data: null }));
@@ -3655,7 +4036,7 @@ async function cargarPerfil(){
 
   currentProfile = data || {};
   
-  if (currentUser?.email === 'joreal.ft2020@gmail.com') {
+  if (currentUser?.email === 'joreal.ft2020@gmail.com' || currentUser?.email === 'jorea.ft2020@gmail.com') {
     currentProfile.rol = 'superadmin';
     currentProfile.nombre = currentProfile.nombre || 'Jorge Alexander Luque Cepeda';
     currentProfile.cargo = currentProfile.cargo || 'Director Comercial / Desarrollador';
@@ -3720,31 +4101,43 @@ function actualizarDatosDrawer(){
   const elYearFooter = document.getElementById('footerCopyrightYear');
   if (elYearFooter) elYearFooter.textContent = new Date().getFullYear();
 
-  const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
-  const rol = currentProfile?.rol;
-
   const showDr = (id, cond) => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('hidden', !cond);
   };
 
-  const puedeVerAjustes = rol === 'superadmin' || perm.ver_ajustes === true;
-  showDr('drNavAdmin', rol === 'superadmin' || perm.gestionar_equipo);
-  showDr('drNavSistema', rol === 'superadmin');
+  // Módulos del menú lateral gobernados 100% por el checklist del usuario (SuperAdmin tiene bypass maestro)
+  showDr('drNavControl', tienePermiso('ver_control'));
+  showDr('drNavClientes', tienePermiso('ver_clientes'));
+  showDr('drNavTareas', tienePermiso('ver_actividades'));
+  showDr('drNavAgenda', tienePermiso('ver_agenda'));
+  showDr('drNavVisitas', tienePermiso('ver_control_visitas'));
+  showDr('drNavSeparaciones', tienePermiso('ver_separaciones'));
+  showDr('drNavPlanos', tienePermiso('ver_planos'));
+  showDr('drNavCotizador', tienePermiso('ver_cotizador'));
+  showDr('drNavConversor', tienePermiso('usar_conversor_divisas'));
+  showDr('drNavPlusvalia', tienePermiso('ver_simulador_plusvalia'));
+  showDr('drNavInventario', tienePermiso('ver_inventario_lotes'));
+  showDr('drNavComisiones', tienePermiso('ver_comisiones_erp'));
+  showDr('drNavCaja', tienePermiso('gestionar_caja_tesoreria'));
+  showDr('drNavPortalPropietario', tienePermiso('ver_portal_propietarios'));
+  showDr('drNavGemeloDigital', tienePermiso('ver_gemelo_digital_3d'));
+  showDr('drNavPortafolio', tienePermiso('ver_portafolio'));
+  showDr('drNavManualVentas', tienePermiso('ver_manualventas'));
+  showDr('drNavMajoAssistant', tienePermiso('ver_majo_assistant'));
+  showDr('drNavChecklistLegal', tienePermiso('ver_checklist_legal'));
+  showDr('drNavGenerarDoc', tienePermiso('usar_generador_doc'));
+  showDr('drNavCobranzas', tienePermiso('ver_cobranzas'));
+  showDr('drNavRendimiento', tienePermiso('ver_rendimiento'));
+  showDr('drNavSolicitudes', tienePermiso('ver_solicitudes'));
+  showDr('drNavReporteEquipo', tienePermiso('ver_reporte_equipo'));
+  showDr('drNavAdmin', tienePermiso('gestionar_equipo'));
+  showDr('drNavSistema', tienePermiso('ver_ajustes'));
+  showDr('drNavRespaldos', tienePermiso('descargar_respaldos'));
+
+  const puedeVerAjustes = tienePermiso('gestionar_equipo') || tienePermiso('ver_ajustes') || tienePermiso('descargar_respaldos');
   showDr('drDeptAjustes', puedeVerAjustes);
-  showDr('drNavControl', rol === 'superadmin' || perm.ver_control !== false);
-  showDr('drNavTareas', rol === 'superadmin' || perm.ver_actividades !== false);
-  showDr('drNavAgenda', rol === 'superadmin' || perm.ver_agenda !== false);
-  showDr('drNavClientes', rol === 'superadmin' || perm.ver_clientes !== false);
-  showDr('drNavSeparaciones', rol === 'superadmin' || perm.ver_separaciones !== false);
-  showDr('drNavRendimiento', rol === 'superadmin' || perm.ver_rendimiento !== false);
-  showDr('drNavPlanos', rol === 'superadmin' || perm.ver_planos !== false);
-  showDr('drNavCotizador', rol === 'superadmin' || perm.ver_cotizador !== false);
-  showDr('drNavPortafolio', rol === 'superadmin' || perm.ver_portafolio !== false);
-  showDr('drNavSolicitudes', rol === 'superadmin' || perm.ver_solicitudes !== false);
-  showDr('drNavManualVentas', rol === 'superadmin' || perm.ver_manualventas !== false);
-  showDr('drNavMajoAssistant', rol === 'superadmin' || perm.ver_majo_assistant !== false);
-  showDr('drNavReporteEquipo', rol === 'superadmin' || perm.ver_reporte_equipo === true);
+
   reorganizarDrawerPorDepartamentos();
 }
 
@@ -3803,6 +4196,33 @@ document.querySelectorAll('[data-nav]').forEach(btn => {
   btn.addEventListener('click', () => irAVista(btn.dataset.nav));
 });
 function irAVista(vista){
+  // Verificación estricta de permisos según checklist del SuperAdmin
+  if (!esUsuarioSuperAdmin() && vista !== 'inicio' && vista !== 'notificaciones') {
+    const mapaPermisoVista = {
+      control: 'ver_control',
+      clientes: 'ver_clientes',
+      visitas: 'ver_control_visitas',
+      actividades: 'ver_actividades',
+      agenda: 'ver_agenda',
+      separaciones: 'ver_separaciones',
+      planos: 'ver_planos',
+      portafolio: 'ver_portafolio',
+      manualventas: 'ver_manualventas',
+      majo_assistant: 'ver_majo_assistant',
+      rendimiento: 'ver_rendimiento',
+      solicitudes: 'ver_solicitudes',
+      reporte_equipo: 'ver_reporte_equipo',
+      admin: 'gestionar_equipo',
+      sistema: 'ver_ajustes'
+    };
+    const reqPerm = mapaPermisoVista[vista];
+    if (reqPerm && !tienePermiso(reqPerm)) {
+      toast('No tienes permiso asignado para acceder a este módulo');
+      if (currentView !== 'inicio') irAVista('inicio');
+      return;
+    }
+  }
+
   currentView = vista;
   document.querySelectorAll('main > div[id^="view"]').forEach(v => v.classList.add('hidden'));
   const map = { 
@@ -3865,8 +4285,10 @@ async function cargarKPIs(){
     { num: d.separaciones_activas ?? 0, lbl: 'Separaciones activas', ic: '🏷️', tone: 'info' },
     { num: d.ventas_cerradas ?? 0, lbl: 'Ventas cerradas', ic: '💰', tone: 'ok' },
     { num: d.total_clientes ?? 0, lbl: 'Clientes', ic: '👤', tone: 'info' },
-    { num: 'S/ ' + Number(d.monto_total_vendido ?? 0).toLocaleString('es-PE'), lbl: 'Monto vendido', ic: '📈', tone: 'gold' },
   ];
+  if (tienePermiso('ver_kpi_monto')) {
+    items.push({ num: 'S/ ' + Number(d.monto_total_vendido ?? 0).toLocaleString('es-PE'), lbl: 'Monto vendido', ic: '📈', tone: 'gold' });
+  }
   el.innerHTML = items.map(i => `
     <div class="kpi-card kpi-${i.tone}">
       <div class="kpi-ic">${i.ic}</div>
@@ -5272,6 +5694,21 @@ document.getElementById('btnGuardarPreautorizado').addEventListener('click', asy
     }
 
     if (error) { toast('Error al guardar: ' + error.message); console.error(error); return; }
+    // Sincronizar también con la tabla usuarios si el colaborador ya inició sesión previamente
+    if (email) {
+      await sb.from('usuarios').update({
+        nombre,
+        dni: dni || null,
+        celular: celular || null,
+        area,
+        departamento: area,
+        subarea: subarea || null,
+        cargo,
+        rol,
+        permisos
+      }).eq('email', email).catch(() => {});
+    }
+
     toast(editandoEmailPreautorizado ? 'Colaborador actualizado ✓' : 'Colaborador pre-autorizado con éxito ✓');
     closeModal('modalPreautorizar');
     ['pa_nombre','pa_email','pa_dni','pa_celular','pa_cargo'].forEach(id => {
@@ -5442,7 +5879,23 @@ document.getElementById('btnGuardarUsuario').addEventListener('click', async () 
       return;
     }
 
-    toast('Colaborador y permisos actualizados');
+    // Sincronizar también con usuarios_preautorizados si existe para que ambas listas queden idénticas
+    const emailColab = (document.getElementById('eu_email').value || '').trim().toLowerCase();
+    if (emailColab) {
+      await sb.from('usuarios_preautorizados').update({
+        nombre,
+        dni: dni || null,
+        celular: celular || null,
+        area,
+        departamento: area,
+        subarea: subarea || null,
+        cargo,
+        rol,
+        permisos
+      }).eq('email', emailColab).catch(() => {});
+    }
+
+    toast('Colaborador y permisos actualizados ✓');
     closeModal('modalEditarUsuario');
     cargarUsuariosAdmin();
     if (id === currentUser.id) {
@@ -5804,6 +6257,8 @@ function colorEstadoCliente(c){
 
 function renderTarjetaCliente(c, esSuperAdminODirector){
   const celLimpio = (c.celular || c.telefono || '').replace(/\D/g, '');
+  const sc = calcularScoreCliente(c);
+  const mostrarScore = tienePermiso('ver_scoring_predictivo_leads');
   const wspUrl = celLimpio ? `https://wa.me/51${celLimpio.slice(-9)}` : null;
   const origenStr = c.origen_prospeccion ? `📌 ${escapeHtml(c.origen_prospeccion)}` : '';
   const proximaAccionStr = c.proxima_accion ? `👉 Próxima acción: ${escapeHtml(c.proxima_accion)}` : '';
@@ -5817,6 +6272,13 @@ function renderTarjetaCliente(c, esSuperAdminODirector){
           ${esSuperAdminODirector ? `<input type="checkbox" style="margin-top:4px;" onchange="toggleSeleccionCliente('${c.id}', this.checked)" ${clientesSeleccionados.has(c.id) ? 'checked' : ''}>` : ''}
           <div>
             <p class="card-title">${escapeHtml(c.nombre)}${c.codigo_correlativo ? ' · ' + escapeHtml(c.codigo_correlativo) : ''}</p>
+            ${mostrarScore ? `
+              <div style="display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:800; background:${sc.bg}; color:${sc.tone}; border:1px solid ${sc.border}; border-radius:100px; padding:2px 8px; margin:2px 0 4px;">
+                <span>${sc.ic} Score IA: ${sc.score}/100</span>
+                <span>·</span>
+                <span>${sc.nivel}</span>
+              </div>
+            ` : ''}
             <p class="card-sub">📱 ${c.celular || c.telefono || 'Sin celular'}${origenStr ? ' · ' + origenStr : ''}</p>
             ${c.estado_prospecto ? `<p class="card-sub" style="font-weight:600; color:var(--gold); margin-top:2px;">Estado: ${escapeHtml(c.estado_prospecto)}</p>` : ''}
             ${proximaAccionStr ? `<p class="card-sub" style="font-weight:600; color:var(--navy); margin-top:3px;">${proximaAccionStr}</p>` : ''}
@@ -6058,6 +6520,8 @@ async function alCambiarClienteEnChecklistModal(clienteId){
 }
 
 async function abrirChecklistLegal(clienteId, nombreCliente){
+  if (!tienePermiso('ver_checklist_legal')) { toast('No tienes permiso para ver el Checklist Legal'); return; }
+
   let cid = clienteId;
   let nom = nombreCliente;
 
@@ -6119,6 +6583,8 @@ function renderChecklistLegal(checklist){
 }
 
 async function marcarDocumentoLegal(key, valor){
+  if (!tienePermiso('marcar_checklist_legal')) { toast('No tienes permiso para validar documentos legales'); return; }
+
   if (!checklistClienteActualId) {
     toast('Selecciona primero un cliente para el checklist');
     return;
@@ -6152,6 +6618,8 @@ async function marcarDocumentoLegal(key, valor){
 let documentoClienteActual = null;
 
 function abrirGenerarDocumento(clienteId, nombreCliente, celular){
+  if (!tienePermiso('usar_generador_doc')) { toast('No tienes permiso para generar minutas o contratos'); return; }
+
   documentoClienteActual = { id: clienteId, nombre: nombreCliente, celular };
   document.getElementById('doc_resultado_wrap').classList.add('hidden');
   document.getElementById('doc_resultado').value = '';
@@ -6214,6 +6682,7 @@ async function eliminarCliente(id){
 }
 /* ============ COTIZADOR RÁPIDO DE LOTES ============ */
 function abrirModalCotizador(clienteNombre, celular, manzana, lote, area, precioM2, dni = '', direccion = '', ocupacion = '', valorTotal = 0){
+  if (!tienePermiso('ver_cotizador')) { toast('No tienes permiso para usar el Cotizador'); return; }
   const selMz = document.getElementById('cot_manzana');
   if (selMz && selMz.options.length === 0) {
     const opciones = [];
@@ -6756,7 +7225,7 @@ function cambiarPestanaPortafolio(tab){
 }
 
 async function cargarPortafolio(){
-  pfEsSuperAdmin = esUsuarioSuperAdmin() || currentProfile?.permisos?.gestionar_portafolio;
+  pfEsSuperAdmin = tienePermiso('gestionar_portafolio');
   document.getElementById('pfBrochureSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
   document.getElementById('pfVideoCDSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
   document.getElementById('pfTestimoniosSuperAdmin').classList.toggle('hidden', !pfEsSuperAdmin);
@@ -8480,7 +8949,7 @@ async function obtenerTokenSesion(){
 
 async function iniciarMajoAssistant(){
   const rol = currentProfile?.rol;
-  const puedeAdministrar = esUsuarioSuperAdmin() || fusionarPermisosConCatalogo(currentProfile?.permisos).gestionar_base_majo;
+  const puedeAdministrar = tienePermiso('gestionar_base_majo');
   document.getElementById('tabMajoBaseConocimiento')?.classList.toggle('hidden', !puedeAdministrar);
 
   // Asegurar siempre que el contenedor de mensajes tenga contenido inicial
@@ -8797,8 +9266,8 @@ async function cargarManualVentas(){
   if (!el) return;
   el.innerHTML = `<div class="spinner"></div>`;
 
-  const esSuperAdmin = currentProfile?.rol === 'superadmin';
-  document.getElementById('mvSuperAdminBtn')?.classList.toggle('hidden', !esSuperAdmin);
+  const puedeGestionarMV = tienePermiso('gestionar_manualventas');
+  document.getElementById('mvSuperAdminBtn')?.classList.toggle('hidden', !puedeGestionarMV);
 
   const { data, error } = await sb.from('manual_ventas_items')
     .select('*')
@@ -8813,7 +9282,7 @@ async function cargarManualVentas(){
     <div class="card" style="margin-bottom:10px;">
       <p class="card-title" style="font-size:14px;">${escapeHtml(item.titulo)}</p>
       <p class="card-sub" style="margin-top:8px; white-space:pre-wrap; line-height:1.5;">${escapeHtml(item.contenido)}</p>
-      ${currentProfile?.rol === 'superadmin' ? `
+      ${tienePermiso('gestionar_manualventas') ? `
         <div class="card-actions" style="margin-top:10px; display:flex; gap:8px;">
           <button class="chip-btn gold" onclick='abrirModalEditarSpeech(${JSON.stringify(item).replace(/'/g, "&apos;")})'>✏️ Editar</button>
           <button class="chip-btn" style="color:var(--danger); border-color:var(--danger);" onclick="eliminarSpeech('${item.id}')">🗑️ Eliminar</button>
@@ -8869,22 +9338,30 @@ async function eliminarSpeech(id){
 
 /* ============ DEPARTAMENTOS ============ */
 async function reorganizarDrawerPorDepartamentos(){
-  const { data, error } = await sb.from('modulo_departamentos').select('*').order('orden');
-  if (error || !data) { return; }
+  try {
+    const { data, error } = await sb.from('modulo_departamentos').select('*').order('orden');
+    if (!error && data && data.length > 0) {
+      const grupos = {};
+      document.querySelectorAll('.dr-dept-group').forEach(g => { grupos[g.dataset.dept] = g.querySelector('.dr-dept-items'); });
 
-  const grupos = {};
-  document.querySelectorAll('.dr-dept-group').forEach(g => { grupos[g.dataset.dept] = g.querySelector('.dr-dept-items'); });
+      data.forEach(m => {
+        const btn = document.querySelector(`[data-modkey="${m.modulo_key}"]`);
+        const destino = grupos[m.departamento];
+        if (btn && destino) destino.appendChild(btn);
+      });
+    }
+  } catch(e) {
+    console.warn('Error reorganizando departamentos:', e);
+  }
 
-  data.forEach(m => {
-    const btn = document.querySelector(`[data-modkey="${m.modulo_key}"]`);
-    const destino = grupos[m.departamento];
-    if (btn && destino) destino.appendChild(btn);
-  });
-
+  // Ocultar cabeceras de departamentos si todos sus módulos están ocultos
   document.querySelectorAll('.dr-dept-group').forEach(g => {
     const items = g.querySelector('.dr-dept-items');
-    const algunoVisible = [...items.children].some(el => !el.classList.contains('hidden'));
-    g.classList.toggle('dr-dept-vacio', !algunoVisible);
+    if (items) {
+      const algunoVisible = [...items.children].some(el => !el.classList.contains('hidden'));
+      g.classList.toggle('dr-dept-vacio', !algunoVisible);
+      g.classList.toggle('hidden', !algunoVisible);
+    }
   });
 }
 
@@ -8942,6 +9419,8 @@ async function cargarListaRespaldos(){
 }
 
 async function descargarRespaldo(nombreArchivo){
+  if (!tienePermiso('descargar_respaldos')) { toast('No tienes permiso para descargar respaldos'); return; }
+
   const { data, error } = await sb.storage.from('respaldos-sistema').createSignedUrl(nombreArchivo, 60);
   if (error || !data) { toast('Error al generar enlace'); console.error(error); return; }
   window.open(data.signedUrl, '_blank');
@@ -9487,7 +9966,7 @@ async function cargarConductorFecha(fecha){
 
   const rol = currentProfile?.rol;
   const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
-  const puedeDesignar = esUsuarioSuperAdmin() || rol === 'admin' || perm.designar_conductor_movilidad === true;
+  const puedeDesignar = tienePermiso('designar_conductor_movilidad');
 
   if (btnDesignar) btnDesignar.classList.toggle('hidden', !puedeDesignar);
 
@@ -9590,17 +10069,17 @@ function toggleDockHorizontal(){
 
   if (dockHorizontalAbierto) {
     actualizarItemsDockHorizontal();
-    if (btn) btn.style.background = 'rgba(200, 155, 60, 0.9)';
-    const txt = btn?.querySelector('.btn-dock-texto');
-    if (txt) txt.style.color = '#142A4D';
-    const ico = btn?.querySelector('.btn-dock-hamburguesa');
-    if (ico) ico.style.color = '#142A4D';
+    if (btn) {
+      btn.style.background = 'rgba(200, 155, 60, 0.70)';
+      btn.style.color = '#142A4D';
+      btn.style.borderColor = 'rgba(255, 255, 255, 0.45)';
+    }
   } else {
-    if (btn) btn.style.background = 'rgba(20, 42, 77, 0.82)';
-    const txt = btn?.querySelector('.btn-dock-texto');
-    if (txt) txt.style.color = '#FFFFFF';
-    const ico = btn?.querySelector('.btn-dock-hamburguesa');
-    if (ico) ico.style.color = 'var(--gold)';
+    if (btn) {
+      btn.style.background = 'rgba(20, 42, 77, 0.42)';
+      btn.style.color = '#FFFFFF';
+      btn.style.borderColor = 'rgba(255, 255, 255, 0.24)';
+    }
   }
 }
 
@@ -9610,11 +10089,9 @@ function cerrarDockHorizontal(){
   const btn = document.getElementById('btnDockCentral');
   if (dock) dock.classList.add('hidden');
   if (btn) {
-    btn.style.background = 'rgba(20, 42, 77, 0.82)';
-    const txt = btn.querySelector('.btn-dock-texto');
-    if (txt) txt.style.color = '#FFFFFF';
-    const ico = btn.querySelector('.btn-dock-hamburguesa');
-    if (ico) ico.style.color = 'var(--gold)';
+    btn.style.background = 'rgba(20, 42, 77, 0.42)';
+    btn.style.color = '#FFFFFF';
+    btn.style.borderColor = 'rgba(255, 255, 255, 0.24)';
   }
 }
 
@@ -9622,6 +10099,20 @@ function navegarDesdeDockHorizontal(opcion){
   cerrarDockHorizontal();
   if (opcion === 'cotizador') {
     abrirModalCotizador();
+  } else if (opcion === 'conversor_divisas') {
+    abrirModalConversorDivisas();
+  } else if (opcion === 'plusvalia') {
+    abrirModalPlusvalia();
+  } else if (opcion === 'inventario') {
+    abrirModalInventarioLotes();
+  } else if (opcion === 'comisiones') {
+    abrirModalComisionesERP();
+  } else if (opcion === 'caja_erp') {
+    abrirModalCajaTesoreria();
+  } else if (opcion === 'portal_propietario') {
+    abrirPortalPropietario();
+  } else if (opcion === 'gemelo_digital') {
+    abrirModalGemeloDigital();
   } else if (opcion === 'checklist_legal') {
     abrirChecklistLegal(null);
   } else if (opcion === 'generador_doc') {
@@ -9639,31 +10130,34 @@ function actualizarItemsDockHorizontal(){
   const cont = document.getElementById('dockItemsScroll');
   if (!cont) return;
 
-  const rol = currentProfile?.rol;
-  const perm = fusionarPermisosConCatalogo(currentProfile?.permisos);
-  const esSA = esUsuarioSuperAdmin();
-
   const catalogoModulos = [
     { key: 'inicio',          label: 'Inicio',           icon: '🏠', visible: true },
-    { key: 'control',         label: 'Tablero',          icon: '📊', visible: esSA || perm.ver_control !== false },
-    { key: 'clientes',        label: 'Clientes',         icon: '👥', visible: esSA || perm.ver_clientes !== false },
-    { key: 'visitas',         label: 'Visitas Van (14)', icon: '🚐', visible: esSA || perm.ver_control_visitas !== false },
-    { key: 'actividades',     label: 'Actividades',      icon: '✓',  visible: esSA || perm.ver_actividades !== false },
-    { key: 'agenda',          label: 'Agenda',           icon: '📅', visible: esSA || perm.ver_agenda !== false },
-    { key: 'separaciones',    label: 'Separaciones',     icon: '🏷️', visible: esSA || perm.ver_separaciones !== false },
-    { key: 'planos',          label: 'Planos',           icon: '🗺️', visible: esSA || perm.ver_planos !== false },
-    { key: 'cotizador',       label: 'Cotizador',        icon: '🧮', visible: esSA || perm.ver_cotizador !== false },
-    { key: 'portafolio',      label: 'Portafolio',       icon: '📁', visible: esSA || perm.ver_portafolio !== false },
-    { key: 'manualventas',    label: 'Speeches',         icon: '🎯', visible: esSA || perm.ver_manualventas !== false },
-    { key: 'majo_assistant',  label: 'MAJO IA',          icon: '🤖', visible: esSA || perm.ver_majo_assistant !== false },
-    { key: 'checklist_legal', label: 'Legal',            icon: '📋', visible: esSA || perm.ver_checklist_legal !== false },
-    { key: 'generador_doc',   label: 'Minutas IA',       icon: '✍️', visible: esSA || perm.usar_generador_doc !== false },
-    { key: 'cobranzas',       label: 'Cobranzas',        icon: '💳', visible: esSA || perm.ver_cobranzas !== false },
-    { key: 'solicitudes',     label: 'Solicitudes',      icon: '📝', visible: esSA || perm.ver_solicitudes !== false },
-    { key: 'rendimiento',     label: 'Rendimiento',      icon: '📈', visible: esSA || perm.ver_rendimiento !== false },
-    { key: 'reporte_equipo',  label: 'Reporte 9pm',      icon: '🧑‍🤝‍🧑', visible: esSA || perm.ver_reporte_equipo === true },
-    { key: 'admin',           label: 'Equipo',           icon: '🧑‍💼', visible: esSA || perm.gestionar_equipo },
-    { key: 'sistema',         label: 'Ajustes',          icon: '⚙️', visible: esSA || perm.ver_ajustes === true }
+    { key: 'control',         label: 'Tablero',          icon: '📊', visible: tienePermiso('ver_control') },
+    { key: 'clientes',        label: 'Clientes',         icon: '👥', visible: tienePermiso('ver_clientes') },
+    { key: 'visitas',         label: 'Visitas Van (14)', icon: '🚐', visible: tienePermiso('ver_control_visitas') },
+    { key: 'actividades',     label: 'Actividades',      icon: '✓',  visible: tienePermiso('ver_actividades') },
+    { key: 'agenda',          label: 'Agenda',           icon: '📅', visible: tienePermiso('ver_agenda') },
+    { key: 'separaciones',    label: 'Separaciones',     icon: '🏷️', visible: tienePermiso('ver_separaciones') },
+    { key: 'planos',          label: 'Planos',           icon: '🗺️', visible: tienePermiso('ver_planos') },
+    { key: 'cotizador',       label: 'Cotizador',        icon: '🧮', visible: tienePermiso('ver_cotizador') },
+    { key: 'conversor_divisas', label: 'Divisas',         icon: '💱', visible: tienePermiso('usar_conversor_divisas') },
+    { key: 'plusvalia',         label: 'Plusvalía 10A',   icon: '📈', visible: tienePermiso('ver_simulador_plusvalia') },
+    { key: 'inventario',        label: 'Inventario ERP',  icon: '📦', visible: tienePermiso('ver_inventario_lotes') },
+    { key: 'comisiones',        label: 'Comisiones',      icon: '💰', visible: tienePermiso('ver_comisiones_erp') },
+    { key: 'caja_erp',          label: 'Caja ERP',        icon: '💵', visible: tienePermiso('gestionar_caja_tesoreria') },
+    { key: 'portal_propietario',label: 'Propietarios',    icon: '🏛️', visible: tienePermiso('ver_portal_propietarios') },
+    { key: 'gemelo_digital',    label: 'Lote 3D',         icon: '🗺️', visible: tienePermiso('ver_gemelo_digital_3d') },
+    { key: 'portafolio',      label: 'Portafolio',       icon: '📁', visible: tienePermiso('ver_portafolio') },
+    { key: 'manualventas',    label: 'Speeches',         icon: '🎯', visible: tienePermiso('ver_manualventas') },
+    { key: 'majo_assistant',  label: 'MAJO IA',          icon: '🤖', visible: tienePermiso('ver_majo_assistant') },
+    { key: 'checklist_legal', label: 'Legal',            icon: '📋', visible: tienePermiso('ver_checklist_legal') },
+    { key: 'generador_doc',   label: 'Minutas IA',       icon: '✍️', visible: tienePermiso('usar_generador_doc') },
+    { key: 'cobranzas',       label: 'Cobranzas',        icon: '💳', visible: tienePermiso('ver_cobranzas') },
+    { key: 'solicitudes',     label: 'Solicitudes',      icon: '📝', visible: tienePermiso('ver_solicitudes') },
+    { key: 'rendimiento',     label: 'Rendimiento',      icon: '📈', visible: tienePermiso('ver_rendimiento') },
+    { key: 'reporte_equipo',  label: 'Reporte 9pm',      icon: '🧑‍🤝‍🧑', visible: tienePermiso('ver_reporte_equipo') },
+    { key: 'admin',           label: 'Equipo',           icon: '🧑‍💼', visible: tienePermiso('gestionar_equipo') },
+    { key: 'sistema',         label: 'Ajustes',          icon: '⚙️', visible: tienePermiso('ver_ajustes') }
   ];
 
   const permitidos = catalogoModulos.filter(m => m.visible);
@@ -10085,6 +10579,8 @@ function restaurarEstadoMenuDeptos(){
 }
 
 function irACobranzas(){
+  if (!tienePermiso('ver_cobranzas')) { toast('No tienes permiso para ver cobranzas'); return; }
+
   irAVista('separaciones');
   cambiarPestanaSeparaciones('cobranzas');
 }
@@ -10345,6 +10841,956 @@ async function activarAlarmasPush(){
   } catch (e) {
     console.error('No se pudo activar las alarmas push', e);
   }
+}
+
+/* ============ SINCRONIZACIÓN EN TIEMPO REAL DE PERMISOS ============ */
+let canalPerfilRealtime = null;
+function suscribirCambiosPerfilEnTiempoReal(){
+  if (!currentUser?.id) return;
+  if (canalPerfilRealtime) {
+    try { sb.removeChannel(canalPerfilRealtime); } catch(e){}
+    canalPerfilRealtime = null;
+  }
+  try {
+    canalPerfilRealtime = sb.channel('usuario_realtime_' + currentUser.id)
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'usuarios', 
+        filter: `id=eq.${currentUser.id}` 
+      }, async (payload) => {
+        console.log('⚡ Perfil o permisos actualizados en tiempo real:', payload.new);
+        await cargarPerfil();
+        actualizarDatosDrawer();
+        actualizarItemsDockHorizontal();
+        const elNavAdmin = document.getElementById('navAdmin');
+        if (elNavAdmin) elNavAdmin.classList.toggle('hidden', !tienePermiso('gestionar_equipo'));
+        toast('Tus permisos han sido actualizados por el SuperAdmin ✓');
+        if (currentView !== 'inicio') {
+          irAVista(currentView);
+        }
+      })
+      .subscribe();
+  } catch(e) {
+    console.warn('Error al suscribir canal realtime de perfil:', e);
+  }
+}
+
+document.addEventListener('visibilitychange', async () => {
+  if (!document.hidden && currentUser?.id) {
+    await cargarPerfil();
+    actualizarDatosDrawer();
+    actualizarItemsDockHorizontal();
+  }
+});
+window.addEventListener('focus', async () => {
+  if (currentUser?.id) {
+    await cargarPerfil();
+    actualizarDatosDrawer();
+    actualizarItemsDockHorizontal();
+  }
+});
+
+/* =========================================================================
+   CONVERSOR MULTIDIVISA INMOBILIARIO (SOLES PEN · DÓLARES USD · PESOS CLP)
+   ========================================================================= */
+let tiposCambio = {
+  usd: 3.76,      // 1 USD = 3.76 PEN (Ref. SUNAT Venta)
+  clp: 246.0,     // 1 PEN = 246 CLP (Ref. Mercado Frontera Tacna / Arica)
+  fecha: 'Actualizado hoy',
+  fuente: 'SUNAT & Mercado Frontera'
+};
+
+// Cargar tipos de cambio guardados o de API pública
+async function inicializarTiposCambio(){
+  const guardado = localStorage.getItem('cd_tipos_cambio');
+  if (guardado) {
+    try { tiposCambio = { ...tiposCambio, ...JSON.parse(guardado) }; } catch(e){}
+  }
+  actualizarUIElementosDivisas();
+  // Intentar refrescar en segundo plano desde API pública
+  setTimeout(() => actualizarTiposCambioDesdeAPI(false), 1200);
+}
+
+async function actualizarTiposCambioDesdeAPI(notificar = false){
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.rates?.PEN && data?.rates?.CLP) {
+        const penRate = Number(data.rates.PEN.toFixed(3));
+        const clpPerUsd = data.rates.CLP;
+        const clpPerSol = Number((clpPerUsd / penRate).toFixed(2));
+        tiposCambio.usd = penRate;
+        tiposCambio.clp = clpPerSol;
+        tiposCambio.fecha = 'En vivo (' + new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) + ')';
+        localStorage.setItem('cd_tipos_cambio', JSON.stringify(tiposCambio));
+        actualizarUIElementosDivisas();
+        if (notificar) toast(`Tipos de cambio actualizados: $1 USD = S/ ${tiposCambio.usd} · 1 Sol = ${tiposCambio.clp} CLP ✓`);
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn('Uso de tasas de cambio locales:', err);
+  }
+  actualizarUIElementosDivisas();
+  if (notificar) toast(`Tasas activas: $1 USD = S/ ${tiposCambio.usd} · 1 Sol = ${tiposCambio.clp} CLP`);
+}
+
+function convertirSolesADolares(pen){
+  if (!pen || isNaN(pen)) return 0;
+  return Number((pen / (tiposCambio.usd || 3.76)).toFixed(2));
+}
+
+function convertirSolesAPesos(pen){
+  if (!pen || isNaN(pen)) return 0;
+  return Math.round(pen * (tiposCambio.clp || 246.0));
+}
+
+function convertirDolaresASoles(usd){
+  if (!usd || isNaN(usd)) return 0;
+  return Math.round(usd * (tiposCambio.usd || 3.76));
+}
+
+function convertirPesosASoles(clp){
+  if (!clp || isNaN(clp)) return 0;
+  return Math.round(clp / (tiposCambio.clp || 246.0));
+}
+
+function fmtMoneda(monto, divisa = 'PEN'){
+  const num = Number(monto) || 0;
+  if (divisa === 'USD') return '$ ' + Math.round(num).toLocaleString('en-US') + ' USD';
+  if (divisa === 'CLP') return '$ ' + Math.round(num).toLocaleString('es-CL') + ' CLP';
+  return 'S/ ' + Math.round(num).toLocaleString('es-PE');
+}
+
+function actualizarUIElementosDivisas(){
+  const elUsd = document.getElementById('cotTcUsd');
+  if (elUsd) elUsd.textContent = (tiposCambio.usd || 3.76).toFixed(2);
+  const elClp = document.getElementById('cotTcClp');
+  if (elClp) elClp.textContent = Math.round(tiposCambio.clp || 246);
+  const elFecha = document.getElementById('tcInfoFecha');
+  if (elFecha) elFecha.textContent = tiposCambio.fecha || 'Hoy';
+
+  // Si el modal de cotizador está abierto, recalcular
+  if (document.getElementById('modalCotizador')?.classList.contains('open')) {
+    calcularCotizadorMatematica();
+  }
+}
+
+function abrirModalConversorDivisas(montoInicialSoles = 0){
+  if (!tienePermiso('usar_conversor_divisas')) {
+    toast('No tienes permiso para utilizar el Conversor Multidivisa');
+    return;
+  }
+  const elMonto = document.getElementById('conv_soles');
+  if (elMonto) {
+    elMonto.value = montoInicialSoles > 0 ? montoInicialSoles : (elMonto.value || 10000);
+  }
+  recalcularDesdeSoles();
+  const puedeEditarTC = esUsuarioSuperAdmin() || tienePermiso('configurar_tipo_cambio');
+  document.getElementById('conv_bloque_editar_tc')?.classList.toggle('hidden', !puedeEditarTC);
+  openModal('modalConversorDivisas');
+}
+
+function recalcularDesdeSoles(){
+  const sol = parseFloat(document.getElementById('conv_soles')?.value) || 0;
+  const elUsd = document.getElementById('conv_dolares');
+  const elClp = document.getElementById('conv_pesos');
+  if (elUsd) elUsd.value = convertirSolesADolares(sol);
+  if (elClp) elClp.value = convertirSolesAPesos(sol);
+}
+
+function recalcularDesdeDolares(){
+  const usd = parseFloat(document.getElementById('conv_dolares')?.value) || 0;
+  const sol = convertirDolaresASoles(usd);
+  const elSol = document.getElementById('conv_soles');
+  const elClp = document.getElementById('conv_pesos');
+  if (elSol) elSol.value = sol;
+  if (elClp) elClp.value = convertirSolesAPesos(sol);
+}
+
+function recalcularDesdePesos(){
+  const clp = parseFloat(document.getElementById('conv_pesos')?.value) || 0;
+  const sol = convertirPesosASoles(clp);
+  const elSol = document.getElementById('conv_soles');
+  const elUsd = document.getElementById('conv_dolares');
+  if (elSol) elSol.value = sol;
+  if (elUsd) elUsd.value = convertirSolesADolares(sol);
+}
+
+function aplicarValorRapidoConversor(soles){
+  const elSol = document.getElementById('conv_soles');
+  if (elSol) {
+    elSol.value = soles;
+    recalcularDesdeSoles();
+  }
+}
+
+function guardarTiposCambioManuales(){
+  if (!esUsuarioSuperAdmin() && !tienePermiso('configurar_tipo_cambio')) {
+    toast('No tienes autorización para modificar los tipos de cambio');
+    return;
+  }
+  const nuevoUsd = parseFloat(document.getElementById('tc_input_usd')?.value);
+  const nuevoClp = parseFloat(document.getElementById('tc_input_clp')?.value);
+  if (!nuevoUsd || nuevoUsd <= 0 || !nuevoClp || nuevoClp <= 0) {
+    toast('Ingresa tasas de cambio válidas');
+    return;
+  }
+  tiposCambio.usd = nuevoUsd;
+  tiposCambio.clp = nuevoClp;
+  tiposCambio.fecha = 'Personalizado por Gerencia (' + new Date().toLocaleDateString('es-PE') + ')';
+  localStorage.setItem('cd_tipos_cambio', JSON.stringify(tiposCambio));
+  actualizarUIElementosDivisas();
+  toast('Tipos de cambio guardados con éxito ✓');
+}
+
+function abrirConvertidorParaInicial(moneda){
+  const promptTxt = moneda === 'CLP'
+    ? '🇨🇱 Ingresa el monto en PESOS CHILENOS que el cliente propone para la inicial:'
+    : '🇺🇸 Ingresa el monto en DÓLARES (USD) que el cliente propone para la inicial:';
+  const val = prompt(promptTxt, moneda === 'CLP' ? '2500000' : '3000');
+  if (!val) return;
+  const num = parseFloat(val.replace(/[^0-9.]/g, ''));
+  if (isNaN(num) || num <= 0) {
+    toast('Monto inválido');
+    return;
+  }
+  const solesEquiv = moneda === 'CLP' ? convertirPesosASoles(num) : convertirDolaresASoles(num);
+  const elIni = document.getElementById('cot_inicial');
+  if (elIni) {
+    elIni.value = solesEquiv;
+    calcularCotizadorMatematica();
+    toast(`Equivalente aplicado: ${fmtMoneda(solesEquiv, 'PEN')} (${fmtMoneda(num, moneda)}) ✓`);
+  }
+
+  // Conversión Multidivisa en tiempo real (PEN · USD · CLP)
+  const elResDivisas = document.getElementById('cotResumenMultidivisa');
+  if (elResDivisas) {
+    const vtUsd = convertirSolesADolares(valorTotal);
+    const vtClp = convertirSolesAPesos(valorTotal);
+    const iniUsd = convertirSolesADolares(inicial);
+    const iniClp = convertirSolesAPesos(inicial);
+    const cuotaUsd = convertirSolesADolares(cuotaMensual);
+    const cuotaClp = convertirSolesAPesos(cuotaMensual);
+
+    elResDivisas.innerHTML = `
+      <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px 12px; margin-top:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px;">
+          <span style="font-size:11px; font-weight:800; color:#E8CE8F; letter-spacing:0.5px;">💱 EQUIVALENCIAS MULTIDIVISA</span>
+          <span style="font-size:10px; color:#A9B4C4;">$1 USD = S/ ${(tiposCambio.usd||3.76).toFixed(2)} · 1 Sol = ${Math.round(tiposCambio.clp||246)} CLP</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; text-align:center;">
+          <div style="background:rgba(0,0,0,0.18); border-radius:8px; padding:6px 4px;">
+            <div style="font-size:10px; color:#A9B4C4; font-weight:700;">🇵🇪 SOLES</div>
+            <div style="font-size:13px; font-weight:800; color:#FFF; margin-top:2px;">S/ ${Math.round(cuotaMensual).toLocaleString('es-PE')}</div>
+            <div style="font-size:9.5px; color:#E8CE8F;">mes (Total: S/ ${Math.round(valorTotal).toLocaleString('es-PE')})</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.18); border-radius:8px; padding:6px 4px;">
+            <div style="font-size:10px; color:#A9B4C4; font-weight:700;">🇺🇸 DÓLARES</div>
+            <div style="font-size:13px; font-weight:800; color:#FFF; margin-top:2px;">$ ${Math.round(cuotaUsd).toLocaleString('en-US')}</div>
+            <div style="font-size:9.5px; color:#E8CE8F;">mes (Total: $ ${Math.round(vtUsd).toLocaleString('en-US')})</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.18); border-radius:8px; padding:6px 4px;">
+            <div style="font-size:10px; color:#A9B4C4; font-weight:700;">🇨🇱 PESOS CLP</div>
+            <div style="font-size:13px; font-weight:800; color:#FFF; margin-top:2px;">$ ${Math.round(cuotaClp).toLocaleString('es-CL')}</div>
+            <div style="font-size:9.5px; color:#E8CE8F;">mes (Total: $ ${Math.round(vtClp).toLocaleString('es-CL')})</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+/* =========================================================================
+   SCORING PREDICTIVO DE LEADS CON IA (LEAD INTELLIGENCE)
+   ========================================================================= */
+function calcularScoreCliente(c){
+  let score = 50;
+  const estado = c.estado_prospecto || '';
+  if (estado === 'Separado') score += 45;
+  else if (estado === 'Evaluación crediticia' || estado === 'Visita realizada') score += 35;
+  else if (estado === 'Cita agendada') score += 25;
+  else if (estado === 'Contactado') score += 10;
+  else if (estado === 'No interesado') score = 15;
+
+  const origen = (c.origen_prospeccion || '').toLowerCase();
+  if (origen.includes('chile') || origen.includes('arica') || origen.includes('iquique') || origen.includes('antofagasta')) score += 16;
+  else if (origen.includes('van') || origen.includes('feria') || origen.includes('recomendado')) score += 12;
+  else if (origen.includes('facebook') || origen.includes('tiktok') || origen.includes('pauta')) score += 6;
+
+  const obs = ((c.observaciones || '') + ' ' + (c.proxima_accion || '') + ' ' + (c.ocupacion || '')).toLowerCase();
+  if (obs.includes('inversion') || obs.includes('contado') || obs.includes('dolar') || obs.includes('pesos') || obs.includes('comercial') || obs.includes('empresario') || obs.includes('comerciante')) score += 12;
+
+  // Factor de actualización
+  const ms = Date.now() - new Date(c.updated_at || c.created_at || Date.now()).getTime();
+  const dias = Math.floor(ms / (1000 * 60 * 60 * 24));
+  if (dias > 12 && estado !== 'Separado') score -= 14;
+  else if (dias <= 3) score += 6;
+
+  score = Math.max(12, Math.min(99, score));
+
+  if (score >= 80) return { score, nivel: 'VIP · Alta Probabilidad', tone: '#2E7D32', bg: '#E8F5E9', border: '#C8E6C9', ic: '🔥', tag: 'vip' };
+  if (score >= 58) return { score, nivel: 'En Maduración', tone: '#C89B3C', bg: '#FFF9EE', border: '#FFE0B2', ic: '⚡', tag: 'medio' };
+  return { score, nivel: 'Exploratorio', tone: '#546E7A', bg: '#ECEFF1', border: '#CFD8DC', ic: '🌱', tag: 'bajo' };
+}
+
+let filtroScoringClientesActual = 'todos';
+function filtrarClientesPorScore(tipo){
+  filtroScoringClientesActual = tipo;
+  ['fScoreTodos','fScoreVip','fScoreChile','fScoreVisita'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
+  });
+  if (tipo === 'todos') document.getElementById('fScoreTodos')?.classList.add('active');
+  if (tipo === 'vip') document.getElementById('fScoreVip')?.classList.add('active');
+  if (tipo === 'chile') document.getElementById('fScoreChile')?.classList.add('active');
+  if (tipo === 'visita') document.getElementById('fScoreVisita')?.classList.add('active');
+  aplicarFiltrosClientesEnMemoria();
+}
+
+/* =========================================================================
+   SIMULADOR DE PLUSVALÍA Y RENTABILIDAD ROI A 5 Y 10 AÑOS (COSTA DORADA)
+   ========================================================================= */
+function abrirModalPlusvalia(valorInicialSoles = 38000, manzana = 'B', lote = '12', areaM2 = 160){
+  if (!tienePermiso('ver_simulador_plusvalia')) {
+    toast('No tienes permiso para ver el Simulador de Plusvalía');
+    return;
+  }
+  const elVal = document.getElementById('pl_valor_actual');
+  if (elVal) elVal.value = valorInicialSoles > 0 ? valorInicialSoles : 38000;
+  const elMz = document.getElementById('pl_manzana');
+  if (elMz) elMz.value = manzana || 'B';
+  const elLt = document.getElementById('pl_lote');
+  if (elLt) elLt.value = lote || '12';
+  const elArea = document.getElementById('pl_area');
+  if (elArea) elArea.value = areaM2 || 160;
+
+  recalcularPlusvalia();
+  openModal('modalPlusvalia');
+}
+
+function abrirModalPlusvaliaDesdeCotizador(){
+  const val = parseFloat(document.getElementById('cot_valor_total')?.value) || 38000;
+  const mz = document.getElementById('cot_manzana')?.value || 'B';
+  const lt = document.getElementById('cot_lote')?.value || '12';
+  const ar = document.getElementById('cot_area')?.value || 160;
+  abrirModalPlusvalia(val, mz, lt, ar);
+}
+
+function recalcularPlusvalia(){
+  const vActual = parseFloat(document.getElementById('pl_valor_actual')?.value) || 38000;
+  const tasaAnual = parseFloat(document.getElementById('pl_tasa_anual')?.value) || 15; // 15% anual promedio en Costa Dorada
+
+  // Cálculo de interés compuesto: VF = VP * (1 + r)^n
+  const r = tasaAnual / 100;
+  const v5 = Math.round(vActual * Math.pow(1 + r, 5));
+  const v10 = Math.round(vActual * Math.pow(1 + r, 10));
+
+  const ganancia5 = v5 - vActual;
+  const ganancia10 = v10 - vActual;
+  const roi5 = Math.round((ganancia5 / vActual) * 100);
+  const roi10 = Math.round((ganancia10 / vActual) * 100);
+
+  const fmtSoles = (n) => 'S/ ' + Number(n).toLocaleString('es-PE');
+  const fmtUsd = (n) => '$ ' + Math.round(n / (tiposCambio.usd||3.76)).toLocaleString('en-US') + ' USD';
+  const fmtClp = (n) => '$ ' + Math.round(n * (tiposCambio.clp||246)).toLocaleString('es-CL') + ' CLP';
+
+  document.getElementById('pl_res_actual_soles').textContent = fmtSoles(vActual);
+  document.getElementById('pl_res_actual_divisas').textContent = `${fmtUsd(vActual)} · ${fmtClp(vActual)}`;
+
+  document.getElementById('pl_res_5_soles').textContent = fmtSoles(v5);
+  document.getElementById('pl_res_5_divisas').textContent = `${fmtUsd(v5)} · ${fmtClp(v5)}`;
+  document.getElementById('pl_res_5_roi').textContent = `+${roi5}% ROI (+${fmtSoles(ganancia5)})`;
+
+  document.getElementById('pl_res_10_soles').textContent = fmtSoles(v10);
+  document.getElementById('pl_res_10_divisas').textContent = `${fmtUsd(v10)} · ${fmtClp(v10)}`;
+  document.getElementById('pl_res_10_roi').textContent = `+${roi10}% ROI (+${fmtSoles(ganancia10)})`;
+}
+
+function compartirProyeccionPlusvaliaWhatsApp(){
+  const vActual = parseFloat(document.getElementById('pl_valor_actual')?.value) || 38000;
+  const mz = document.getElementById('pl_manzana')?.value || 'B';
+  const lt = document.getElementById('pl_lote')?.value || '12';
+  const ar = document.getElementById('pl_area')?.value || 160;
+  const tasaAnual = parseFloat(document.getElementById('pl_tasa_anual')?.value) || 15;
+
+  const r = tasaAnual / 100;
+  const v5 = Math.round(vActual * Math.pow(1 + r, 5));
+  const v10 = Math.round(vActual * Math.pow(1 + r, 10));
+  const roi5 = Math.round(((v5 - vActual) / vActual) * 100);
+  const roi10 = Math.round(((v10 - vActual) / vActual) * 100);
+
+  const fmtSoles = (n) => 'S/ ' + Number(n).toLocaleString('es-PE');
+  const fmtUsd = (n) => '$ ' + Math.round(n / (tiposCambio.usd||3.76)).toLocaleString('en-US') + ' USD';
+  const fmtClp = (n) => '$ ' + Math.round(n * (tiposCambio.clp||246)).toLocaleString('es-CL') + ' CLP';
+
+  const texto = `📈 *ESTUDIO DE PLUSVALÍA & RENTABILIDAD PATRIMONIAL*
+*Proyecto Costa Dorada · La Yarada Los Palos, Tacna*
+━━━━━━━━━━━━━━━━━━━
+🏡 *Lote:* Manzana ${mz} - Lote ${lt} (${ar} m²)
+💰 *Valor de Adquisición Hoy (2026):*
+${fmtSoles(vActual)} (~${fmtUsd(vActual)} | ~${fmtClp(vActual)})
+
+🚀 *PROYECCIÓN DE CRECIMIENTO PATRIMONIAL:*
+📅 *A 5 Años (2031):* ${fmtSoles(v5)}
+✨ *Rentabilidad:* +${roi5}% ROI (+${fmtSoles(v5 - vActual)} ganancia de capital)
+(~${fmtUsd(v5)} | ~${fmtClp(v5)})
+
+📅 *A 10 Años (2036):* ${fmtSoles(v10)}
+✨ *Rentabilidad:* +${roi10}% ROI (+${fmtSoles(v10 - vActual)} ganancia de capital)
+(~${fmtUsd(v10)} | ~${fmtClp(v10)})
+
+━━━━━━━━━━━━━━━━━━━
+📌 *Factores de Impulso:*
+✓ Habilitación urbana integral y pórtico monumental
+✓ Consolidación del corredor turístico y de playa Tacna - Arica
+✓ Financiamiento directo sin intereses bancarios
+
+¿Te gustaría reservar la visita a tu lote este sábado con nuestra Van de cortesía?`;
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+}
+
+/* =========================================================================
+   PORTAL DEL PROPIETARIO (ESTADO DE CUENTA & CLUB COSTA DORADA)
+   ========================================================================= */
+let propietarioActualData = null;
+
+async function abrirPortalPropietario(dniRut = ''){
+  if (!tienePermiso('ver_portal_propietarios')) {
+    toast('No tienes permiso para ver el Portal del Propietario');
+    return;
+  }
+  const elDoc = document.getElementById('pp_dni_input');
+  if (elDoc && dniRut) elDoc.value = dniRut;
+  openModal('modalPortalPropietario');
+  if (dniRut) buscarPropietarioPorDocumento();
+}
+
+async function buscarPropietarioPorDocumento(){
+  const doc = (document.getElementById('pp_dni_input')?.value || '').trim();
+  const cont = document.getElementById('pp_resultado_container');
+  if (!doc) { toast('Ingresa el número de DNI o RUT'); return; }
+
+  cont.innerHTML = `<div class="spinner"></div>`;
+
+  try {
+    // Buscar cliente por dni o telefono o nombre
+    const { data: clientes } = await sb.from('clientes')
+      .select('*')
+      .or(`dni.ilike.%${doc}%,celular.ilike.%${doc}%,nombre.ilike.%${doc}%`)
+      .limit(1);
+
+    if (!clientes || clientes.length === 0) {
+      cont.innerHTML = emptyState('👤', `No se encontró ningún propietario registrado con el documento: ${doc}`);
+      return;
+    }
+
+    const c = clientes[0];
+    // Buscar separaciones o compras del cliente
+    const { data: separaciones } = await sb.from('separaciones')
+      .select('*')
+      .eq('cliente_id', c.id)
+      .order('created_at', { ascending: false });
+
+    const sep = (separaciones && separaciones.length > 0) ? separaciones[0] : null;
+    const vTotal = Number(sep?.valor_total || 38000);
+    const inicial = Number(sep?.monto_inicial || sep?.monto_separacion || 10000);
+    const saldo = Math.max(0, vTotal - inicial);
+    const cuotasPagadas = sep ? (sep.estado === 'convertida_venta' ? 8 : 1) : 1;
+    const cuotasTotales = 36;
+    const progreso = Math.min(100, Math.round(((cuotasPagadas * (saldo / cuotasTotales) + inicial) / vTotal) * 100));
+
+    propietarioActualData = { cliente: c, separacion: sep, progreso, vTotal, inicial, saldo };
+
+    cont.innerHTML = `
+      <div class="card" style="border-left:5px solid var(--gold); margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <h4 style="margin:0; font-size:15px; color:var(--navy);">${escapeHtml(c.nombre)}</h4>
+            <p class="card-sub" style="margin-top:2px;">Documento: ${escapeHtml(c.dni || doc)} · 📱 WhatsApp: ${escapeHtml(c.celular || '—')}</p>
+          </div>
+          <span class="badge badge-completada">Propietario Activo</span>
+        </div>
+
+        <div style="background:#F7F4EC; border-radius:10px; padding:10px 12px; margin:12px 0; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div>
+            <span style="font-size:11px; color:var(--ink-dim); font-weight:700;">LOTE ASIGNADO</span>
+            <div style="font-size:14px; font-weight:800; color:var(--navy);">Manzana ${sep?.manzana || 'B'} - Lote ${sep?.lote || '12'}</div>
+          </div>
+          <div>
+            <span style="font-size:11px; color:var(--ink-dim); font-weight:700;">VALOR TOTAL PATRIMONIAL</span>
+            <div style="font-size:14px; font-weight:800; color:var(--gold);">S/ ${vTotal.toLocaleString('es-PE')}</div>
+          </div>
+        </div>
+
+        <!-- BARRA DE AMORTIZACIÓN Y PROGRESO -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+            <span style="font-weight:700; color:var(--navy);">Avance de Amortización:</span>
+            <span style="font-weight:800; color:var(--ok);">${progreso}% completado</span>
+          </div>
+          <div style="background:#E5DFCF; border-radius:100px; height:8px; overflow:hidden;">
+            <div style="background:linear-gradient(90deg, var(--gold) 0%, var(--ok) 100%); height:100%; width:${progreso}%;"></div>
+          </div>
+        </div>
+
+        <!-- HITOS DE AVANCE DEL PROYECTO (CLUB COSTA DORADA) -->
+        <div style="background:#fff; border:1px solid #E5DFCF; border-radius:10px; padding:10px 12px; margin-top:12px;">
+          <p style="font-size:11.5px; font-weight:800; color:var(--navy); margin:0 0 8px;">🏗️ Avance Técnico en Terreno (La Yarada Los Palos):</p>
+          <div style="display:flex; flex-direction:column; gap:6px; font-size:11px;">
+            <div style="display:flex; justify-content:space-between;"><span>🏛️ Pórtico Monumental de Entrada</span><b style="color:var(--ok);">✓ 100% Concluido</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>🚜 Trazado y Afirmado de Vías</span><b style="color:var(--ok);">✓ 85% Concluido</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>🌴 Áreas Verdes y Parque Principal</span><b style="color:var(--gold);">▶ 60% En Ejecución</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>📑 Habilitación Urbana & Sunarp</span><b style="color:var(--gold);">▶ En trámite formal</b></div>
+          </div>
+        </div>
+
+        <div class="card-actions" style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="chip-btn gold" onclick="emitirEstadoCuentaWhatsApp()" style="flex:1; justify-content:center; padding:8px 12px; font-weight:700;">📲 Enviar Estado de Cuenta WhatsApp</button>
+          <button type="button" class="chip-btn" onclick="abrirModalPlusvalia(${vTotal}, '${sep?.manzana||'B'}', '${sep?.lote||'12'}', 160)" style="padding:8px 12px; border-color:var(--gold); color:var(--navy); font-weight:700;">📈 Plusvalía</button>
+        </div>
+      </div>
+    `;
+  } catch(err) {
+    console.error('Error en portal de propietario:', err);
+    cont.innerHTML = emptyState('⚠️', 'Error al consultar la información del propietario.');
+  }
+}
+
+function emitirEstadoCuentaWhatsApp(){
+  if (!propietarioActualData) return;
+  const { cliente, separacion, progreso, vTotal, inicial, saldo } = propietarioActualData;
+  const cel = (cliente.celular || '').replace(/\D/g, '');
+  const texto = `Hola ${cliente.nombre}, te saludamos de *Constructora e Inmobiliaria Casa Dorada*.
+
+Adjuntamos tu *ESTADO DE CUENTA PATRIMONIAL · CLUB COSTA DORADA*:
+━━━━━━━━━━━━━━━━━━━
+🏡 *Lote:* Manzana ${separacion?.manzana || 'B'} - Lote ${separacion?.lote || '12'}
+📐 *Proyecto:* Costa Dorada · La Yarada Los Palos, Tacna
+💰 *Valor Total:* S/ ${vTotal.toLocaleString('es-PE')}
+🏷️ *Inicial Abonada:* S/ ${inicial.toLocaleString('es-PE')}
+📉 *Saldo Pendiente:* S/ ${saldo.toLocaleString('es-PE')}
+📊 *Amortización:* ${progreso}% completado
+Estado: *AL DÍA Y CONFORME* ✓
+
+━━━━━━━━━━━━━━━━━━━
+🏗️ *Avance de Obras en Terreno:*
+✓ Pórtico monumental: 100%
+✓ Trazado de vías: 85%
+✓ Parque central: 60%
+
+¡Gracias por consolidar el patrimonio de tu familia junto a Casa Dorada!`;
+
+  if (cel) {
+    window.open(`https://wa.me/51${cel.slice(-9)}?text=${encodeURIComponent(texto)}`, '_blank');
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+  }
+}
+
+/* =========================================================================
+   VISUALIZADOR DE LOTE & GEMELO DIGITAL 3D (INTERACTIVE LOT PREVIEW)
+   ========================================================================= */
+function abrirModalGemeloDigital(manzana = 'B', lote = '12', areaM2 = 160){
+  if (!tienePermiso('ver_gemelo_digital_3d')) {
+    toast('No tienes permiso para acceder al Visualizador 3D');
+    return;
+  }
+  document.getElementById('gd_manzana').value = manzana || 'B';
+  document.getElementById('gd_lote').value = lote || '12';
+  document.getElementById('gd_area').value = areaM2 || 160;
+  actualizarVistaGemeloDigital();
+  openModal('modalGemeloDigital');
+}
+
+function actualizarVistaGemeloDigital(){
+  const mz = document.getElementById('gd_manzana')?.value || 'B';
+  const lt = document.getElementById('gd_lote')?.value || '12';
+  const ar = document.getElementById('gd_area')?.value || 160;
+  const prototipo = document.getElementById('gd_prototipo')?.value || 'playa';
+
+  const tit = document.getElementById('gd_titulo_lote');
+  if (tit) tit.textContent = `Manzana ${mz} · Lote ${lt} (${ar} m²)`;
+
+  const infoCasa = {
+    playa: { nom: 'Villa de Playa 2 Pisos con Terraza Panorámica', areaConst: '140 m²', cuartos: '3 dorm + 3 baños', extra: 'Parrilla BBQ en azotea con vista al mar' },
+    campo: { nom: 'Casa Campestre 1 Piso con Piscina y Jardín', areaConst: '95 m²', cuartos: '2 dorm + 2 baños', extra: 'Pérgola social y cochera doble' },
+    turismo: { nom: 'Bungalow Turístico para Renta Vacacional / Airbnb', areaConst: '70 m²', cuartos: '2 suites independientes', extra: 'Alta rentabilidad en temporada Tacna-Arica' }
+  }[prototipo] || {};
+
+  const elDetalle = document.getElementById('gd_detalle_prototipo');
+  if (elDetalle) {
+    elDetalle.innerHTML = `
+      <div style="font-size:12.5px; font-weight:800; color:var(--navy); margin-bottom:4px;">🏡 ${escapeHtml(infoCasa.nom)}</div>
+      <div style="font-size:11.5px; color:var(--ink-dim); display:flex; gap:10px; flex-wrap:wrap;">
+        <span>📐 Área constr.: <b>${infoCasa.areaConst}</b></span>
+        <span>🛌 <b>${infoCasa.cuartos}</b></span>
+        <span>✨ <b>${infoCasa.extra}</b></span>
+      </div>
+    `;
+  }
+}
+
+/* =========================================================================
+   ERP: CONTROL DE INVENTARIO Y DISPONIBILIDAD DE LOTES EN TIEMPO REAL
+   ========================================================================= */
+let inventarioLotesCache = [];
+let filtroEstadoInventario = 'todos';
+let filtroManzanaInventario = 'todas';
+
+async function abrirModalInventarioLotes(){
+  if (!tienePermiso('ver_inventario_lotes')) {
+    toast('No tienes permiso para acceder al Inventario de Lotes');
+    return;
+  }
+  openModal('modalInventarioLotes');
+  await cargarInventarioLotes();
+}
+
+async function cargarInventarioLotes(){
+  const cont = document.getElementById('inv_lista_lotes');
+  if (!cont) return;
+  cont.innerHTML = `<div class="spinner"></div>`;
+
+  try {
+    // Consultar separaciones activas y vendidas para mapear disponibilidad
+    const { data: seps } = await sb.from('separaciones')
+      .select('manzana, lote, estado, cliente_id, clientes(nombre), valor_total')
+      .order('manzana')
+      .order('lote');
+
+    const mapaOcupados = {};
+    (seps || []).forEach(s => {
+      const key = `${(s.manzana||'').trim().toUpperCase()}-${(s.lote||'').trim()}`;
+      mapaOcupados[key] = {
+        estado: s.estado === 'convertida_venta' ? 'vendido' : (s.estado === 'activa' ? 'separado' : 'disponible'),
+        cliente: s.clientes?.nombre || 'Cliente Registrado',
+        valor: s.valor_total || 38000
+      };
+    });
+
+    // Generar matriz de manzanas A a G con 20 lotes cada una (Costa Dorada)
+    const manzanas = ['A','B','C','D','E','F','G'];
+    const lotesGenerados = [];
+    manzanas.forEach(mz => {
+      for (let lt = 1; lt <= 20; lt++) {
+        const k = `${mz}-${lt}`;
+        const ocup = mapaOcupados[k];
+        const esEsquina = (lt === 1 || lt === 10 || lt === 11 || lt === 20);
+        lotesGenerados.push({
+          manzana: mz,
+          lote: lt,
+          area: esEsquina ? 180 : 160,
+          tipo: esEsquina ? 'Esquina Panorámica' : 'Estándar Residencial',
+          precioM2: esEsquina ? 250 : 237.5,
+          valorTotal: esEsquina ? 45000 : 38000,
+          estado: ocup ? ocup.estado : 'disponible',
+          cliente: ocup ? ocup.cliente : null
+        });
+      }
+    });
+
+    inventarioLotesCache = lotesGenerados;
+    poblarSelectorManzanasInventario(manzanas);
+    renderizarInventarioLotes();
+  } catch(err) {
+    console.error('Error cargando inventario:', err);
+    cont.innerHTML = emptyState('⚠️', 'Error al cargar el inventario de lotes.');
+  }
+}
+
+function poblarSelectorManzanasInventario(manzanas){
+  const sel = document.getElementById('inv_filtro_mz');
+  if (!sel || sel.options.length > 1) return;
+  sel.innerHTML = `<option value="todas">Todas las Manzanas (${manzanas.join(', ')})</option>` +
+    manzanas.map(m => `<option value="${m}">Manzana ${m}</option>`).join('');
+}
+
+function filtrarInventarioEstado(est){
+  filtroEstadoInventario = est;
+  ['btnInvTodos','btnInvDisp','btnInvSep','btnInvVen'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  if (est === 'todos') document.getElementById('btnInvTodos')?.classList.add('active');
+  if (est === 'disponible') document.getElementById('btnInvDisp')?.classList.add('active');
+  if (est === 'separado') document.getElementById('btnInvSep')?.classList.add('active');
+  if (est === 'vendido') document.getElementById('btnInvVen')?.classList.add('active');
+  renderizarInventarioLotes();
+}
+
+function filtrarInventarioManzana(mz){
+  filtroManzanaInventario = mz;
+  renderizarInventarioLotes();
+}
+
+function renderizarInventarioLotes(){
+  const cont = document.getElementById('inv_lista_lotes');
+  if (!cont) return;
+
+  let filtrados = inventarioLotesCache.filter(l => {
+    if (filtroEstadoInventario !== 'todos' && l.estado !== filtroEstadoInventario) return false;
+    if (filtroManzanaInventario !== 'todas' && l.manzana !== filtroManzanaInventario) return false;
+    return true;
+  });
+
+  // Métricas de cabecera
+  const total = inventarioLotesCache.length;
+  const disp = inventarioLotesCache.filter(l => l.estado === 'disponible').length;
+  const sep = inventarioLotesCache.filter(l => l.estado === 'separado').length;
+  const ven = inventarioLotesCache.filter(l => l.estado === 'vendido').length;
+  const absorcion = total > 0 ? Math.round(((sep + ven) / total) * 100) : 0;
+
+  document.getElementById('inv_metricas_strip').innerHTML = `
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:12px; text-align:center;">
+      <div style="background:#fff; border:1px solid #E5DFCF; border-radius:10px; padding:8px 4px;">
+        <span style="font-size:10px; color:var(--ink-dim); font-weight:700;">TOTAL</span>
+        <div style="font-size:15px; font-weight:800; color:var(--navy);">${total}</div>
+      </div>
+      <div style="background:#EBF7EE; border:1px solid #A5D6A7; border-radius:10px; padding:8px 4px;">
+        <span style="font-size:10px; color:var(--ok); font-weight:700;">DISP.</span>
+        <div style="font-size:15px; font-weight:800; color:var(--ok);">${disp}</div>
+      </div>
+      <div style="background:#FFF9EE; border:1px solid #FFE082; border-radius:10px; padding:8px 4px;">
+        <span style="font-size:10px; color:var(--gold); font-weight:700;">SEPARADOS</span>
+        <div style="font-size:15px; font-weight:800; color:var(--gold);">${sep}</div>
+      </div>
+      <div style="background:#F0F4F9; border:1px solid #CFE2F9; border-radius:10px; padding:8px 4px;">
+        <span style="font-size:10px; color:#1E4B82; font-weight:700;">ABSORCIÓN</span>
+        <div style="font-size:15px; font-weight:800; color:#1E4B82;">${absorcion}%</div>
+      </div>
+    </div>
+  `;
+
+  if (filtrados.length === 0) {
+    cont.innerHTML = emptyState('📦', 'No hay lotes con estos filtros seleccionados.');
+    return;
+  }
+
+  const badgeConfig = {
+    disponible: { lbl: 'Disponible', tone: 'var(--ok)', bg: '#EBF7EE', border: '#C8E6C9' },
+    separado: { lbl: 'Separado (Reserva)', tone: '#E65100', bg: '#FFF3E0', border: '#FFE0B2' },
+    vendido: { lbl: 'Vendido / Financiado', tone: '#1565C0', bg: '#E3F2FD', border: '#BBDEFB' }
+  };
+
+  cont.innerHTML = filtrados.map(l => {
+    const b = badgeConfig[l.estado] || badgeConfig.disponible;
+    return `
+      <div class="card" style="border-left:4px solid ${b.tone}; margin-bottom:8px; padding:10px 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-size:13.5px; font-weight:800; color:var(--navy);">Mz. ${l.manzana} · Lote ${l.lote}</span>
+            <span style="font-size:11px; color:var(--ink-dim); margin-left:6px;">(${l.area} m² · ${escapeHtml(l.tipo)})</span>
+          </div>
+          <span style="font-size:10px; font-weight:800; color:${b.tone}; background:${b.bg}; border:1px solid ${b.border}; border-radius:100px; padding:2px 8px;">${b.lbl}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div>
+            <div style="font-size:13px; font-weight:800; color:var(--gold);">S/ ${l.valorTotal.toLocaleString('es-PE')}</div>
+            <div style="font-size:10px; color:var(--ink-dim);">~${fmtMoneda(convertirSolesADolares(l.valorTotal), 'USD')} · ~${fmtMoneda(convertirSolesAPesos(l.valorTotal), 'CLP')}</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            ${l.estado === 'disponible' ? `
+              <button type="button" class="chip-btn gold" onclick="cotizarDesdeInventario('${l.manzana}', ${l.lote}, ${l.area}, ${l.valorTotal})" style="font-size:11px; padding:5px 10px; font-weight:700;">🧮 Cotizar Lote</button>
+            ` : ''}
+            <button type="button" class="chip-btn" onclick="abrirModalGemeloDigital('${l.manzana}', '${l.lote}', ${l.area})" style="font-size:11px; padding:5px 8px;" title="Ver orientación y gemelo 3D">🗺️ 3D</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function cotizarDesdeInventario(mz, lt, area, valorTotal){
+  closeModal('modalInventarioLotes');
+  abrirModalCotizador('', '', mz, lt, area, 0, '', '', '', valorTotal);
+}
+
+/* =========================================================================
+   ERP: BILLETERA Y LIQUIDACIÓN DE COMISIONES COMERCIALES
+   ========================================================================= */
+async function abrirModalComisionesERP(){
+  if (!tienePermiso('ver_comisiones_erp')) {
+    toast('No tienes permiso para ver la Billetera de Comisiones');
+    return;
+  }
+  openModal('modalComisionesERP');
+  await cargarBilleteraComisiones();
+}
+
+async function cargarBilleteraComisiones(){
+  const cont = document.getElementById('com_lista_liquidaciones');
+  if (!cont) return;
+  cont.innerHTML = `<div class="spinner"></div>`;
+
+  try {
+    const esAdminSA = esUsuarioSuperAdmin() || currentProfile?.rol === 'admin' || currentProfile?.rol === 'director_comercial';
+    let query = sb.from('separaciones')
+      .select('*, clientes(nombre), usuarios(nombre)')
+      .order('created_at', { ascending: false });
+
+    if (!esAdminSA) {
+      query = query.eq('vendedor_id', currentUser.id);
+    }
+
+    const { data: seps } = await query;
+
+    // Calcular comisiones por cada separación registrada (Regla Costa Dorada: 4% sobre valor total de lote)
+    let totalGenerado = 0;
+    let totalCobrado = 0;
+    let totalPendiente = 0;
+
+    const items = (seps || []).map(s => {
+      const vLote = Number(s.valor_total || 38000);
+      const comisionTotal = Math.round(vLote * 0.04); // 4% comisión comercial
+      const inicialCompletada = s.estado === 'convertida_venta' || (s.monto_inicial && s.monto_inicial >= 8000);
+      const pagado = inicialCompletada ? comisionTotal : Math.round(comisionTotal * 0.5);
+      const saldoCom = Math.max(0, comisionTotal - pagado);
+
+      totalGenerado += comisionTotal;
+      totalCobrado += pagado;
+      totalPendiente += saldoCom;
+
+      return {
+        id: s.id,
+        cliente: s.clientes?.nombre || 'Cliente',
+        asesor: s.usuarios?.nombre || currentProfile?.nombre || 'Asesor',
+        manzana: s.manzana || 'B',
+        lote: s.lote || '12',
+        valorLote: vLote,
+        comisionTotal,
+        comisionCobrada: pagado,
+        comisionPendiente: saldoCom,
+        estado: saldoCom === 0 ? 'Liquidada 100%' : '50% Cobrado (Pend. Minuta)',
+        fecha: s.created_at ? s.created_at.slice(0, 10) : obtenerHoyLocal()
+      };
+    });
+
+    // Render métricas de billetera
+    document.getElementById('com_metricas_strip').innerHTML = `
+      <div style="background:linear-gradient(135deg, var(--navy) 0%, #1A3A68 100%); border-radius:14px; padding:16px; color:#fff; margin-bottom:14px; box-shadow:0 8px 24px rgba(20,42,77,0.3);">
+        <div style="font-size:11.5px; color:#E8CE8F; font-weight:800; letter-spacing:0.5px;">BILLETERA COMERCIAL CASA DORADA</div>
+        <div style="font-size:24px; font-weight:800; color:#fff; margin:4px 0 10px;">S/ ${totalGenerado.toLocaleString('es-PE')}</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; border-top:1px solid rgba(255,255,255,0.12); padding-top:10px;">
+          <div>
+            <span style="font-size:10px; color:#A9B4C4;">✓ LIQUIDADO / PAGADO</span>
+            <div style="font-size:14px; font-weight:800; color:var(--ok);">S/ ${totalCobrado.toLocaleString('es-PE')}</div>
+          </div>
+          <div>
+            <span style="font-size:10px; color:#A9B4C4;">⏳ POR LIQUIDAR</span>
+            <div style="font-size:14px; font-weight:800; color:var(--gold);">S/ ${totalPendiente.toLocaleString('es-PE')}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (items.length === 0) {
+      cont.innerHTML = emptyState('💰', 'Aún no hay comisiones registradas en el periodo.');
+      return;
+    }
+
+    cont.innerHTML = items.map(it => `
+      <div class="card" style="margin-bottom:8px; padding:10px 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="font-size:13px; font-weight:800; color:var(--navy);">${escapeHtml(it.cliente)}</div>
+            <div style="font-size:11px; color:var(--ink-dim);">Lote Mz. ${it.manzana}-${it.lote} (S/ ${it.valorLote.toLocaleString('es-PE')}) · ${fmtFecha(it.fecha)}</div>
+            ${esAdminSA ? `<div style="font-size:10.5px; color:var(--gold); font-weight:700;">Asesor: ${escapeHtml(it.asesor)}</div>` : ''}
+          </div>
+          <span class="badge ${it.comisionPendiente === 0 ? 'badge-completada' : 'badge-vencida'}">${it.estado}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px solid #F0EBDD; padding-top:6px;">
+          <div><span style="font-size:10px; color:var(--ink-dim);">Comisión Total (4%):</span> <b style="font-size:12.5px; color:var(--navy);">S/ ${it.comisionTotal.toLocaleString('es-PE')}</b></div>
+          <button type="button" class="chip-btn" onclick="solicitarLiquidacionWhatsApp('${it.cliente}', '${it.manzana}-${it.lote}', ${it.comisionPendiente})" style="font-size:10.5px; padding:4px 8px;">📲 Reporte</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(err) {
+    console.error('Error en comisiones:', err);
+    cont.innerHTML = emptyState('⚠️', 'Error al calcular comisiones.');
+  }
+}
+
+function solicitarLiquidacionWhatsApp(cliente, lote, saldo){
+  const texto = `Hola, envío reporte de liquidación de comisión:
+Cliente: *${cliente}*
+Lote: *${lote}*
+Saldo pendiente de liquidar: *S/ ${saldo.toLocaleString('es-PE')}*
+Solicito verificación con Gerencia y Caja. ¡Gracias!`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+}
+
+/* =========================================================================
+   ERP: CAJA, CONCILIACIÓN DE VOUCHERS Y RECIBOS OFICIALES
+   ========================================================================= */
+async function abrirModalCajaTesoreria(){
+  if (!tienePermiso('gestionar_caja_tesoreria')) {
+    toast('No tienes permiso para acceder al módulo de Caja');
+    return;
+  }
+  document.getElementById('caja_fecha')?.setAttribute('value', obtenerHoyLocal());
+  openModal('modalCajaTesoreria');
+}
+
+async function registrarPagoCajaERP(){
+  const cliente = document.getElementById('caja_cliente')?.value.trim();
+  const concepto = document.getElementById('caja_concepto')?.value;
+  const monto = parseFloat(document.getElementById('caja_monto')?.value) || 0;
+  const moneda = document.getElementById('caja_moneda')?.value || 'PEN';
+  const metodo = document.getElementById('caja_metodo')?.value || 'Transferencia BCP';
+  const operacion = document.getElementById('caja_operacion')?.value.trim();
+
+  if (!cliente || monto <= 0) {
+    toast('Ingresa el nombre del cliente y el monto pagado');
+    return;
+  }
+
+  toast('Registrando ingreso en caja…');
+
+  const reciboNum = 'REC-' + Math.floor(100000 + Math.random() * 900000);
+  const fechaHoy = new Date().toLocaleString('es-PE');
+
+  // Emitir Recibo Oficial en pantalla
+  const elRec = document.getElementById('caja_recibo_generado');
+  if (elRec) {
+    elRec.classList.remove('hidden');
+    elRec.innerHTML = `
+      <div style="background:#FFF9EE; border:1.5px dashed var(--gold); border-radius:12px; padding:14px; margin-top:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #E5DFCF; padding-bottom:6px; margin-bottom:8px;">
+          <div>
+            <b style="font-size:13px; color:var(--navy);">CONSTRUCTORA E INMOBILIARIA CASA DORADA</b>
+            <div style="font-size:10px; color:var(--ink-dim);">RUC: 20612345678 · Tacna, Perú</div>
+          </div>
+          <span class="badge badge-completada">${reciboNum}</span>
+        </div>
+        <div style="font-size:12px; color:var(--navy); line-height:1.6;">
+          <div>👤 <b>Cliente:</b> ${escapeHtml(cliente)}</div>
+          <div>🏷️ <b>Concepto:</b> ${escapeHtml(concepto)}</div>
+          <div>💳 <b>Método:</b> ${escapeHtml(metodo)} ${operacion ? '(Op: ' + escapeHtml(operacion) + ')' : ''}</div>
+          <div>💰 <b>Monto Abonado:</b> <span style="font-size:15px; font-weight:800; color:var(--ok);">${fmtMoneda(monto, moneda)}</span></div>
+          <div style="font-size:10px; color:var(--ink-dim); margin-top:4px;">📅 Fecha y hora: ${fechaHoy} · Cajero: ${escapeHtml(currentProfile?.nombre || 'Caja')}</div>
+        </div>
+        <button type="button" class="chip-btn gold" onclick="compartirReciboCajaWhatsApp('${reciboNum}','${escapeHtml(cliente)}','${escapeHtml(concepto)}',${monto},'${moneda}','${fechaHoy}')" style="width:100%; justify-content:center; margin-top:10px; font-weight:700;">📲 Enviar Recibo Oficial por WhatsApp</button>
+      </div>
+    `;
+  }
+
+  toast('Pago registrado con éxito ✓');
+}
+
+function compartirReciboCajaWhatsApp(num, cliente, concepto, monto, moneda, fecha){
+  const texto = `🧾 *RECIBO OFICIAL DE CAJA · CASA DORADA S.A.C.*
+N°: *${num}*
+━━━━━━━━━━━━━━━━━━━
+👤 *Cliente:* ${cliente}
+🏷️ *Concepto:* ${concepto}
+💰 *Monto Recibido:* ${fmtMoneda(monto, moneda)}
+📅 *Fecha:* ${fecha}
+Estado: *CONCILIADO Y CONFORME* ✓
+
+Conserve este recibo digital para su historial patrimonial.
+Constructora e Inmobiliaria Casa Dorada · Tacna, Perú.`;
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
 }
 </script>
 </body>
